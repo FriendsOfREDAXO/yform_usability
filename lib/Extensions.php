@@ -63,7 +63,10 @@ class Extensions
             $list->setColumnFormat($first_col_name, 'custom', function ($params)
             {
                 return '
-                        <i class="rex-icon fa fa-bars sort-icon" data-id="###id###" data-table="' . $params['params']['table']->getTableName() . '"></i>
+                        <i class="rex-icon fa fa-bars sort-icon" 
+                            data-id="###id###" 
+                            data-table="' . $params['params']['table']->getTableName() . '" 
+                            data-sort="'. strtolower($params['params']['table']->getSortOrderName()) .'"></i>
                     ';
             }, ['table' => $table]);
         }

@@ -46,7 +46,7 @@
                     $.post(rex.frontend_url + '?rex-api-call=yform_usability_api&method=updateSort', {
                         data_id: $sort_icon.data('id'),
                         table: $sort_icon.data('table'),
-                        prio: e.newIndex - e.oldIndex
+                        prio: $sort_icon.data('sort') == 'asc' ? e.newIndex - e.oldIndex : e.oldIndex - e.newIndex
                     }, function (resp) {
                         $('#rex-js-ajax-loader').removeClass('rex-visible');
 
