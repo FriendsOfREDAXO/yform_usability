@@ -58,8 +58,10 @@ class rex_api_yform_usability_api extends rex_api_function
         {
             $table   = rex_post('table', 'string');
             $data_id = rex_post('data_id', 'int');
+            $_filter = rex_post('filter', 'string');
             $sql     = \rex_sql::factory();
             $_prio   = abs($prio);
+            $filter  = strlen($_filter) ? explode(',', $_filter) : [];
 
             try
             {
@@ -76,9 +78,11 @@ class rex_api_yform_usability_api extends rex_api_function
                 }
 
                 $order = $prio < 0 ? '0, 1' : '1, 0';
+                $where = count($filter) ? 'WHERE '. implode(' AND ', $filter) : '';
                 $query = "
                         UPDATE {$table}
-                        SET `prio` = (SELECT @count := @count + 1) 
+                        SET `prio` = (SELECT @count := @count + 1)
+                        {$where}
                         ORDER BY `prio`, IF(`id` = :id, {$order})
                     ";
                 $sql->setQuery('SET @count = 0');

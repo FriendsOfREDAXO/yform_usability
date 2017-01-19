@@ -45,6 +45,7 @@
 
                     $.post(rex.frontend_url + '?rex-api-call=yform_usability_api&method=updateSort', {
                         data_id: $sort_icon.data('id'),
+                        filter: $sort_icon.data('filter'),
                         table: $sort_icon.data('table'),
                         prio: $sort_icon.data('sort') == 'asc' ? e.newIndex - e.oldIndex : e.oldIndex - e.newIndex
                     }, function (resp) {

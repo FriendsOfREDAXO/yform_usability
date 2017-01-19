@@ -20,18 +20,18 @@ class Extensions
         $list  = $params->getSubject();
         $table = $params->getParam('table');
 
-        if (count($table->getFields(['name' => 'status'])))
+        if (count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table])))
         {
             $list = self::addStatusToggle($list, $table);
         }
-        if (count($table->getFields(['name' => 'prio'])))
+        if (count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table])))
         {
             $list = self::addDragNDropSort($list, $table);
         }
         return $list;
     }
 
-    private static function addStatusToggle($list, $table)
+    protected static function addStatusToggle($list, $table)
     {
         $list->addColumn('packing_list', '', count($list->getColumnNames()));
         $list->setColumnLabel('packing_list', 'Status');
@@ -53,7 +53,7 @@ class Extensions
         return $list;
     }
 
-    private static function addDragNDropSort($list, $table)
+    protected static function addDragNDropSort($list, $table)
     {
         $first_col_name = array_shift($list->getColumnNames());
 
@@ -62,11 +62,13 @@ class Extensions
             $list->addFormAttribute('class', 'sortable-list');
             $list->setColumnFormat($first_col_name, 'custom', function ($params)
             {
+                $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
                 return '
                         <i class="rex-icon fa fa-bars sort-icon" 
                             data-id="###id###" 
                             data-table="' . $params['params']['table']->getTableName() . '" 
-                            data-sort="'. strtolower($params['params']['table']->getSortOrderName()) .'"></i>
+                            data-sort="'. strtolower($params['params']['table']->getSortOrderName()) .'"
+                            data-filter="'. implode(',', $filters) .'"></i>
                     ';
             }, ['table' => $table]);
         }
