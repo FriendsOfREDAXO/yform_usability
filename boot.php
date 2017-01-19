@@ -31,7 +31,7 @@ namespace yform\usability;
 
 if (\rex::isBackend() && \rex::getUser())
 {
-    if ($this->getProperty('compile'))
+    if ($this->getProperty('compile') || \rex_addon::get('project')->getProperty('compile')  || !file_exists($this->getAssetsPath('styles.css')))
     {
         $compiler   = new \rex_scss_compiler();
         $scss_files = [$this->getPath('assets/scss/styles.scss')];
