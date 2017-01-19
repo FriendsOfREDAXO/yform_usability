@@ -1,0 +1,8 @@
+.sortable-list {
+    .status-toggle {
+        cursor:pointer;
+    }
+    .sort-handle:hover {
+        transform: scale(1.2);
+    }
+}

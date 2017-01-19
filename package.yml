@@ -1,0 +1,8 @@
+package: yform/usability
+version: '1.0'
+author: 'Kreatif Gmbh'
+compile: 1
+
+requires:
+    packages:
+        yform/manager: '^2.0'
