@@ -1,7 +1,7 @@
 package: yform/usability
 version: '1.0'
 author: 'Kreatif Gmbh'
-compile: 1
+compile: 0
 
 requires:
     packages:
