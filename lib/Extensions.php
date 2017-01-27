@@ -19,12 +19,13 @@ class Extensions
     {
         $list  = $params->getSubject();
         $table = $params->getParam('table');
+        $is_opener = rex_get('rex_yform_manager_opener', 'array');
 
         if (count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table])))
         {
             $list = self::addStatusToggle($list, $table);
         }
-        if (count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table])))
+        if (empty ($is_opener) && count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table])))
         {
             $list = self::addDragNDropSort($list, $table);
         }
