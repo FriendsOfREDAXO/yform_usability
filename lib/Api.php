@@ -3,12 +3,15 @@
 /**
  * This file is part of the yform/usability package.
  *
+ * @author Friends Of REDAXO
  * @author Kreatif GmbH
  * @author a.platter@kreatif.it
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+
 class rex_api_yform_usability_api extends rex_api_function
 {
     protected $response  = [];
