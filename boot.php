@@ -13,7 +13,6 @@
 namespace yform\usability;
 
 
-
 \rex_extension::register('FE_OUTPUT', function ($params)
 {
     // api endpoint
