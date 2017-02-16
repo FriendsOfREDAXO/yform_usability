@@ -20,6 +20,6 @@ if (!$this->hasConfig())
     $sql = \rex_sql::factory();
     if (count($sql->getArray("SHOW TABLES LIKE 'rex_yform_table'")))
     {
-        $sql->setQuery("ALTER TABLE `rex_yform_table` MODIFY `list_amount` INTEGER");
+        $sql->setQuery("ALTER TABLE `rex_yform_table` MODIFY `list_amount` INTEGER UNSIGNED");
     }
 }

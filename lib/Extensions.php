@@ -17,16 +17,14 @@ class Extensions
 {
     public static function yform_data_list($params)
     {
-        $list  = $params->getSubject();
-        $table = $params->getParam('table');
+        $list      = $params->getSubject();
+        $table     = $params->getParam('table');
         $is_opener = rex_get('rex_yform_manager_opener', 'array');
 
-        if (count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table])))
-        {
+        if (count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table]))) {
             $list = self::addStatusToggle($list, $table);
         }
-        if (empty ($is_opener) && count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table])))
-        {
+        if (empty ($is_opener) && count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table]))) {
             $list = self::addDragNDropSort($list, $table);
         }
         return $list;
@@ -36,8 +34,7 @@ class Extensions
     {
         $list->addColumn('packing_list', '', count($list->getColumnNames()));
         $list->setColumnLabel('packing_list', 'Status');
-        $list->setColumnFormat('packing_list', 'custom', function ($params)
-        {
+        $list->setColumnFormat('packing_list', 'custom', function ($params) {
             $_status = $params['list']->getValue('status');
             $status  = $_status ? 'online' : 'offline';
             return '
@@ -56,20 +53,19 @@ class Extensions
 
     protected static function addDragNDropSort($list, $table)
     {
-        $first_col_name = array_shift($list->getColumnNames());
+        $columns        = $list->getColumnNames();
+        $first_col_name = array_shift($columns);
 
-        if ($first_col_name != 'id')
-        {
+        if ($first_col_name != 'id') {
             $list->addFormAttribute('class', 'sortable-list');
-            $list->setColumnFormat($first_col_name, 'custom', function ($params)
-            {
+            $list->setColumnFormat($first_col_name, 'custom', function ($params) {
                 $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
                 return '
                         <i class="rex-icon fa fa-bars sort-icon" 
                             data-id="###id###" 
                             data-table="' . $params['params']['table']->getTableName() . '" 
-                            data-sort="'. strtolower($params['params']['table']->getSortOrderName()) .'"
-                            data-filter="'. implode(',', $filters) .'"></i>
+                            data-sort="' . strtolower($params['params']['table']->getSortOrderName()) . '"
+                            data-filter="' . implode(',', $filters) . '"></i>
                     ';
             }, ['table' => $table]);
         }
