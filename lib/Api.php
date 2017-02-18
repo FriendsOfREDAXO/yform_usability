@@ -41,14 +41,21 @@ class rex_api_yform_usability_api extends rex_api_function
 
     private function __changestatus()
     {
-        $status  = rex_post('status', 'int');
+        $status  = (int) rex_post('status', 'int');
+        $data_id = (int) rex_post('data_id', 'int');
         $table   = rex_post('table', 'string');
-        $data_id = rex_post('data_id', 'int');
-        $Object  = rex_yform_manager_dataset::get($data_id, $table);
+        $sql     = rex_sql::factory();
 
-        $Object->setValue('status', $status);
-        $Object->save();
-
+        $sql
+            ->setTable($table)
+            ->setValue('status', $status)
+            ->setWhere(['id' => $data_id]);
+        try {
+            $sql->update();
+        }
+        catch (\rex_sql_exception $ex) {
+            throw new rex_api_exception($ex->getMessage());
+        }
         $this->response['new_status']     = $status ? 'online' : 'offline';
         $this->response['new_status_val'] = (int) !$status;
     }
