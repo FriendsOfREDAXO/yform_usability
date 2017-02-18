@@ -56,6 +56,11 @@ class rex_api_yform_usability_api extends rex_api_function
         catch (\rex_sql_exception $ex) {
             throw new rex_api_exception($ex->getMessage());
         }
+        // flush url path file
+        if (rex_addon::get('url')->isAvailable()) {
+            rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
+        }
+
         $this->response['new_status']     = $status ? 'online' : 'offline';
         $this->response['new_status_val'] = (int) !$status;
     }
