@@ -18,3 +18,4 @@ Installation
 
 * Addon über den Installer herunterladen oder
 * alternativ GitHub-Version entpacken, den Ordner in `usability` umbenennen und in den REDAXO AddOn-Ordner legen `/redaxo/src/addons/yform_usabilty`
+* alternativ über das AddOn zip_install hochladen und anschließend in der AddOns-Page installieren
