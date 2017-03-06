@@ -64,7 +64,6 @@ class Extensions
                         <i class="rex-icon fa fa-bars sort-icon" 
                             data-id="###id###" 
                             data-table="' . $params['params']['table']->getTableName() . '" 
-                            data-sort="' . strtolower($params['params']['table']->getSortOrderName()) . '"
                             data-filter="' . implode(',', $filters) . '"></i>
                     ';
             }, ['table' => $table]);

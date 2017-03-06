@@ -39,15 +39,20 @@
                 animation: 150,
                 handle: '.sort-handle',
                 onUpdate: function (e) {
-                    var $sort_icon = $(e.item).find('.sort-icon');
+                    var $sort_icon = $(e.item).find('.sort-icon'),
+                        $next = $(e.item).next(),
+                        id = 0;
 
                     $('#rex-js-ajax-loader').addClass('rex-visible');
 
+                    if ($next.length) {
+                        id = $next.find('.sort-icon').data('id');
+                    }
                     $.post(rex.frontend_url + '?rex-api-call=yform_usability_api&method=updateSort', {
                         data_id: $sort_icon.data('id'),
                         filter: $sort_icon.data('filter'),
                         table: $sort_icon.data('table'),
-                        prio: $sort_icon.data('sort') == 'asc' ? e.newIndex - e.oldIndex : e.oldIndex - e.newIndex
+                        next_id: id
                     }, function (resp) {
                         $('#rex-js-ajax-loader').removeClass('rex-visible');
 
