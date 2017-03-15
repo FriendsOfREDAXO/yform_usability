@@ -1,1 +1,5 @@
 yform_usability.label.use_dragndrop = Verwende Drag&Drop für die Sortierung der Datensätze
+yform_usability_label.online_status = Online/Offline Status anzeigen
+yform_usability_label.sorting = Sortierung aktiv
+yform_usability_label.duplication = Duplizieren von Datensätzen
+yform_usability_action.duplicate = duplizieren

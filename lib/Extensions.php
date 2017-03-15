@@ -19,12 +19,17 @@ class Extensions
     {
         $list      = $params->getSubject();
         $table     = $params->getParam('table');
+        $config    = \rex_addon::get('yform_usability')->getConfig(null, []);
         $is_opener = rex_get('rex_yform_manager_opener', 'array');
 
-        if (count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table]))) {
+
+        if ($config['has_duplication'] && empty ($is_opener) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDuplication', true, ['list' => $list, 'table' => $table]))) {
+            $list = self::addDuplication($list, $table);
+        }
+        if ($config['has_status'] && count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table]))) {
             $list = self::addStatusToggle($list, $table);
         }
-        if (empty ($is_opener) && count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table]))) {
+        if ($config['has_sorting'] && empty ($is_opener) && count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table]))) {
             $list = self::addDragNDropSort($list, $table);
         }
         return $list;
@@ -68,6 +73,14 @@ class Extensions
                     ';
             }, ['table' => $table]);
         }
+        return $list;
+    }
+
+    protected static function addDuplication($list, $table)
+    {
+        $list->addColumn('func_duplication', '<i class="rex-icon fa-files-o"></i> '. \rex_addon::get('yform_usability')->i18n('action.duplicate'), count($list->getColumnNames()));
+        $list->setColumnLabel('func_duplication', '');
+        $list->setColumnParams('func_duplication', ['func' => 'duplicate', 'id' => '###id###', 'page' => 'yform/manager/yform-usability']);
         return $list;
     }
 }

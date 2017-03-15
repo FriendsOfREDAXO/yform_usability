@@ -7,3 +7,13 @@ compile: 0
 requires:
     packages:
         yform/manager: '^2.0'
+
+page:
+
+    hidden: true
+
+pages:
+    system/yform-usability:
+        title: 'yform-usability'
+    yform/manager/yform-usability:
+        title: 'yform-usability'
