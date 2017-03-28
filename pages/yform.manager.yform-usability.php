@@ -33,5 +33,5 @@ switch ($func) {
         break;
 }
 
-header('Location: '. rex_server('HTTP_REFERER', 'string'));
+header('Location: '. \rex_url::backendPage('yform/manager/data_edit', ['table_name' => $table], false));
 exit;

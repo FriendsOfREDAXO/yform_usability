@@ -14,7 +14,8 @@ namespace yform\usability;
 $info    = '';
 $success = '';
 $error   = [];
-
+$tables  = [];
+$_tables = \rex_yform_manager_table::getAll();
 
 if (rex_post('btn_save', 'string') == 'save') {
 
@@ -30,6 +31,18 @@ if (rex_post('btn_save', 'string') == 'save') {
 
 $config = $this->getConfig();
 
+$status_options    = ['<option value="all" '. (in_array('all', (array) $config['status_tables']) ? 'selected="selected"' : '') .'>- '. $this->i18n('label.all') .' -</option>'];
+$sorting_options   = ['<option value="all" '. (in_array('all', (array) $config['sorting_tables']) ? 'selected="selected"' : '') .'>- '. $this->i18n('label.all') .' -</option>'];
+$duplicate_options = ['<option value="all" '. (in_array('all', (array) $config['duplicate_tables']) ? 'selected="selected"' : '') .'>- '. $this->i18n('label.all') .' -</option>'];
+
+foreach ($_tables as $table) {
+    $tables[$table->getTableName()] = $table->getName();
+
+    $status_options[]    = '<option value="' . $table->getTableName() . '" ' . (in_array($table->getTableName(), (array) $config['status_tables']) ? 'selected="selected"' : '') . '>' . $table->getName() . '</option>';
+    $sorting_options[]   = '<option value="' . $table->getTableName() . '" ' . (in_array($table->getTableName(), (array) $config['sorting_tables']) ? 'selected="selected"' : '') . '>' . $table->getName() . '</option>';
+    $duplicate_options[] = '<option value="' . $table->getTableName() . '" ' . (in_array($table->getTableName(), (array) $config['duplicate_tables']) ? 'selected="selected"' : '') . '>' . $table->getName() . '</option>';
+}
+
 // messages
 if (count($error)) {
     echo \rex_view::error(implode('<br />', $error));
@@ -41,6 +54,7 @@ if ($success != '') {
     echo \rex_view::success($success);
 }
 
+
 // output
 $content = [];
 
@@ -48,27 +62,24 @@ $formElements = [
     [
         'label' => '<label>' . $this->i18n('label.online_status') . '</label>',
         'field' => '
-            <select name="settings[has_status]" class="form-control">
-                <option value="1" ' . ($config['has_status'] ? 'selected="selected"' : '') . '>' . \rex_i18n::msg('yes') . '</option>
-                <option value="0" ' . (!$config['has_status'] ? 'selected="selected"' : '') . '>' . \rex_i18n::msg('no') . '</option>
+            <select name="settings[status_tables][]" class="form-control" multiple="multiple" size="8">
+                '. implode('', $status_options) .'
             </select>
         ',
     ],
     [
         'label' => '<label>' . $this->i18n('label.sorting') . '</label>',
         'field' => '
-            <select name="settings[has_sorting]" class="form-control">
-                <option value="1" ' . ($config['has_sorting'] ? 'selected="selected"' : '') . '>' . \rex_i18n::msg('yes') . '</option>
-                <option value="0" ' . (!$config['has_sorting'] ? 'selected="selected"' : '') . '>' . \rex_i18n::msg('no') . '</option>
+            <select name="settings[sorting_tables][]" class="form-control" multiple="multiple" size="8">
+                '. implode('', $sorting_options) .'
             </select>
         ',
     ],
     [
         'label' => '<label>' . $this->i18n('label.duplication') . '</label>',
         'field' => '
-            <select name="settings[has_duplication]" class="form-control">
-                <option value="1" ' . ($config['has_duplication'] ? 'selected="selected"' : '') . '>' . \rex_i18n::msg('yes') . '</option>
-                <option value="0" ' . (!$config['has_duplication'] ? 'selected="selected"' : '') . '>' . \rex_i18n::msg('no') . '</option>
+            <select name="settings[duplicate_tables][]" class="form-control" multiple="multiple" size="8">
+                '. implode('', $duplicate_options) .'
             </select>
         ',
     ],
