@@ -11,6 +11,8 @@
  */
 namespace yform\usability;
 
+echo \rex_view::title(\rex_i18n::msg('yform'));
+
 $info    = '';
 $success = '';
 $error   = [];
@@ -20,20 +22,25 @@ $_tables = \rex_yform_manager_table::getAll();
 if (rex_post('btn_save', 'string') == 'save') {
 
     // set config
-    $config = array_merge($this->getConfig(null, []), rex_post('settings', 'array'));
+    $_config = \rex_addon::get('yform_usability')->getConfig(null, []);
+    $config  = rex_post('settings', 'array');
 
-    if (!count($error)) {
-        $this->setConfig($config);
-        $success = \rex_i18n::msg('info_updated');
+    foreach ($_config as $key => $value) {
+        if (isset($config[$key])) {
+            \rex_addon::get('yform_usability')->setConfig($key, $config[$key]);
+        }
+        else {
+            \rex_addon::get('yform_usability')->removeConfig($key);
+        }
     }
+    $success = \rex_i18n::msg('info_updated');
 }
 
+$config = \rex_addon::get('yform_usability')->getConfig();
 
-$config = $this->getConfig();
-
-$status_options    = ['<option value="all" '. (in_array('all', (array) $config['status_tables']) ? 'selected="selected"' : '') .'>- '. $this->i18n('label.all') .' -</option>'];
-$sorting_options   = ['<option value="all" '. (in_array('all', (array) $config['sorting_tables']) ? 'selected="selected"' : '') .'>- '. $this->i18n('label.all') .' -</option>'];
-$duplicate_options = ['<option value="all" '. (in_array('all', (array) $config['duplicate_tables']) ? 'selected="selected"' : '') .'>- '. $this->i18n('label.all') .' -</option>'];
+$status_options    = ['<option value="all" ' . (in_array('all', (array) $config['status_tables']) ? 'selected="selected"' : '') . '>- ' . $this->i18n('label.all') . ' -</option>'];
+$sorting_options   = ['<option value="all" ' . (in_array('all', (array) $config['sorting_tables']) ? 'selected="selected"' : '') . '>- ' . $this->i18n('label.all') . ' -</option>'];
+$duplicate_options = ['<option value="all" ' . (in_array('all', (array) $config['duplicate_tables']) ? 'selected="selected"' : '') . '>- ' . $this->i18n('label.all') . ' -</option>'];
 
 foreach ($_tables as $table) {
     $tables[$table->getTableName()] = $table->getName();
@@ -63,7 +70,7 @@ $formElements = [
         'label' => '<label>' . $this->i18n('label.online_status') . '</label>',
         'field' => '
             <select name="settings[status_tables][]" class="form-control" multiple="multiple" size="8">
-                '. implode('', $status_options) .'
+                ' . implode('', $status_options) . '
             </select>
         ',
     ],
@@ -71,7 +78,7 @@ $formElements = [
         'label' => '<label>' . $this->i18n('label.sorting') . '</label>',
         'field' => '
             <select name="settings[sorting_tables][]" class="form-control" multiple="multiple" size="8">
-                '. implode('', $sorting_options) .'
+                ' . implode('', $sorting_options) . '
             </select>
         ',
     ],
@@ -79,7 +86,7 @@ $formElements = [
         'label' => '<label>' . $this->i18n('label.duplication') . '</label>',
         'field' => '
             <select name="settings[duplicate_tables][]" class="form-control" multiple="multiple" size="8">
-                '. implode('', $duplicate_options) .'
+                ' . implode('', $duplicate_options) . '
             </select>
         ',
     ],

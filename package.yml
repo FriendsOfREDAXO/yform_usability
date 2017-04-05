@@ -9,11 +9,11 @@ requires:
         yform/manager: '^2.0'
 
 page:
-
     hidden: true
 
 pages:
-    system/yform-usability:
-        title: 'yform-usability'
+    yform/manager/usability:
+        title: 'Usability'
     yform/manager/yform-usability:
         title: 'yform-usability'
+        hidden: true

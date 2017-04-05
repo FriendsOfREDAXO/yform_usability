@@ -11,15 +11,14 @@
  */
 namespace yform\usability;
 
-$config = array_merge([
-    'installed'       => 1,
-    'has_status'      => 1,
-    'has_sorting'     => 1,
-    'has_duplication' => 1,
-], $this->getConfig(null, []));
-
-
 if (!$this->hasConfig()) {
+    $config = [
+        'status_tables'    => ['all'],
+        'sorting_tables'   => ['all'],
+        'duplicate_tables' => ['all'],
+    ];
+    $this->setConfig($config);
+
     // alter the yform table manager table
     $sql = \rex_sql::factory();
     if (count($sql->getArray("SHOW TABLES LIKE 'rex_yform_table'"))) {
@@ -27,4 +26,3 @@ if (!$this->hasConfig()) {
     }
 }
 
-$this->setConfig($config);
