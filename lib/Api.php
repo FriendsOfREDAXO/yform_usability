@@ -59,35 +59,37 @@ class rex_api_yform_usability_api extends rex_api_function
 
     private function __updatesort()
     {
-        $table = rex_post('table', 'string');
+        $tablename = rex_post('table', 'string');
 
-        if ($table != '') {
+        if ($tablename != '') {
             $data_id = rex_post('data_id', 'int');
-            $nid     = rex_post('next_id', 'int');
-            $_filter = rex_post('filter', 'string');
-            $Table   = rex_yform_manager_table::get($table);
-            $class   = rex_yform_manager_dataset::getModelClass($table);
-            $sort    = strtolower($Table->getSortOrderName());
-            $sql     = \rex_sql::factory();
-            $filter  = strlen($_filter) ? explode(',', $_filter) : [];
-            $Object  = $nid ? $class::get($nid) : $class::query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne();
-            $prio    = $Object->getValue('prio');
-
+            $next_id = rex_post('next_id', 'int');
+            $filter = rex_post('filter', 'string');
+            $tableobject = rex_yform_manager_table::get($tablename);
+            $sort    = strtolower($tableobject->getSortOrderName());
+            $filter  = strlen($filter) ? explode(',', $filter) : [];
+            if ($next_id) {
+                $prio = $tableobject->query()->findOne($next_id)->getValue('prio');
+            }
+            else {
+                $prio = $tableobject->query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne()->getValue('prio');
+            }
             try {
                 $query = "
-                        UPDATE {$table}
+                        UPDATE {$tablename}
                         SET prio = {$prio}
                         WHERE id = :id
                     ";
+                $sql = \rex_sql::factory();
                 $sql->setQuery($query, ['id' => $data_id]);
 
                 if (strlen($sql->getError())) {
                     throw new rex_api_exception($sql->getError());
                 }
-                $order = $nid ? ($sort == 'asc' ? '0, 1' : '1, 0') : ($sort == 'desc' ? '0, 1' : '1, 0');
+                $order = $next_id ? ($sort == 'asc' ? '0, 1' : '1, 0') : ($sort == 'desc' ? '0, 1' : '1, 0');
                 $where = count($filter) ? 'WHERE ' . implode(' AND ', $filter) : '';
                 $query = "
-                        UPDATE {$table}
+                        UPDATE {$tablename}
                         SET `prio` = (SELECT @count := @count + 1)
                         {$where}
                         ORDER BY `prio`, IF(`id` = :id, {$order})
@@ -104,4 +106,5 @@ class rex_api_yform_usability_api extends rex_api_function
             }
         }
     }
+
 }

@@ -22,15 +22,15 @@ $_tables = \rex_yform_manager_table::getAll();
 if (rex_post('btn_save', 'string') == 'save') {
 
     // set config
-    $_config = \rex_addon::get('yform_usability')->getConfig(null, []);
+    $default_config = \rex_addon::get('yform_usability')->getProperty('default_config');
     $config  = rex_post('settings', 'array');
 
-    foreach ($_config as $key => $value) {
+    foreach ($default_config as $key => $value) {
         if (isset($config[$key])) {
             \rex_addon::get('yform_usability')->setConfig($key, $config[$key]);
         }
         else {
-            \rex_addon::get('yform_usability')->removeConfig($key);
+            \rex_addon::get('yform_usability')->setConfig($key, $default_config[$key]);
         }
     }
     $success = \rex_i18n::msg('info_updated');
@@ -69,7 +69,7 @@ $formElements = [
     [
         'label' => '<label>' . $this->i18n('label.online_status') . '</label>',
         'field' => '
-            <select name="settings[status_tables][]" class="form-control" multiple="multiple" size="8">
+            <select name="settings[status_tables][]" class="form-control" multiple="multiple" size="'.count($status_options).'">
                 ' . implode('', $status_options) . '
             </select>
         ',
@@ -77,7 +77,7 @@ $formElements = [
     [
         'label' => '<label>' . $this->i18n('label.sorting') . '</label>',
         'field' => '
-            <select name="settings[sorting_tables][]" class="form-control" multiple="multiple" size="8">
+            <select name="settings[sorting_tables][]" class="form-control" multiple="multiple" size="'.count($sorting_options).'">
                 ' . implode('', $sorting_options) . '
             </select>
         ',
@@ -85,7 +85,7 @@ $formElements = [
     [
         'label' => '<label>' . $this->i18n('label.duplication') . '</label>',
         'field' => '
-            <select name="settings[duplicate_tables][]" class="form-control" multiple="multiple" size="8">
+            <select name="settings[duplicate_tables][]" class="form-control" multiple="multiple" size="'.count($duplicate_options).'">
                 ' . implode('', $duplicate_options) . '
             </select>
         ',
