@@ -13,25 +13,26 @@ namespace yform\usability;
 
 $func  = rex_get('func', 'string');
 $id    = rex_get('id', 'int');
-$table = rex_get('table_name', 'string');
-$Class = \rex_yform_manager_dataset::getModelClass($table);
+$tablename = rex_get('table_name', 'string');
 
 switch ($func) {
     case 'duplicate':
-        $data = $Class::get($id)->getData();
-        unset($data['id']);
-
-        $Object = $Class::create();
-
-        foreach ($data as $key => $value) {
-            $Object->setValue($key, $value);
-        }
-        if (!$Object->save()) {
-            echo \rex_view::error(implode('<br/>', $Object->getMessages()));
-            exit;
+        $sql = \rex_sql::factory();
+        $sql->setTable($tablename);
+        $sql->setWhere('id = '.$id);
+        $sql->select('*');
+        if($sql->getRows())
+        {
+             $iSql = \rex_sql::factory();
+             $iSql->setTable($tablename);
+             foreach ($sql->getFieldNames() as $field) {
+                 if ($field != 'id') {
+                     $iSql->setValue($field, $sql->getValue($field));
+                 }
+             }
+             $iSql->insert();
         }
         break;
 }
-
-header('Location: '. \rex_url::backendPage('yform/manager/data_edit', ['table_name' => $table], false));
+header('Location: '. \rex_url::backendPage('yform/manager/data_edit', ['table_name' => $tablename], false));
 exit;

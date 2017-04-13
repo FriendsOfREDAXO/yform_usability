@@ -17,3 +17,8 @@ pages:
     yform/manager/yform-usability:
         title: 'yform-usability'
         hidden: true
+
+default_config:
+    duplicate_tables: []
+    status_tables: []
+    sorting_tables: []

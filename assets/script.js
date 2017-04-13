@@ -56,9 +56,9 @@
                     }, function (resp) {
                         $('#rex-js-ajax-loader').removeClass('rex-visible');
 
-                        if (resp.length)
+                        if (resp.length && window.console)
                         {
-                            alert(resp);
+                            console.log(resp);
                         }
                     });
                 }
