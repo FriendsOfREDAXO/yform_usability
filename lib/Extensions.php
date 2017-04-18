@@ -68,8 +68,9 @@ class Extensions
     {
         $columns = $list->getColumnNames();
         $first_col_name = array_shift($columns);
+        $orderBy = rex_get('sort', 'string', $table->getSortFieldName());
 
-        if ($first_col_name != 'id')
+        if ($first_col_name != 'id' && $orderBy == 'prio')
         {
             $list->addFormAttribute('class', 'sortable-list');
             $list->setColumnFormat($first_col_name, 'custom', function ($params)
