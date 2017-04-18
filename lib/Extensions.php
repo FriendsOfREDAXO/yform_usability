@@ -57,8 +57,7 @@ class Extensions
                     data-status="' . (int)!$_status . '"
                     data-table="' . $params['params']['table']->getTableName() . '"
                 >
-                    <i class="rex-icon rex-icon-' . $status . '"></i>
-                    <span class="text">' . $status . '</span>
+                    <i class="rex-icon rex-icon-' . $status . '"></i>&nbsp;<span class="text">' . $status . '</span>
                 </a>
             ';
         }, ['table' => $table]);
@@ -89,7 +88,7 @@ class Extensions
 
     protected static function addDuplication($list, $table)
     {
-        $list->addColumn('func_duplication', '<i class="rex-icon fa-files-o"></i> ' . \rex_addon::get('yform_usability')->i18n('action.duplicate'), count($list->getColumnNames()));
+        $list->addColumn('func_duplication', '<i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_addon::get('yform_usability')->i18n('action.duplicate'), count($list->getColumnNames()));
         $list->setColumnLabel('func_duplication', '');
         $list->setColumnParams('func_duplication', ['func' => 'duplicate', 'id' => '###id###', 'page' => 'yform/manager/yform-usability']);
         return $list;
