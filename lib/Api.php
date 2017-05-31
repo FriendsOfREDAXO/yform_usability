@@ -69,7 +69,7 @@ class rex_api_yform_usability_api extends rex_api_function
             $sort    = strtolower($tableobject->getSortOrderName());
             $filter  = strlen($filter) ? explode(',', $filter) : [];
             if ($next_id) {
-                $prio = $tableobject->query()->findOne($next_id)->getValue('prio');
+                $prio = $tableobject->query()->findId($next_id)->getValue('prio');
             }
             else {
                 $prio = $tableobject->query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne()->getValue('prio');
