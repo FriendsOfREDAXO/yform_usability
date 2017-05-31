@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 1.2.2 - 31.05.2017
+--------------------------
+- Fehler bei Update von Sortierung behoben
+- Cache cleaning bei Installation integriert
+
 Version 1.2.1 - 04.04.2017
 --------------------------
 - Default-Einstellungen bei Erstinstallation haben gefehlt

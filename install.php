@@ -11,6 +11,10 @@
  */
 namespace yform\usability;
 
+\rex_sql_table::get(\rex::getTable('yform_table'))
+    ->ensureColumn(new \rex_sql_column('list_amount', 'int'))
+    ->alter();
+
 if (!$this->hasConfig()) {
     $config = [
         'status_tables'    => ['all'],
@@ -18,11 +22,6 @@ if (!$this->hasConfig()) {
         'duplicate_tables' => ['all'],
     ];
     $this->setConfig($config);
-
-    // alter the yform table manager table
-    $sql = \rex_sql::factory();
-    if (count($sql->getArray("SHOW TABLES LIKE 'rex_yform_table'"))) {
-        $sql->setQuery("ALTER TABLE `rex_yform_table` MODIFY `list_amount` INTEGER UNSIGNED");
-    }
 }
 
+rex_delete_cache();
