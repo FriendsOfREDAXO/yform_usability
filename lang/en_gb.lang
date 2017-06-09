@@ -1,1 +1,6 @@
-yform_usability.label.use_dragndrop = Use drag & drop to sort the records
+yform_label.online_status = Show online/offline state
+yform_label.sorting = Sorting active
+yform_label.duplication = Duplication active
+yform_label.all = All
+
+yform_usability_action.duplicate = duplicate
