@@ -89,7 +89,7 @@ class Extensions
 
     protected static function addDuplication($list, $table)
     {
-        $list->addColumn('func_duplication', '<i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_addon::get('yform_usability')->i18n('action.duplicate'), count($list->getColumnNames()));
+        $list->addColumn('func_duplication', '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_addon::get('yform_usability')->i18n('action.duplicate') .'</div>', count($list->getColumnNames()));
         $list->setColumnLabel('func_duplication', '');
         $list->setColumnParams('func_duplication', ['func' => 'duplicate', 'id' => '###id###', 'page' => 'yform/manager/yform-usability']);
         return $list;

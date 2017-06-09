@@ -26,7 +26,10 @@ switch ($func) {
              $iSql = \rex_sql::factory();
              $iSql->setTable($tablename);
              foreach ($sql->getFieldNames() as $field) {
-                 if ($field != 'id') {
+                 if ($field == 'status') {
+                     $iSql->setValue($field, 0);
+                 }
+                 else if ($field != 'id') {
                      $iSql->setValue($field, $sql->getValue($field));
                  }
              }

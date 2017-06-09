@@ -1,6 +1,10 @@
 .sortable-list {
+    .duplicator {
+        white-space: nowrap;
+    }
     .status-toggle {
         cursor: pointer;
+        white-space: nowrap;
     }
     .sort-handle:hover {
         color: #4b9ad9;
