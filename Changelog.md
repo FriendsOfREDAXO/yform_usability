@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 1.2.3 - 09.06.2017
+--------------------------
+- CSS: Action-Links brechen in Liste nicht mehr um
+- beim Duplizieren von Datensätzen werden diese nun automatisch auf offline gesetzt
+
 Version 1.2.2 - 31.05.2017
 --------------------------
 - Fehler bei Update von Sortierung behoben
