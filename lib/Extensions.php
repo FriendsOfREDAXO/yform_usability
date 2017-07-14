@@ -49,15 +49,16 @@ class Extensions
         $list->setColumnLabel('packing_list', 'Status');
         $list->setColumnFormat('packing_list', 'custom', function ($params)
         {
-            $_status = $params['list']->getValue('status');
-            $status = $_status ? 'online' : 'offline';
+            $value   = $params['list']->getValue('status');
+            $tparams = Utils::getStatusColumnParams($params['params']['table'], $value);
+
             return '
-                <a class="status-toggle rex-' . $status . '" 
+                <a class="status-toggle rex-' . $tparams['intern_status'] . '" 
                     data-id="' . $params['list']->getValue('id') . '" 
-                    data-status="' . (int)!$_status . '"
+                    data-status="' . $tparams['toggle_value'] . '"
                     data-table="' . $params['params']['table']->getTableName() . '"
                 >
-                    <i class="rex-icon rex-icon-' . $status . '"></i>&nbsp;<span class="text">' . $status . '</span>
+                    <i class="rex-icon rex-icon-' . $tparams['intern_status'] . '"></i>&nbsp;<span class="text">('. $tparams['toggle_value'] .') ' . $tparams['current_label'] . '</span>
                 </a>
             ';
         }, ['table' => $table]);

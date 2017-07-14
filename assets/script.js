@@ -20,10 +20,10 @@
                 }, function (resp) {
                     $('#rex-js-ajax-loader').removeClass('rex-visible');
 
-                    _this.data('status', resp.message.new_status_val);
-                    _this.prop('class', 'status-toggle rex-'+ resp.message.new_status);
-                    _this.find('.rex-icon').prop('class', 'rex-icon rex-icon-'+ resp.message.new_status);
-                    _this.find('.text').html(resp.message.new_status);
+                    _this.data('status', resp.message.toggle_value);
+                    _this.prop('class', 'status-toggle rex-'+ resp.message.intern_status);
+                    _this.find('.rex-icon').prop('class', 'rex-icon rex-icon-'+ resp.message.intern_status);
+                    _this.find('.text').html(resp.message.current_label);
                 });
                 return false;
             });

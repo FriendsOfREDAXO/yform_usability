@@ -53,8 +53,9 @@ class rex_api_yform_usability_api extends rex_api_function
             rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
         }
 
-        $this->response['new_status']     = $status ? 'online' : 'offline';
-        $this->response['new_status_val'] = (int) !$status;
+        $tparams = \yform\usability\Utils::getStatusColumnParams(rex_yform_manager_table::get($table), $status);
+
+        $this->response = array_merge($this->response, $tparams);
     }
 
     private function __updatesort()
