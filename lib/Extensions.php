@@ -58,7 +58,7 @@ class Extensions
                     data-status="' . $tparams['toggle_value'] . '"
                     data-table="' . $params['params']['table']->getTableName() . '"
                 >
-                    <i class="rex-icon rex-icon-' . $tparams['intern_status'] . '"></i>&nbsp;<span class="text">('. $tparams['toggle_value'] .') ' . $tparams['current_label'] . '</span>
+                    <i class="rex-icon rex-icon-' . $tparams['intern_status'] . '"></i>&nbsp;<span class="text">' . $tparams['current_label'] . '</span>
                 </a>
             ';
         }, ['table' => $table]);
