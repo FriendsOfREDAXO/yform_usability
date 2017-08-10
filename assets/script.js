@@ -41,7 +41,41 @@
                 onUpdate: function (e) {
                     var $sort_icon = $(e.item).find('.sort-icon'),
                         $next = $(e.item).next(),
-                        id = 0;
+                        id = 0,
+                        prio_td_index = -1,
+                        lowest_prio = -1;
+
+                    // find index of prio th
+                    $this.find('thead').find('th').each(function (idx,el) {
+                        var $a = $(el).find('a'),
+                            href = '';
+                        if (!$a.length) {
+                            return true; // no link, continue
+                        }
+                        href = $a.attr('href');
+                        if (href.indexOf('func=add') !== -1) {
+                            return true; // add link, continue
+                        }
+                        if (href.indexOf('sort=prio') !== -1) {
+                            prio_td_index = idx;
+                            return false; // found prio th, store index and break
+                        }
+                    });
+                    // find lowest prio
+                    if (prio_td_index > -1) {
+                        $this.find('tbody').find('tr').find('td:eq(' + prio_td_index + ')').each(function (idx,el) {
+                            var prio = parseInt($(el).text());
+                            if (lowest_prio < 0 || prio < lowest_prio) {
+                                lowest_prio = prio;
+                            }
+                        });
+                    }
+                    // set new prio
+                    if (lowest_prio > -1) {
+                        $this.find('tbody').find('tr').find('td:eq(' + prio_td_index + ')').each(function (idx,el) {
+                            $(el).text(lowest_prio + idx);
+                        });
+                    }
 
                     $('#rex-js-ajax-loader').addClass('rex-visible');
 
