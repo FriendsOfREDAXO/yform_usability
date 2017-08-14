@@ -116,6 +116,15 @@ $fragment->setVar('buttons', $buttons, false);
 $content = $fragment->parse('core/page/section.php');
 
 ?>
+<section class="rex-page-section">
+    <div class="panel help-block">
+        <div class="panel-body">
+            <a style="float:right; font-size: 2em; line-height: 0;" href="index.php?page=packages&subpage=help&package=yform_usability" title="<?php echo $this->i18n('usability.help_open_readme'); ?>"><i class="fa fa-question-circle"></i></a>
+            <p><?php echo $this->i18n('usability.help_prio'); ?></p>
+            <p style="margin-bottom:0"><?php echo $this->i18n('usability.help_status'); ?></p>
+        </div>
+    </div>
+</section>
 <form action="" method="post">
     <?= $content ?>
 </form>
