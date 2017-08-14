@@ -20,9 +20,15 @@ class Utils
     {
         $Field   = $table->getValueField('status');
         $options = (new \rex_yform_value_select())->getArrayFromString($Field->getElement('options'));
-        $okeys   = array_keys($options);
-        $_nvalue = $okeys[array_search($currentValue, $okeys) + 1];
-        $nvalue  = $_nvalue === null ? $okeys[0] : $_nvalue;
+        
+        if (!$currentValue) {
+            $nvalue = 1;
+            $intern_status = 'offline';
+        }
+        else {
+            $nvalue = 0;
+            $intern_status = 'online';
+        }
 
         return [
             'current_label' => $options[$currentValue],
