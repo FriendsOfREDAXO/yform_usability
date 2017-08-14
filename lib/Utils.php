@@ -21,13 +21,12 @@ class Utils
         $Field   = $table->getValueField('status');
         $options = (new \rex_yform_value_select())->getArrayFromString($Field->getElement('options'));
         
-        if (!$currentValue) {
+        $nvalue = 0;
+        $intern_status = 'online';
+        if (!$currentValue)
+        {
             $nvalue = 1;
             $intern_status = 'offline';
-        }
-        else {
-            $nvalue = 0;
-            $intern_status = 'online';
         }
 
         return [
