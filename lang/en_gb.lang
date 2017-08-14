@@ -1,3 +1,5 @@
+yform_usability.settings = Settings
+
 yform_label.online_status = Show online/offline state
 yform_label.sorting = Sorting active
 yform_label.duplication = Duplication active
