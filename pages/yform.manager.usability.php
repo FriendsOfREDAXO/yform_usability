@@ -110,7 +110,7 @@ $buttons = $fragment->parse('core/form/submit.php');
 // section
 $fragment = new \rex_fragment();
 $fragment->setVar('class', 'edit', false);
-$fragment->setVar('title', $this->i18n('settings'), false);
+$fragment->setVar('title', $this->i18n('usability.settings'), false);
 $fragment->setVar('body', implode('', $content), false);
 $fragment->setVar('buttons', $buttons, false);
 $content = $fragment->parse('core/page/section.php');
