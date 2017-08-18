@@ -21,17 +21,13 @@ class Utils
         $Field   = $table->getValueField('status');
         $options = (new \rex_yform_value_select())->getArrayFromString($Field->getElement('options'));
         
-        $nvalue = 0;
-        $intern_status = 'online';
-        if (!$currentValue)
-        {
-            $nvalue = 1;
-            $intern_status = 'offline';
-        }
+        $okeys   = array_keys($options);
+        $cur_idx = array_search($currentValue, $okeys);
+        $nvalue  = isset($okeys[$cur_idx + 1]) ? $okeys[$cur_idx + 1] : $okeys[0];
 
         return [
             'current_label' => $options[$currentValue],
-            'intern_status' => $intern_status,
+            'intern_status' => $currentValue > 0 ? 'online' : 'offline',
             'toggle_value'  => $nvalue,
         ];
     }
