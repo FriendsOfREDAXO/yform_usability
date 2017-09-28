@@ -16,28 +16,66 @@ namespace yform\usability;
 
 class Extensions
 {
-    public static function yform_data_list($params)
+
+    public static function rex_list_get(\rex_extension_point $ep)
     {
-        $list = $params->getSubject();
-        $table = $params->getParam('table');
+        $list    = $ep->getSubject();
+        $lparams = $list->getParams();
+
+        if ($lparams['page'] == 'yform/manager/table_field') {
+            $first_col_name = $list->getColumnNames()[0];
+            $table_name     = \rex_yform_manager_field::table();
+
+            $list->addFormAttribute('class', 'sortable-list');
+            $list->setColumnLayout($first_col_name, ['<th class="rex-table-icon">###VALUE###</th>', '###VALUE###']); // ###VALUE###
+            $list->setColumnFormat($first_col_name, 'custom', function ($params) {
+                $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
+
+                switch ($params['list']->getValue('type_id')) {
+                    case 'validate':
+                        $style = 'color:#aaa;'; // background-color:#cfd9d9;
+                        break;
+                    case 'action':
+                        $style = 'background-color:#cfd9d9;';
+                        break;
+                    default:
+                        $style = 'background-color:#eff9f9;';
+                        break;
+                }
+                return '
+                    <td class="rex-table-icon" style="' . $style . '">
+                        <i class="rex-icon fa fa-bars sort-icon" 
+                            data-id="###id###" 
+                            data-table-type="db_table"
+                            data-table-sort-field="prio"
+                            data-table-sort-order="asc"
+                            data-table="' . $params['params']['table'] . '" 
+                            data-filter="' . implode(',', $filters) . '"></i>
+                    </td>
+                ';
+            }, ['yform_table' => $lparams['table_name'], 'table' => $table_name]);
+        }
+    }
+
+    public static function yform_data_list(\rex_extension_point $ep)
+    {
+        $list           = $ep->getSubject();
+        $table          = $ep->getParam('table');
         $default_config = \rex_addon::get('yform_usability')->getProperty('default_config');
-        $config = \rex_addon::get('yform_usability')->getConfig(null, $default_config);
-        $is_opener = rex_get('rex_yform_manager_opener', 'array');
+        $config         = \rex_addon::get('yform_usability')->getConfig(null, $default_config);
+        $is_opener      = rex_get('rex_yform_manager_opener', 'array');
 
-        $has_duplicate = count((array)$config['duplicate_tables']) && (in_array('all', $config['duplicate_tables']) || in_array($table->getTableName(), $config['duplicate_tables']));
-        $has_status = count((array)$config['status_tables']) && (in_array('all', $config['status_tables']) || in_array($table->getTableName(), $config['status_tables']));
-        $has_sorting = count((array)$config['sorting_tables']) && (in_array('all', $config['sorting_tables']) || in_array($table->getTableName(), $config['sorting_tables']));
+        $has_duplicate = count((array) $config['duplicate_tables']) && (in_array('all', $config['duplicate_tables']) || in_array($table->getTableName(), $config['duplicate_tables']));
+        $has_status    = count((array) $config['status_tables']) && (in_array('all', $config['status_tables']) || in_array($table->getTableName(), $config['status_tables']));
+        $has_sorting   = count((array) $config['sorting_tables']) && (in_array('all', $config['sorting_tables']) || in_array($table->getTableName(), $config['sorting_tables']));
 
-        if ($has_duplicate && empty ($is_opener) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDuplication', true, ['list' => $list, 'table' => $table])))
-        {
+        if ($has_duplicate && empty ($is_opener) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDuplication', true, ['list' => $list, 'table' => $table]))) {
             $list = self::addDuplication($list, $table);
         }
-        if ($has_status && count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table])))
-        {
+        if ($has_status && count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table]))) {
             $list = self::addStatusToggle($list, $table);
         }
-        if ($has_sorting && empty ($is_opener) && count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table])))
-        {
+        if ($has_sorting && empty ($is_opener) && count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table]))) {
             $list = self::addDragNDropSort($list, $table);
         }
         return $list;
@@ -47,8 +85,7 @@ class Extensions
     {
         $list->addColumn('packing_list', '', count($list->getColumnNames()));
         $list->setColumnLabel('packing_list', 'Status');
-        $list->setColumnFormat('packing_list', 'custom', function ($params)
-        {
+        $list->setColumnFormat('packing_list', 'custom', function ($params) {
             $value   = $params['list']->getValue('status');
             $tparams = Utils::getStatusColumnParams($params['params']['table'], $value);
 
@@ -67,19 +104,18 @@ class Extensions
 
     protected static function addDragNDropSort($list, $table)
     {
-        $columns = $list->getColumnNames();
+        $columns        = $list->getColumnNames();
         $first_col_name = array_shift($columns);
-        $orderBy = rex_get('sort', 'string', $table->getSortFieldName());
+        $orderBy        = rex_get('sort', 'string', $table->getSortFieldName());
 
-        if ($first_col_name != 'id' && $orderBy == 'prio')
-        {
+        if ($first_col_name != 'id' && $orderBy == 'prio') {
             $list->addFormAttribute('class', 'sortable-list');
-            $list->setColumnFormat($first_col_name, 'custom', function ($params)
-            {
+            $list->setColumnFormat($first_col_name, 'custom', function ($params) {
                 $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
                 return '
                         <i class="rex-icon fa fa-bars sort-icon" 
                             data-id="###id###" 
+                            data-table-type="orm_model"
                             data-table="' . $params['params']['table']->getTableName() . '" 
                             data-filter="' . implode(',', $filters) . '"></i>
                     ';
@@ -90,7 +126,7 @@ class Extensions
 
     protected static function addDuplication($list, $table)
     {
-        $list->addColumn('func_duplication', '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_addon::get('yform_usability')->i18n('action.duplicate') .'</div>', count($list->getColumnNames()));
+        $list->addColumn('func_duplication', '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_addon::get('yform_usability')->i18n('action.duplicate') . '</div>', count($list->getColumnNames()));
         $list->setColumnLabel('func_duplication', '');
         $list->setColumnParams('func_duplication', ['func' => 'duplicate', 'id' => '###id###', 'page' => 'yform/manager/yform-usability']);
         return $list;

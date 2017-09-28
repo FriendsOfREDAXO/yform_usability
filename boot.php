@@ -49,4 +49,5 @@ if (\rex::isBackend() && \rex::getUser())
     \rex_view::addJsFile($this->getAssetsUrl('script.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
 
     \rex_extension::register('YFORM_DATA_LIST', ['\yform\usability\Extensions', 'yform_data_list']);
+    \rex_extension::register('REX_LIST_GET', ['\yform\usability\Extensions', 'rex_list_get']);
 }

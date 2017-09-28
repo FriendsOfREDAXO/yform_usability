@@ -65,15 +65,40 @@ class rex_api_yform_usability_api extends rex_api_function
         if ($tablename != '') {
             $data_id = rex_post('data_id', 'int');
             $next_id = rex_post('next_id', 'int');
-            $filter = rex_post('filter', 'string');
-            $tableobject = rex_yform_manager_table::get($tablename);
-            $sort    = strtolower($tableobject->getSortOrderName());
+            $filter  = rex_post('filter', 'string');
             $filter  = strlen($filter) ? explode(',', $filter) : [];
-            if ($next_id) {
-                $prio = $tableobject->query()->findId($next_id)->getValue('prio');
+
+            if (rex_post('table_type') == 'db_table') {
+                $sql    = rex_sql::factory();
+                $sort   = rex_post('table_sort_order', 'string', 'asc');
+                $sfield = rex_post('table_sort_field', 'string', 'prio');
+
+
+                if ($next_id) {
+                    $sql->setTable($tablename);
+                    $sql->setWhere('id = :id', ['id' => $next_id]);
+                    $sql->select($sfield);
+                    $prio = @$sql->getValue($sfield);
+                }
+                else {
+                    $prio = @$sql->getArray("
+                        SELECT {$sfield} 
+                        FROM {$tablename} 
+                        ORDER BY {$sfield} ". ($sort == 'asc' ? 'desc' : 'asc') ." 
+                        LIMIT 1
+                    ")[0]['prio'];
+                }
             }
             else {
-                $prio = $tableobject->query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne()->getValue('prio');
+                $tableobject = rex_yform_manager_table::get($tablename);
+                $sort        = strtolower($tableobject->getSortOrderName());
+
+                if ($next_id) {
+                    $prio = $tableobject->query()->findId($next_id)->getValue('prio');
+                }
+                else {
+                    $prio = $tableobject->query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne()->getValue('prio');
+                }
             }
             try {
                 $query = "
@@ -81,7 +106,7 @@ class rex_api_yform_usability_api extends rex_api_function
                         SET prio = {$prio}
                         WHERE id = :id
                     ";
-                $sql = \rex_sql::factory();
+                $sql   = \rex_sql::factory();
                 $sql->setQuery($query, ['id' => $data_id]);
 
                 if (strlen($sql->getError())) {

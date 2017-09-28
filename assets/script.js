@@ -86,6 +86,9 @@
                         data_id: $sort_icon.data('id'),
                         filter: $sort_icon.data('filter'),
                         table: $sort_icon.data('table'),
+                        table_type: $sort_icon.data('table-type'),
+                        table_sort_order: $sort_icon.data('table-sort-order') || null,
+                        table_sort_field: $sort_icon.data('table-sort-field') || null,
                         next_id: id
                     }, function (resp) {
                         $('#rex-js-ajax-loader').removeClass('rex-visible');
