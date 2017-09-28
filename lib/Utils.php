@@ -27,7 +27,7 @@ class Utils
 
         return [
             'current_label' => $options[$currentValue],
-            'intern_status' => $currentValue > 0 ? 'online' : 'offline',
+            'intern_status' => $currentValue > 1 ? 'status-'. $currentValue : ($currentValue > 0 ? 'online' : 'offline'),
             'toggle_value'  => $nvalue,
         ];
     }
