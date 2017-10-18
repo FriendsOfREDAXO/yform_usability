@@ -89,15 +89,10 @@ class Extensions
             $value   = $params['list']->getValue('status');
             $tparams = Utils::getStatusColumnParams($params['params']['table'], $value);
 
-            return '
-                <a class="status-toggle rex-' . $tparams['intern_status'] . '" 
-                    data-id="' . $params['list']->getValue('id') . '" 
-                    data-status="' . $tparams['toggle_value'] . '"
-                    data-table="' . $params['params']['table']->getTableName() . '"
-                >
-                    <i class="rex-icon rex-icon-' . $tparams['intern_status'] . '"></i>&nbsp;<span class="text">' . $tparams['current_label'] . '</span>
-                </a>
-            ';
+            return strtr($tparams['element'], [
+                '{{ID}}'    => $params['list']->getValue('id'),
+                '{{TABLE}}' => $params['params']['table']->getTableName(),
+            ]);
         }, ['table' => $table]);
         return $list;
     }

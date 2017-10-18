@@ -36,7 +36,7 @@ class rex_api_yform_usability_api extends rex_api_function
 
     private function __changestatus()
     {
-        $status  = (int) rex_post('status', 'int');
+        $status  = rex_post('status', 'string');
         $data_id = (int) rex_post('data_id', 'int');
         $table   = rex_post('table', 'string');
         $sql     = rex_sql::factory();
@@ -55,6 +55,10 @@ class rex_api_yform_usability_api extends rex_api_function
 
         $tparams = \yform\usability\Utils::getStatusColumnParams(rex_yform_manager_table::get($table), $status);
 
+        $tparams['element'] = strtr($tparams['element'], [
+            '{{ID}}'    => $data_id,
+            '{{TABLE}}' => $table,
+        ]);
         $this->response = array_merge($this->response, $tparams);
     }
 

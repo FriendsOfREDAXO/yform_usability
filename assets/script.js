@@ -4,29 +4,47 @@
         initList(event, container);
     });
 
-
     function initList(event, container) {
+
+        function updateStatus($this, status, callback) {
+            $('#rex-js-ajax-loader').addClass('rex-visible');
+
+            $.post(rex.frontend_url + '?rex-api-call=yform_usability_api&method=changeStatus', {
+                data_id: $this.data('id'),
+                table: $this.data('table'),
+                status: status
+            }, function (resp) {
+                callback(resp);
+                $('#rex-js-ajax-loader').removeClass('rex-visible');
+            });
+        }
+
         // status toggle
         if (container.find('.status-toggle').length) {
-            container.find('.status-toggle').click(function() {
+            var statusToggle = function () {
                 var _this = $(this);
 
-                $('#rex-js-ajax-loader').addClass('rex-visible');
-
-                $.post(rex.frontend_url + '?rex-api-call=yform_usability_api&method=changeStatus', {
-                    data_id: _this.data('id'),
-                    table: _this.data('table'),
-                    status: _this.data('status')
-                }, function (resp) {
-                    $('#rex-js-ajax-loader').removeClass('rex-visible');
-
-                    _this.data('status', resp.message.toggle_value);
-                    _this.prop('class', 'status-toggle rex-'+ resp.message.intern_status);
-                    _this.find('.rex-icon').prop('class', 'rex-icon rex-icon-'+ resp.message.intern_status);
-                    _this.find('.text').html(resp.message.current_label);
+                updateStatus(_this, _this.data('status'), function (resp) {
+                    var $parent = _this.parent();
+                    $parent.html(resp.message.element);
+                    $parent.children('a:first').click(statusToggle);
                 });
                 return false;
-            });
+            };
+            container.find('.status-toggle').click(statusToggle);
+        }
+        // status select
+        if (container.find('.status-select').length) {
+            var statusChange = function () {
+                var _this = $(this);
+
+                updateStatus(_this, _this.val(), function (resp) {
+                    var $parent = _this.parent();
+                    $parent.html(resp.message.element);
+                    $parent.children('select:first').change(statusChange);
+                });
+            };
+            container.find('.status-select').change(statusChange);
         }
 
 
@@ -46,7 +64,7 @@
                         lowest_prio = -1;
 
                     // find index of prio th
-                    $this.find('thead').find('th').each(function (idx,el) {
+                    $this.find('thead').find('th').each(function (idx, el) {
                         var $a = $(el).find('a'),
                             href = '';
                         if (!$a.length) {
@@ -63,7 +81,7 @@
                     });
                     // find lowest prio
                     if (prio_td_index > -1) {
-                        $this.find('tbody').find('tr').find('td:eq(' + prio_td_index + ')').each(function (idx,el) {
+                        $this.find('tbody').find('tr').find('td:eq(' + prio_td_index + ')').each(function (idx, el) {
                             var prio = parseInt($(el).text());
                             if (lowest_prio < 0 || prio < lowest_prio) {
                                 lowest_prio = prio;
@@ -72,7 +90,7 @@
                     }
                     // set new prio
                     if (lowest_prio > -1) {
-                        $this.find('tbody').find('tr').find('td:eq(' + prio_td_index + ')').each(function (idx,el) {
+                        $this.find('tbody').find('tr').find('td:eq(' + prio_td_index + ')').each(function (idx, el) {
                             $(el).text(lowest_prio + idx);
                         });
                     }
@@ -93,8 +111,7 @@
                     }, function (resp) {
                         $('#rex-js-ajax-loader').removeClass('rex-visible');
 
-                        if (resp.length && window.console)
-                        {
+                        if (resp.length && window.console) {
                             console.log(resp);
                         }
                     });
@@ -102,5 +119,4 @@
             });
         }
     }
-
 })(jQuery);

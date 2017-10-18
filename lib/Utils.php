@@ -20,15 +20,33 @@ class Utils
     {
         $Field   = $table->getValueField('status');
         $options = (new \rex_yform_value_select())->getArrayFromString($Field->getElement('options'));
-        
+
         $okeys   = array_keys($options);
         $cur_idx = array_search($currentValue, $okeys);
         $nvalue  = isset($okeys[$cur_idx + 1]) ? $okeys[$cur_idx + 1] : $okeys[0];
+        $istatus = $currentValue > 1 ? 'status-' . $currentValue : ($currentValue > 0 ? 'online' : 'offline');
+
+        if (count($options) > 2) {
+            $element = '<select class="status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-status="' . $nvalue. '" data-table="{{TABLE}}">';
+
+            foreach ($options as $key => $option) {
+                $element .= '<option value="'. $key .'" '. ($currentValue == $key ? 'selected="selected"' : '') .'>'. $option .'</option>';
+            }
+            $element .= '</select>';
+        }
+        else {
+            $element = '
+                <a class="status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-status="' . $nvalue. '" data-table="{{TABLE}}">
+                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . $options[$currentValue] . '</span>
+                </a>
+            ';
+        }
 
         return [
             'current_label' => $options[$currentValue],
-            'intern_status' => $currentValue > 1 ? 'status-'. $currentValue : ($currentValue > 0 ? 'online' : 'offline'),
+            'intern_status' => $istatus,
             'toggle_value'  => $nvalue,
+            'element'       => $element,
         ];
     }
 }
