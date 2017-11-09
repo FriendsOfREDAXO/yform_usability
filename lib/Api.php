@@ -92,6 +92,7 @@ class rex_api_yform_usability_api extends rex_api_function
                         LIMIT 1
                     ")[0]['prio'];
                 }
+                rex_yform_manager_table::deleteCache();
             }
             else {
                 $tableobject = rex_yform_manager_table::get($tablename);
