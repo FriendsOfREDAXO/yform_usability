@@ -21,12 +21,12 @@ class Extensions
     {
         $list    = $ep->getSubject();
         $lparams = $list->getParams();
+        $list->addFormAttribute('class', 'sortable-list');
 
         if ($lparams['page'] == 'yform/manager/table_field') {
             $first_col_name = $list->getColumnNames()[0];
             $table_name     = \rex_yform_manager_field::table();
 
-            $list->addFormAttribute('class', 'sortable-list');
             $list->setColumnLayout($first_col_name, ['<th class="rex-table-icon">###VALUE###</th>', '###VALUE###']); // ###VALUE###
             $list->setColumnFormat($first_col_name, 'custom', function ($params) {
                 $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
