@@ -53,7 +53,7 @@
 
             $this.find('.sort-icon').parent().addClass('sort-handle');
 
-            Sortable.create($this.find('tbody').get(0), {
+            $this.find('tbody').sortable({
                 animation: 150,
                 handle: '.sort-handle',
                 onUpdate: function (e) {
