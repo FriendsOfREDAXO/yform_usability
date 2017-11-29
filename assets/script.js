@@ -56,9 +56,9 @@
             $this.find('tbody').sortable({
                 animation: 150,
                 handle: '.sort-handle',
-                onUpdate: function (e) {
-                    var $sort_icon = $(e.item).find('.sort-icon'),
-                        $next = $(e.item).next(),
+                update: function (e, ui) {
+                    var $sort_icon = $(ui.item).find('.sort-icon'),
+                        $next = $(ui.item).next(),
                         id = 0,
                         prio_td_index = -1,
                         lowest_prio = -1;
@@ -108,11 +108,10 @@
                         table_sort_order: $sort_icon.data('table-sort-order') || null,
                         table_sort_field: $sort_icon.data('table-sort-field') || null,
                         next_id: id
-                    }, function (resp) {
+                    }).done(function (data) {
                         $('#rex-js-ajax-loader').removeClass('rex-visible');
-
-                        if (resp.length && window.console) {
-                            console.log(resp);
+                        if (window.console) {
+                            console.log(data);
                         }
                     });
                 }
