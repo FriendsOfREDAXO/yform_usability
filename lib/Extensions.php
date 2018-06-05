@@ -87,7 +87,7 @@ class Extensions
         $list->setColumnLabel('packing_list', 'Status');
         $list->setColumnFormat('packing_list', 'custom', function ($params) {
             $value   = $params['list']->getValue('status');
-            $tparams = Utils::getStatusColumnParams($params['params']['table'], $value);
+            $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
 
             return strtr($tparams['element'], [
                 '{{ID}}'    => $params['list']->getValue('id'),

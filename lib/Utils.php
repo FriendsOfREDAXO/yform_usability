@@ -16,10 +16,14 @@ namespace yform\usability;
 
 class Utils
 {
-    public static function getStatusColumnParams(\rex_yform_manager_table $table, $currentValue)
+    public static function getStatusColumnParams(\rex_yform_manager_table $table, $currentValue, $list = null)
     {
         $Field   = $table->getValueField('status');
         $options = array_filter((array) (new \rex_yform_value_select())->getArrayFromString($Field->getElement('options')));
+        $options = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.getStatusColumnParams.options', $options, [
+            'table' => $table,
+            'list'  => $list,
+        ]));
 
         $okeys   = count($options) ? array_keys($options) : explode(',', $Field->getElement('values'));
         $cur_idx = array_search($currentValue, $okeys);
@@ -27,16 +31,19 @@ class Utils
         $istatus = $currentValue > 1 ? 'status-' . $currentValue : ($currentValue > 0 ? 'online' : 'offline');
 
         if (count($options) > 2) {
-            $element = '<select class="status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-status="' . $nvalue. '" data-table="{{TABLE}}">';
+            $element = '<select class="status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">';
 
             foreach ($options as $key => $option) {
-                $element .= '<option value="'. $key .'" '. ($currentValue == $key ? 'selected="selected"' : '') .'>'. $option .'</option>';
+                $element .= '<option value="' . $key . '" ' . ($currentValue == $key ? 'selected="selected"' : '') . '>' . $option . '</option>';
             }
             $element .= '</select>';
         }
+        else if (count($options) == 1) {
+            $element = array_shift($options);
+        }
         else {
             $element = '
-                <a class="status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-status="' . $nvalue. '" data-table="{{TABLE}}">
+                <a class="status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">
                     <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . (strlen($options[$currentValue]) ? $options[$currentValue] : $istatus) . '</span>
                 </a>
             ';
