@@ -1,0 +1,12 @@
+yform_usability.settings = Ajustes
+
+yform_label.online_status = Mostrar estado en línea/fuera de línea
+yform_label.sorting = Clasificación activa
+yform_label.duplication = Duplicación activa
+yform_label.all = Todos
+
+yform_usability_action.duplicate = duplicar
+
+yform_usability.help_prio = <b>Ordenar por arrastrar y soltar </b>: la tabla necesita un campo de tipo <code>prio</code>. Además, en las propiedades de la tabla, cambie la clasificación de <code>id</code> a <code>prio</code>.
+yform_usability.help_status = <b>Cambiar el estado en línea del conjunto de datos mediante el clic</b>: la tabla necesita un Feld seleccionado con el nombre de fila <code>estado</code>, los valores deben ser <code>0</code> y <code>1</code>.
+yform_usability.help_open_readme = Lecturas abiertas
