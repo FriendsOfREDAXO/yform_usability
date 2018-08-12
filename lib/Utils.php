@@ -44,7 +44,7 @@ class Utils
         else {
             $element = '
                 <a class="status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">
-                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . (strlen($options[$currentValue]) ? $options[$currentValue] : $istatus) . '</span>
+                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . (strlen($options[$currentValue]) ? \rex_i18n::translate($options[$currentValue]) : $istatus) . '</span>
                 </a>
             ';
         }
