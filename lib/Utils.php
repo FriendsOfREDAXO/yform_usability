@@ -34,7 +34,7 @@ class Utils
             $element = '<select class="status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">';
 
             foreach ($options as $key => $option) {
-                $element .= '<option value="' . $key . '" ' . ($currentValue == $key ? 'selected="selected"' : '') . '>' . $option . '</option>';
+                $element .= '<option value="' . $key . '" ' . ($currentValue == $key ? 'selected="selected"' : '') . '>' . \rex_i18n::translate($option) . '</option>';
             }
             $element .= '</select>';
         }
@@ -44,7 +44,7 @@ class Utils
         else {
             $element = '
                 <a class="status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">
-                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . (strlen($options[$currentValue]) ? $options[$currentValue] : $istatus) . '</span>
+                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . (strlen($options[$currentValue]) ? \rex_i18n::translate($options[$currentValue]) : $istatus) . '</span>
                 </a>
             ';
         }
