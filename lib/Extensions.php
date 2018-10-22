@@ -83,9 +83,9 @@ class Extensions
 
     protected static function addStatusToggle($list, $table)
     {
-        $list->addColumn('packing_list', '', count($list->getColumnNames()));
-        $list->setColumnLabel('packing_list', 'Status');
-        $list->setColumnFormat('packing_list', 'custom', function ($params) {
+        $list->addColumn('status_toggle', '', count($list->getColumnNames()));
+        $list->setColumnLabel('status_toggle', 'Status');
+        $list->setColumnFormat('status_toggle', 'custom', function ($params) {
             $value   = $params['list']->getValue('status');
             $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
 
