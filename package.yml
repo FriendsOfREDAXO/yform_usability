@@ -1,12 +1,12 @@
 package: yform_usability
-version: '1.4-dev'
+version: '1.4'
 author: 'Friends Of REDAXO'
 supportpage: https://github.com/FriendsOfREDAXO/yform_usability
 compile: 0
 
 requires:
     packages:
-        yform/manager: '^2.0'
+        yform/manager: '>=2,<4'
 
 page:
     hidden: true
