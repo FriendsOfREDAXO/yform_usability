@@ -21,6 +21,7 @@ class Utils
         $Field   = $table->getValueField('status');
         $choices = $Field->getElement('choices');
         $options = $Field->getElement('options');
+        $istatus = '';
 
         if (strlen(trim($choices))) {
             $options = \rex_yform_value_choice::getListValues([
