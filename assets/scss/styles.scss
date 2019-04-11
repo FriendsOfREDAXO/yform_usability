@@ -10,4 +10,16 @@
         color: #4b9ad9;
         cursor: move;
     }
+    .ui-sortable-placeholder {
+        background: #FFFCDD !important;
+        visibility: visible !important;
+    }
+    .ui-sortable-helper {
+        display: table-row;
+        background: #fff;
+
+        td {
+            display: table-cell;
+        }
+    }
 }

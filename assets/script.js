@@ -100,7 +100,10 @@
                     if ($next.length) {
                         id = $next.find('.sort-icon').data('id');
                     }
-                    $.post(rex.ajax_url + '&rex-api-call=yform_usability_api&method=updateSort', {
+                    
+                    var url = $sort_icon.data('url') || rex.ajax_url + '&rex-api-call=yform_usability_api&method=updateSort';
+
+                    $.post(url, {
                         data_id: $sort_icon.data('id'),
                         filter: $sort_icon.data('filter'),
                         table: $sort_icon.data('table'),
