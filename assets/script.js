@@ -9,7 +9,7 @@
         function updateStatus($this, status, callback) {
             $('#rex-js-ajax-loader').addClass('rex-visible');
 
-            $.post(rex.frontend_url + '?rex-api-call=yform_usability_api&method=changeStatus', {
+            $.post(rex.ajax_url + '&rex-api-call=yform_usability_api&method=changeStatus', {
                 data_id: $this.data('id'),
                 table: $this.data('table'),
                 status: status
@@ -100,7 +100,7 @@
                     if ($next.length) {
                         id = $next.find('.sort-icon').data('id');
                     }
-                    $.post(rex.frontend_url + '?rex-api-call=yform_usability_api&method=updateSort', {
+                    $.post(rex.ajax_url + '&rex-api-call=yform_usability_api&method=updateSort', {
                         data_id: $sort_icon.data('id'),
                         filter: $sort_icon.data('filter'),
                         table: $sort_icon.data('table'),

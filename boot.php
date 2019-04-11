@@ -12,17 +12,21 @@
 namespace yform\usability;
 
 
-\rex_extension::register('FE_OUTPUT', function ($params)
+\rex_extension::register('PAGE_CHECKED', function ($params)
 {
-    // api endpoint
-    $api_result = \rex_api_yform_usability_api::factory();
-    if ($api_result && $api_result->hasMessage())
-    {
-        header('Content-Type: application/json');
-        echo $api_result->getResult()->toJSON();
-        exit;
+    if (\rex_request('rex-api-call', 'string') == 'yform_usability_api') {
+        // api endpoint
+        $api_result = \rex_api_yform_usability_api::factory();
+
+        \rex_api_function::handleCall();
+
+        if ($api_result && $api_result->getResult())
+        {
+            \rex_response::cleanOutputBuffers();
+            \rex_response::sendContent($api_result->getResult()->toJSON(), 'application/json');
+            exit;
+        }
     }
-    return $params->getSubject();
 }, \rex_extension::EARLY);
 
 
@@ -43,7 +47,7 @@ if (\rex::isBackend() && \rex::getUser())
         \rex_file::copy($this->getPath('assets/vendor/Sortable.min.js'), $this->getAssetsPath('vendor/Sortable.min.js'));
         \rex_file::copy($this->getPath('assets/script.js'), $this->getAssetsPath('script.js'));
     }
-    \rex_view::setJsProperty('frontend_url', \rex_url::frontendController());
+    \rex_view::setJsProperty('ajax_url', \rex_url::backendPage('yform/manager/usability', \rex_csrf_token::factory('rex_api_yform_usability_api')->getUrlParams()));
     \rex_view::addCssFile($this->getAssetsUrl('styles.css?mtime=' . filemtime($this->getAssetsPath('styles.css'))));
     \rex_view::addJsFile($this->getAssetsUrl('vendor/Sortable.min.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
     \rex_view::addJsFile($this->getAssetsUrl('script.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));

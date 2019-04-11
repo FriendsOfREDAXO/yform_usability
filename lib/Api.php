@@ -53,6 +53,16 @@ class rex_api_yform_usability_api extends rex_api_function
             rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
         }
 
+        $modelClass = \rex_yform_manager_dataset::getModelClass($table);
+
+        if ($modelClass) {
+            rex_extension::registerPoint(new rex_extension_point('YFORM_DATA_STATUS_CHANGED', null, [
+                'data'     => $modelClass::get($data_id),
+                'old_data' => true
+            ]));
+        }
+
+
         $tparams = \yform\usability\Utils::getStatusColumnParams(rex_yform_manager_table::get($table), $status);
 
         $tparams['element'] = strtr($tparams['element'], [
