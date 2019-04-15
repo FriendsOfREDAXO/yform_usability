@@ -1,4 +1,7 @@
-(function ($) {
+var YformUsability = (function ($) {
+    'use strict';
+
+    var searchHandle = null;
 
     $(document).on('rex:ready', function (event, container) {
         initList(event, container);
@@ -121,4 +124,34 @@
             });
         }
     }
+
+    return {
+        doYformSearch: function (_this, event) {
+            if (searchHandle) {
+                window.clearTimeout(searchHandle);
+            }
+
+            if (event.which == 37 || event.which == 38 || event.which == 39 || event.which == 40 || event.which == 16 || event.which == 20 || event.which == 17 || event.which == 91 || event.which == 27 || event.which == 9) {
+                return false;
+            }
+
+            searchHandle = window.setTimeout(function () {
+                var $form = $(_this).parents('form');
+
+                $form.on('submit', function (event) {
+                    $.pjax.submit(event, {
+                        push: true,
+                        fragment: '#rex-js-page-main',
+                        container: '#rex-js-page-main'
+                    });
+                    return false;
+                }).submit();
+            }, 500);
+            return false;
+        },
+
+        resetYformSearch: function(_this) {
+            $(_this).parents('form').find('[name=yfu-term]').val('').trigger('keyup');
+        }
+    };
 })(jQuery);

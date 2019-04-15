@@ -16,6 +16,8 @@ namespace yform\usability;
 
 class Extensions
 {
+    protected static $manager   = null;
+    protected static $hasSearch = false;
 
     public static function rex_list_get(\rex_extension_point $ep)
     {
@@ -79,6 +81,117 @@ class Extensions
             $list = self::addDragNDropSort($list, $table);
         }
         return $list;
+    }
+
+    public static function yform_data_list_sql(\rex_extension_point $ep)
+    {
+        $sql = $ep->getSubject();
+
+        if (\rex_request('yfu-action', 'string') == 'search') {
+            $where      = [];
+            $table      = $ep->getParam('table');
+            $sql_o      = \rex_sql::factory();
+            $fields     = explode(',', \rex_request('yfu-searchfield', 'string'));
+            $term       = trim(\rex_request('yfu-term', 'string'));
+            $sprogIsAvl = \rex_addon::get('sprog')
+                ->isAvailable();
+
+            if ($term == '') {
+                return $sql;
+            }
+
+
+            foreach ($fields as $fieldname) {
+                $field = $table->getFields(['name' => $fieldname])[0];
+
+                if ($field) {
+                    if ($field->getTypename() == 'be_manager_relation') {
+                        $relWhere  = [];
+                        $query     = "
+                            SELECT id
+                            FROM {$field->getElement('table')}
+                            WHERE {$field->getElement('field')} LIKE :term
+                        ";
+                        $relResult = $sql_o->getArray($query, ['term' => "%{$term}%"]);
+
+                        foreach ($relResult as $item) {
+                            $relWhere[] = $item['id'];
+                        }
+
+                        $relWhere = $relWhere ?: [-1];
+                        $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
+                    } else if ($field->getTypename() == 'choice') {
+                        $list = new \rex_yform_choice_list([]);
+                        $list->createListFromJson($field->getElement('choices'));
+
+                        foreach ($list->getChoicesByValues() as $value => $item) {
+                            if (stripos($item, $term) !== false) {
+                                $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($value);
+                            } else if ($sprogIsAvl) {
+                                $label = \Wildcard::get(strtr($item, [
+                                    \Wildcard::getOpenTag()  => '',
+                                    \Wildcard::getCloseTag() => '',
+                                ]));
+
+                                if (stripos($label, $term) !== false) {
+                                    $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($value);
+                                }
+                            }
+                        }
+                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $sql_o->escape('%' . $term . '%');
+                    } else {
+                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $sql_o->escape('%' . $term . '%');
+                    }
+                } else if ($fieldname == 'id') {
+                    $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($term);
+                }
+            }
+
+            if (count($where)) {
+                if (strrpos($sql, 'where') !== false) {
+                    $sql = str_replace(' where ', ' where (' . implode(' OR ', $where) . ') AND ', $sql);
+                } else {
+                    $sql = str_replace(' ORDER BY ', ' WHERE (' . implode(' OR ', $where) . ') ORDER BY ', $sql);
+                }
+            }
+        }
+
+        return $sql;
+    }
+
+    public static function yform_manager_rex_info(\rex_extension_point $ep)
+    {
+        $content = $ep->getSubject();
+
+        if (self::$hasSearch) {
+            // search bar
+            $fragment = new \rex_fragment();
+            $fragment->setVar('manager', self::$manager);
+            $partial = $fragment->parse('yform_usability/search.php');
+
+            $fragment = new \rex_fragment();
+            $fragment->setVar('body', $partial, false);
+            $fragment->setVar('class', 'action');
+            $content .= $fragment->parse('core/page/section.php');
+        }
+        return $content;
+    }
+
+    public static function yform_manager_data_page(\rex_extension_point $ep)
+    {
+        $manager = $ep->getSubject();
+
+        if ($manager->table->isSearchable()) {
+            $functions = $manager->dataPageFunctions;
+            $sIndex    = array_search('search', $functions);
+
+            self::$manager   = $manager;
+            self::$hasSearch = true;
+            unset($functions[$sIndex]);
+            $functions[] = 'yform_search';
+            $manager->setDataPageFunctions($functions);
+        }
+        return $manager;
     }
 
     protected static function addStatusToggle($list, $table)

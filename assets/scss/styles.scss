@@ -23,3 +23,59 @@
         }
     }
 }
+
+#yform_usability-search {
+
+    .form-group {
+        margin: 0;
+    }
+    .form-group > * {
+        margin-bottom: 10px;
+
+        &:last-child {
+            margin: 0;
+        }
+    }
+
+    @media (min-width: 640px) {
+        .form-group > * {
+            display: inline-block;
+            margin: 0 10px 0 0;
+
+            &:last-child {
+                margin: 0;
+            }
+        }
+        label {
+            width: 14%;
+        }
+        select {
+            width: 30%;
+        }
+        .input-wrapper {
+            width: 48%;
+            position: relative;
+
+            .filter-reset {
+                display: none;
+                cursor: pointer;
+                position: absolute;
+                top: 0;
+                right: 0;
+                font-size: 24px;
+                padding: 5px 8px;
+            }
+        }
+    }
+
+    &.filtered {
+        .input-wrapper {
+            input {
+                padding-right: 37px;
+            }
+            .filter-reset {
+                display: block;
+            }
+        }
+    }
+}
