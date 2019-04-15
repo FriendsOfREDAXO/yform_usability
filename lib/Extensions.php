@@ -63,13 +63,15 @@ class Extensions
     {
         $list           = $ep->getSubject();
         $table          = $ep->getParam('table');
-        $default_config = \rex_addon::get('yform_usability')->getProperty('default_config');
-        $config         = \rex_addon::get('yform_usability')->getConfig(null, $default_config);
+        $default_config = \rex_addon::get('yform_usability')
+            ->getProperty('default_config');
+        $config         = \rex_addon::get('yform_usability')
+            ->getConfig(null, $default_config);
         $is_opener      = rex_get('rex_yform_manager_opener', 'array');
 
-        $has_duplicate = count((array) $config['duplicate_tables']) && (in_array('all', $config['duplicate_tables']) || in_array($table->getTableName(), $config['duplicate_tables']));
-        $has_status    = count((array) $config['status_tables']) && (in_array('all', $config['status_tables']) || in_array($table->getTableName(), $config['status_tables']));
-        $has_sorting   = count((array) $config['sorting_tables']) && (in_array('all', $config['sorting_tables']) || in_array($table->getTableName(), $config['sorting_tables']));
+        $has_duplicate = count((array)$config['duplicate_tables']) && (in_array('all', $config['duplicate_tables']) || in_array($table->getTableName(), $config['duplicate_tables']));
+        $has_status    = count((array)$config['status_tables']) && (in_array('all', $config['status_tables']) || in_array($table->getTableName(), $config['status_tables']));
+        $has_sorting   = count((array)$config['sorting_tables']) && (in_array('all', $config['sorting_tables']) || in_array($table->getTableName(), $config['sorting_tables']));
 
         if ($has_duplicate && empty ($is_opener) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDuplication', true, ['list' => $list, 'table' => $table]))) {
             $list = self::addDuplication($list, $table);
@@ -121,8 +123,16 @@ class Extensions
                         $relWhere = $relWhere ?: [-1];
                         $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                     } else if ($field->getTypename() == 'choice') {
-                        $list = new \rex_yform_choice_list([]);
-                        $list->createListFromJson($field->getElement('choices'));
+                        $list    = new \rex_yform_choice_list([]);
+                        $choices = $field->getElement('choices');
+
+                        if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
+                            $list->createListFromSqlArray($sql_o->getArray($choices));
+                        } else if (is_string($choices) && strlen(trim($choices)) > 0 && substr(trim($choices), 0, 1) == '{') {
+                            $list->createListFromJson($choices);
+                        } else {
+                            $list->createListFromStringArray($self->getArrayFromString($choices));
+                        }
 
                         foreach ($list->getChoicesByValues() as $value => $item) {
                             if (stripos($item, $term) !== false) {
@@ -234,7 +244,8 @@ class Extensions
 
     protected static function addDuplication($list, $table)
     {
-        $list->addColumn('func_duplication', '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_addon::get('yform_usability')->i18n('action.duplicate') . '</div>', count($list->getColumnNames()));
+        $list->addColumn('func_duplication', '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_addon::get('yform_usability')
+                ->i18n('action.duplicate') . '</div>', count($list->getColumnNames()));
         $list->setColumnLabel('func_duplication', '');
         $list->setColumnParams('func_duplication', ['func' => 'duplicate', 'id' => '###id###', 'page' => 'yform/manager/yform-usability']);
         return $list;
