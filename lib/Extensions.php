@@ -171,7 +171,7 @@ class Extensions
 
             $fragment = new \rex_fragment();
             $fragment->setVar('body', $partial, false);
-            $fragment->setVar('class', 'action');
+            $fragment->setVar('class', 'info');
             $content .= $fragment->parse('core/page/section.php');
         }
         return $content;
