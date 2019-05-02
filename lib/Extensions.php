@@ -195,11 +195,13 @@ class Extensions
             $functions = $manager->dataPageFunctions;
             $sIndex    = array_search('search', $functions);
 
-            self::$manager   = $manager;
-            self::$hasSearch = true;
-            unset($functions[$sIndex]);
-            $functions[] = 'yform_search';
-            $manager->setDataPageFunctions($functions);
+            if ($sIndex !== false) {
+                self::$manager   = $manager;
+                self::$hasSearch = true;
+                unset($functions[$sIndex]);
+                $functions[] = 'yform_search';
+                $manager->setDataPageFunctions($functions);
+            }
         }
         return $manager;
     }
