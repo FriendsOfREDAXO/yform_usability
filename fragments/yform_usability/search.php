@@ -13,8 +13,10 @@
 
 $manager    = $this->getVar('manager');
 $term       = rex_request('yfu-term', 'string');
+$openerData = rex_get('rex_yform_manager_opener', 'array');
 $fields     = $manager->table->getFields();
 $selFields  = array_filter(explode(',', rex_request('yfu-searchfield', 'string')));
+$getParams  = [];
 $optionVals = ['id'];
 $options    = [
     [
@@ -34,9 +36,12 @@ foreach ($fields as $field) {
     }
 }
 
+if ($openerData) {
+    $getParams['rex_yform_manager_opener'] = $openerData;
+}
 
 ?>
-<form action="<?= rex_url::backendPage('yform/manager/data_edit', ['table_name' => $manager->table->getTablename()]) ?>" method="get" onsubmit="return false;" id="yform_usability-search" class="<?= $term != '' ? 'filtered' : '' ?>">
+<form action="<?= rex_url::backendPage('yform/manager/data_edit', array_merge($getParams, ['table_name' => $manager->table->getTablename()])) ?>" method="get" onsubmit="return false;" id="yform_usability-search" class="<?= $term != '' ? 'filtered' : '' ?>">
     <div class="form-group">
         <label class="control-label">Suche</label>
         <select name="yfu-searchfield" class="form-control" onchange="YformUsability.doYformSearch(this, event)">
