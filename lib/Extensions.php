@@ -149,6 +149,26 @@ class Extensions
                             }
                         }
                         $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $sql_o->escape('%' . $term . '%');
+                    } else if ($field->getTypename() == 'be_link') {
+                        $relWhere  = [];
+                        $query     = "
+                            SELECT id
+                            FROM rex_article
+                            WHERE 
+                              name LIKE :term
+                              OR id = :id
+                        ";
+                        $relResult = $sql_o->getArray($query, [
+                            'term' => "%{$term}%",
+                            'id'   => $term,
+                        ]);
+
+                        foreach ($relResult as $item) {
+                            $relWhere[] = $item['id'];
+                        }
+
+                        $relWhere = $relWhere ?: [-1];
+                        $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                     } else {
                         $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $sql_o->escape('%' . $term . '%');
                     }
