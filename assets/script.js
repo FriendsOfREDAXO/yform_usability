@@ -1,7 +1,8 @@
 var YformUsability = (function ($) {
     'use strict';
 
-    var searchHandle = null;
+    var searchHandle = null,
+        searchValue = '';
 
     $(document).on('rex:ready', function (event, container) {
         initList(event, container);
@@ -103,7 +104,7 @@ var YformUsability = (function ($) {
                     if ($next.length) {
                         id = $next.find('.sort-icon').data('id');
                     }
-                    
+
                     var url = $sort_icon.data('url') || rex.ajax_url + '&rex-api-call=yform_usability_api&method=updateSort';
 
                     $.post(url, {
@@ -131,10 +132,10 @@ var YformUsability = (function ($) {
                 window.clearTimeout(searchHandle);
             }
 
-            if (event.which == 37 || event.which == 38 || event.which == 39 || event.which == 40 || event.which == 16 || event.which == 20 || event.which == 17 || event.which == 91 || event.which == 27 || event.which == 9) {
+            if (searchValue == _this.value) {
                 return false;
             }
-
+            searchValue = _this.value;
             searchHandle = window.setTimeout(function () {
                 var $form = $(_this).parents('form');
 
@@ -150,7 +151,7 @@ var YformUsability = (function ($) {
             return false;
         },
 
-        resetYformSearch: function(_this) {
+        resetYformSearch: function (_this) {
             $(_this).parents('form').find('[name=yfu-term]').val('').trigger('keyup');
         }
     };

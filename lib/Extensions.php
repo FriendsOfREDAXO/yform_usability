@@ -90,12 +90,13 @@ class Extensions
         $sql = $ep->getSubject();
 
         if (\rex_request('yfu-action', 'string') == 'search') {
-            $where      = [];
-            $table      = $ep->getParam('table');
-            $sql_o      = \rex_sql::factory();
-            $fields     = explode(',', \rex_request('yfu-searchfield', 'string'));
-            $term       = trim(\rex_request('yfu-term', 'string'));
-            $sprogIsAvl = \rex_addon::get('sprog')
+            $where       = [];
+            $table       = $ep->getParam('table');
+            $sql_o       = \rex_sql::factory();
+            $fields      = explode(',', \rex_request('yfu-searchfield', 'string'));
+            $term        = trim(\rex_request('yfu-term', 'string'));
+            $isEmptyTerm = $term == '!' || $term == '#';
+            $sprogIsAvl  = \rex_addon::get('sprog')
                 ->isAvailable();
 
             if ($term == '') {
@@ -108,69 +109,86 @@ class Extensions
 
                 if ($field) {
                     if ($field->getTypename() == 'be_manager_relation') {
-                        $relWhere  = [];
-                        $query     = "
-                            SELECT id
-                            FROM {$field->getElement('table')}
-                            WHERE {$field->getElement('field')} LIKE :term
-                        ";
-                        $relResult = $sql_o->getArray($query, ['term' => "%{$term}%"]);
-
-                        foreach ($relResult as $item) {
-                            $relWhere[] = $item['id'];
-                        }
-
-                        $relWhere = $relWhere ?: [-1];
-                        $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
-                    } else if ($field->getTypename() == 'choice') {
-                        $list    = new \rex_yform_choice_list([]);
-                        $choices = $field->getElement('choices');
-
-                        if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
-                            $list->createListFromSqlArray($sql_o->getArray($choices));
-                        } else if (is_string($choices) && strlen(trim($choices)) > 0 && substr(trim($choices), 0, 1) == '{') {
-                            $list->createListFromJson($choices);
+                        if ($isEmptyTerm) {
+                            $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ""';
                         } else {
-                            $list->createListFromStringArray($self->getArrayFromString($choices));
+                            $relWhere  = [];
+                            $query     = "
+                                SELECT id
+                                FROM {$field->getElement('table')}
+                                WHERE {$field->getElement('field')} LIKE :term
+                            ";
+                            $relResult = $sql_o->getArray($query, ['term' => "%{$term}%"]);
+
+                            foreach ($relResult as $item) {
+                                $relWhere[] = $item['id'];
+                            }
+
+                            $relWhere = $relWhere ?: [-1];
+                            $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                         }
+                    } else if ($field->getTypename() == 'choice') {
 
-                        foreach ($list->getChoicesByValues() as $value => $item) {
-                            if (stripos($item, $term) !== false) {
-                                $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($value);
-                            } else if ($sprogIsAvl) {
-                                $label = \Wildcard::get(strtr($item, [
-                                    \Wildcard::getOpenTag()  => '',
-                                    \Wildcard::getCloseTag() => '',
-                                ]));
+                        if ($isEmptyTerm) {
+                            $term = '""';
+                        } else {
+                            $list    = new \rex_yform_choice_list([]);
+                            $choices = $field->getElement('choices');
 
-                                if (stripos($label, $term) !== false) {
+                            if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
+                                $list->createListFromSqlArray($sql_o->getArray($choices));
+                            } else if (is_string($choices) && strlen(trim($choices)) > 0 && substr(trim($choices), 0, 1) == '{') {
+                                $list->createListFromJson($choices);
+                            } else {
+                                $list->createListFromStringArray(self::getArrayFromString($choices));
+                            }
+
+                            foreach ($list->getChoicesByValues() as $value => $item) {
+                                if (stripos($item, $term) !== false) {
                                     $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($value);
+                                } else if ($sprogIsAvl) {
+                                    $label = \Wildcard::get(strtr($item, [
+                                        \Wildcard::getOpenTag()  => '',
+                                        \Wildcard::getCloseTag() => '',
+                                    ]));
+
+                                    if (stripos($label, $term) !== false) {
+                                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($value);
+                                    }
                                 }
                             }
+
+                            $term = $sql_o->escape('%' . $term . '%');
                         }
-                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $sql_o->escape('%' . $term . '%');
+                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $term;
                     } else if ($field->getTypename() == 'be_link') {
-                        $relWhere  = [];
-                        $query     = "
-                            SELECT id
-                            FROM rex_article
-                            WHERE 
-                              name LIKE :term
-                              OR id = :id
-                        ";
-                        $relResult = $sql_o->getArray($query, [
-                            'term' => "%{$term}%",
-                            'id'   => $term,
-                        ]);
+                        if ($isEmptyTerm) {
+                            $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ""';
+                        } else {
+                            $relWhere = [];
+                            $query    = "
+                                SELECT id
+                                FROM rex_article
+                                WHERE 
+                                  name LIKE :term
+                                  OR id = :id
+                            ";
 
-                        foreach ($relResult as $item) {
-                            $relWhere[] = $item['id'];
+                            $relResult = $sql_o->getArray($query, [
+                                'term' => "%{$term}%",
+                                'id'   => $term,
+                            ]);
+
+                            foreach ($relResult as $item) {
+                                $relWhere[] = $item['id'];
+                            }
+
+                            $relWhere = $relWhere ?: [-1];
+                            $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                         }
-
-                        $relWhere = $relWhere ?: [-1];
-                        $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                     } else {
-                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $sql_o->escape('%' . $term . '%');
+                        $term    = $isEmptyTerm ? '""' : $sql_o->escape('%' . $term . '%');
+                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $term;
                     }
                 } else if ($fieldname == 'id') {
                     $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($term);
@@ -187,6 +205,32 @@ class Extensions
         }
 
         return $sql;
+    }
+
+    public static function getArrayFromString($string)
+    {
+        if (is_array($string)) {
+            return $string;
+        }
+        $delimeter  = ',';
+        $rawOptions = preg_split('~(?<!\\\)' . preg_quote($delimeter, '~') . '~', $string);
+        $options    = [];
+        foreach ($rawOptions as $option) {
+            $delimeter   = '=';
+            $finalOption = preg_split('~(?<!\\\)' . preg_quote($delimeter, '~') . '~', $option);
+            $v           = $finalOption[0];
+            if (isset($finalOption[1])) {
+                $k = $finalOption[1];
+            } else {
+                $k = $finalOption[0];
+            }
+            $s           = ['\=', '\,'];
+            $r           = ['=', ','];
+            $k           = str_replace($s, $r, $k);
+            $v           = str_replace($s, $r, $v);
+            $options[$k] = $v;
+        }
+        return $options;
     }
 
     public static function yform_manager_rex_info(\rex_extension_point $ep)
