@@ -1,4 +1,5 @@
 yform_usability.settings = Inställningsr
+yform_usability.search_in_all = i alla
 
 yform_label.online_status = Visa online / offline-status
 yform_label.sorting = Sortering aktiv
