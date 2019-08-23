@@ -1,13 +1,13 @@
-yform_usability.settings = Inställningsr
-yform_usability.search_in_all = i alla
+usability.settings = Inställningsr
+usability.search_in_all = i alla
 
-yform_label.online_status = Visa online / offline-status
-yform_label.sorting = Sortering aktiv
-yform_label.duplication = Duplicera poster
-yform_label.all = Alla
+label.online_status = Visa online / offline-status
+label.sorting = Sortering aktiv
+label.duplication = Duplicera poster
+label.all = Alla
 
-yform_usability_action.duplicate = Duplicera
+usability_action.duplicate = Duplicera
 
-yform_usability.help_prio = <b> Sortera via dra & släpp </ b>: tabellen behöver ett fält av typ <code> prio </ code>. Ändra tabellens standardordning från <code> id </ code> till <code> prio </ code>.
-yform_usability.help_status = <b> Ändra datasätets online-status via klick </ b>: tabellen behöver ett markerat fält med radnamnet <code> status </ code>, värdena måste vara <code> 0 </ code> och <code > 1 </ code>.
-yform_usability.help_open_readme = Öppna readme
+usability.help_prio = <b> Sortera via dra & släpp </ b>: tabellen behöver ett fält av typ <code> prio </ code>. Ändra tabellens standardordning från <code> id </ code> till <code> prio </ code>.
+usability.help_status = <b> Ändra datasätets online-status via klick </ b>: tabellen behöver ett markerat fält med radnamnet <code> status </ code>, värdena måste vara <code> 0 </ code> och <code > 1 </ code>.
+usability.help_open_readme = Öppna readme

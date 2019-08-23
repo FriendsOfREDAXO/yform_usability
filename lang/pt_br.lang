@@ -1,12 +1,12 @@
-yform_usability.settings = Configurações
+usability.settings = Configurações
 
-yform_label.online_status = Exibir status online/offline
-yform_label.sorting = Triagem ativa
-yform_label.duplication = Duplicação ativa
-yform_label.all = Todos
+label.online_status = Exibir status online/offline
+label.sorting = Triagem ativa
+label.duplication = Duplicação ativa
+label.all = Todos
 
-yform_usability_action.duplicate = Duplicar
+usability_action.duplicate = Duplicar
 
-yform_usability.help_prio = <b>Order via drag&drop</b>: the table needs a field of typ <code>prio</code>. Please change the table's default order from <code>id</code> to <code>prio</code>.
-yform_usability.help_status = <b>Change dataset online-status via click</b>: the table needs a select Feld with the rowname <code>status</code>, the values need to be <code>0</code> and <code>1</code>.
-yform_usability.help_open_readme = open readme
+usability.help_prio = <b>Order via drag&drop</b>: the table needs a field of typ <code>prio</code>. Please change the table's default order from <code>id</code> to <code>prio</code>.
+usability.help_status = <b>Change dataset online-status via click</b>: the table needs a select Feld with the rowname <code>status</code>, the values need to be <code>0</code> and <code>1</code>.
+usability.help_open_readme = open readme

@@ -1,6 +1,6 @@
-yform_label.online_status = Visualizza online/offline stato
-yform_label.sorting = Ordinamento attivato
-yform_label.duplication = Duplicazione attiva
-yform_label.all = Tutti
+label.online_status = Visualizza online/offline stato
+label.sorting = Ordinamento attivato
+label.duplication = Duplicazione attiva
+label.all = Tutti
 
-yform_usability_action.duplicate = duplicare
+usability_action.duplicate = duplicare

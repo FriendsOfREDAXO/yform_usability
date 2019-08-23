@@ -1,13 +1,13 @@
-yform_usability.settings = Einstellungen
-yform_usability.search_in_all = in allen
+usability.settings = Einstellungen
+usability.search_in_all = in allen
 
-yform_label.online_status = Online/Offline Status anzeigen
-yform_label.sorting = Sortierung aktiv
-yform_label.duplication = Duplizieren von Datensätzen
-yform_label.all = Alle
+label.online_status = Online/Offline Status anzeigen
+label.sorting = Sortierung aktiv
+label.duplication = Duplizieren von Datensätzen
+label.all = Alle
 
-yform_usability_action.duplicate = duplizieren
+usability_action.duplicate = duplizieren
 
-yform_usability.help_prio = <b>Sortierung per Drag&Drop</b>: die Tabelle benötigt ein Feld vom Typ <code>prio</code>. Außerdem bitte in den Eigenschaften der Tabelle die Sortierung von <code>id</code> auf <code>prio</code> ändern.
-yform_usability.help_status = <b>Datensätze per Klick online / offline schalten</b>: die Tabelle benötigt ein select Feld mit dem Feldnamen <code>status</code>. Werte sind frei wählbar (Bsp.: <code>Inaktiv=0,Aktiv=1,Pending=2,zu Erledigen=55</code>)!
-yform_usability.help_open_readme = Readme öffnen
+usability.help_prio = <b>Sortierung per Drag&Drop</b>: die Tabelle benötigt ein Feld vom Typ <code>prio</code>. Außerdem bitte in den Eigenschaften der Tabelle die Sortierung von <code>id</code> auf <code>prio</code> ändern.
+usability.help_status = <b>Datensätze per Klick online / offline schalten</b>: die Tabelle benötigt ein select Feld mit dem Feldnamen <code>status</code>. Werte sind frei wählbar (Bsp.: <code>Inaktiv=0,Aktiv=1,Pending=2,zu Erledigen=55</code>)!
+usability.help_open_readme = Readme öffnen
