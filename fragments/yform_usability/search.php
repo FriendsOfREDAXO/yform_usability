@@ -46,7 +46,7 @@ if ($openerData) {
         <label class="control-label">Suche</label>
         <select name="yfu-searchfield" class="form-control" onchange="YformUsability.doYformSearch(this, event)">
             <?php if (count($options) > 1): ?>
-                <option value="<?= implode(',', $optionVals) ?>">- <?= rex_i18n::msg('yform_usability.search_in_all') ?> -</option>
+                <option value="<?= implode(',', $optionVals) ?>">- <?= rex_i18n::msg('usability.search_in_all') ?> -</option>
             <?php endif; ?>
 
             <?php foreach ($options as $option): ?>
