@@ -130,7 +130,7 @@ class Extensions
                     } else if ($field->getTypename() == 'choice') {
 
                         if ($isEmptyTerm) {
-                            $term = '""';
+                            $_term = '""';
                         } else {
                             $list    = new \rex_yform_choice_list([]);
                             $choices = $field->getElement('choices');
@@ -158,9 +158,9 @@ class Extensions
                                 }
                             }
 
-                            $term = $sql_o->escape('%' . $term . '%');
+                            $_term = $sql_o->escape('%' . $term . '%');
                         }
-                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $term;
+                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
                     } else if ($field->getTypename() == 'be_link') {
                         if ($isEmptyTerm) {
                             $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ""';
@@ -187,8 +187,8 @@ class Extensions
                             $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                         }
                     } else {
-                        $term    = $isEmptyTerm ? '""' : $sql_o->escape('%' . $term . '%');
-                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $term;
+                        $_term    = $isEmptyTerm ? '""' : $sql_o->escape('%' . $term . '%');
+                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
                     }
                 } else if ($fieldname == 'id') {
                     $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($term);
