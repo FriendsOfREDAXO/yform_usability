@@ -1,4 +1,5 @@
 yform_usability.settings = Settings
+yform_usability.search_in_all = in all
 
 yform_label.online_status = Show online/offline state
 yform_label.sorting = Sorting active
