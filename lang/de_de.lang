@@ -1,5 +1,12 @@
 yform_usability.settings = Einstellungen
 yform_usability.search_in_all = in allen
+yform_usability.partial = HTML-Partial
+
+yform_usability.tab_start = START: vor das erste sprachabhängige Feld setzen
+yform_usability.tab_break = BREAK: dient dazu um verschiedene Felder von Sprachen zu trennen
+yform_usability.tab_end = END: nach dem letzten sprachabhängigen Feld setzen
+yform_usability.lang_tabs_description = Erstellt Tabs für alle Sprachen und ermöglicht somit das gruppieren von Sprachfeldern
+
 
 yform_label.online_status = Online/Offline Status anzeigen
 yform_label.sorting = Sortierung aktiv
