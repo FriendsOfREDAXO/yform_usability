@@ -20,20 +20,10 @@ class Utils
     public static function parseBodyFromDataPage(\rex_yform_manager $page)
     {
         try {
-            # Seite erzeugen und abfangen
             ob_start();
             $page->getDataPage();
             $output = ob_get_clean();
-            # Such den Header - Fall 1: mit Suchspalte?
-            $p = strpos($output, '<div class="row">');
-            # Such den Header - Fall 2: ohne Suchspalte
-            if (false === $p) {
-                $p = strpos($output, '<section class="rex-page-section">');
-            }
-            # Header rauswerfen
-            if (false !== $p) {
-                $output = '' . substr($output, $p);
-            }
+            $output = preg_replace('/<header[^>]*>(.+?)<\/header>/is', '', $output);
         } catch (\Exception $e) {
             ob_get_clean();
             $message = nl2br($e->getMessage() . "\n" . $e->getTraceAsString());
@@ -69,7 +59,7 @@ class Utils
         $okeys   = count($options) ? array_keys($options) : explode(',', $Field->getElement('values'));
         $cur_idx = array_search($currentValue, $okeys);
         $nvalue  = isset($okeys[$cur_idx + 1]) ? $okeys[$cur_idx + 1] : $okeys[0];
-        
+
 
         if (count($options) > 2) {
             $element = '<select class="status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">';
