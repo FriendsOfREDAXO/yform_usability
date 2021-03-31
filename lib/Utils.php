@@ -16,6 +16,32 @@ namespace yform\usability;
 
 class Utils
 {
+
+    public static function parseBodyFromDataPage(\rex_yform_manager $page)
+    {
+        try {
+            # Seite erzeugen und abfangen
+            ob_start();
+            $page->getDataPage();
+            $output = ob_get_clean();
+            # Such den Header - Fall 1: mit Suchspalte?
+            $p = strpos($output, '<div class="row">');
+            # Such den Header - Fall 2: ohne Suchspalte
+            if (false === $p) {
+                $p = strpos($output, '<section class="rex-page-section">');
+            }
+            # Header rauswerfen
+            if (false !== $p) {
+                $output = '' . substr($output, $p);
+            }
+        } catch (\Exception $e) {
+            ob_get_clean();
+            $message = nl2br($e->getMessage() . "\n" . $e->getTraceAsString());
+            $output  = \rex_view::warning($message);
+        }
+        return $output;
+    }
+
     public static function getStatusColumnParams(\rex_yform_manager_table $table, $currentValue, $list = null)
     {
         $Field   = $table->getValueField('status');
