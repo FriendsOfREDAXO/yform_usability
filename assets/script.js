@@ -6,7 +6,14 @@ var YformUsability = (function ($) {
 
     $(document).on('rex:ready', function (event, container) {
         initList(event, container);
+        initSelect2();
     });
+
+    function initSelect2() {
+        if(jQuery().select2) {
+            $('#yform-table_field-rex_event_date-prio select').select2();
+        }
+    }
 
     function initList(event, container) {
 
