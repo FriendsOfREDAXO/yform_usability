@@ -1,34 +1,36 @@
 .sortable-list {
-    .duplicator {
-        white-space: nowrap;
-    }
     .status-toggle {
         cursor: pointer;
         white-space: nowrap;
     }
+
     .sort-handle:hover {
         color: #4b9ad9;
-        cursor: move;
+        cursor: ns-resize;
     }
-    .ui-sortable-placeholder {
+
+    .sortable-ghost {
         background: #FFFCDD !important;
-        visibility: visible !important;
-    }
-    .ui-sortable-helper {
-        display: table-row;
-        background: #fff;
 
         td {
-            display: table-cell;
+            background: transparent !important;
+        }
+    }
+
+    .sortable-drag {
+        background: rgba(255, 255, 255, 0.5) !important;
+
+        td {
+            background: transparent !important;
         }
     }
 }
 
 #yform_usability-search {
-
     .form-group {
         margin: 0;
     }
+
     .form-group > * {
         margin-bottom: 10px;
 
@@ -73,6 +75,7 @@
             input {
                 padding-right: 37px;
             }
+
             .filter-reset {
                 display: block;
             }

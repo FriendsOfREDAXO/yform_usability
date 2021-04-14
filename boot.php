@@ -43,15 +43,17 @@ if (\rex::isBackend() && \rex::getUser()) {
         \rex_file::copy($this->getPath('assets/vendor/Sortable.min.js'), $this->getAssetsPath('vendor/Sortable.min.js'));
         \rex_file::copy($this->getPath('assets/script.js'), $this->getAssetsPath('script.js'));
     }
+
     \rex_view::setJsProperty('ajax_url', \rex_url::backendPage('yform/manager/usability', \rex_csrf_token::factory('rex_api_yform_usability_api')->getUrlParams()));
     \rex_view::addCssFile($this->getAssetsUrl('styles.css?mtime=' . filemtime($this->getAssetsPath('styles.css'))));
     \rex_view::addJsFile($this->getAssetsUrl('vendor/Sortable.min.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
     \rex_view::addJsFile($this->getAssetsUrl('script.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
     \rex_yform::addTemplatePath($this->getPath('ytemplates'));
 
-    \rex_extension::register('YFORM_MANAGER_DATA_PAGE', ['\yform\usability\Extensions', 'yform_manager_data_page']);
-    \rex_extension::register('YFORM_MANAGER_REX_INFO', ['\yform\usability\Extensions', 'yform_manager_rex_info']);
-    \rex_extension::register('YFORM_DATA_LIST', ['\yform\usability\Extensions', 'yform_data_list']);
-    \rex_extension::register('YFORM_DATA_LIST_SQL', ['\yform\usability\Extensions', 'yform_data_list_sql']);
-    \rex_extension::register('REX_LIST_GET', ['\yform\usability\Extensions', 'rex_list_get']);
+    \rex_extension::register('PACKAGES_INCLUDED', [Usability::class, 'init']);
+    \rex_extension::register('YFORM_MANAGER_DATA_PAGE', [Extensions::class, 'ext_yformManagerDataPage']);
+    \rex_extension::register('YFORM_DATA_LIST', [Extensions::class, 'ext_yformDataList']);
+    \rex_extension::register('YFORM_MANAGER_REX_INFO', [Extensions::class, 'ext_yformManagerRexInfo']);
+    \rex_extension::register('YFORM_DATA_LIST_SQL', [Extensions::class, 'ext_yformDataListSql']);
+    \rex_extension::register('REX_LIST_GET', [Extensions::class, 'ext_rexListGet']);
 }

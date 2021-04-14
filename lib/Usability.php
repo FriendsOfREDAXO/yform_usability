@@ -15,6 +15,46 @@ namespace yform\usability;
 class Usability
 {
 
+    public static function init(): void
+    {
+        $action = rex_get('yfu-action', 'string');
+
+        if ($action == 'duplicate') {
+            self::duplicateRow();
+        }
+    }
+
+    public static function getConfig($key = null)
+    {
+        return \rex_config::get('yform_usability', $key);
+    }
+
+    public static function duplicateRow()
+    {
+        $id        = rex_get('id', 'int');
+        $tablename = rex_get('table_name', 'string');
+
+        if ($id > 0) {
+            $sql = \rex_sql::factory();
+            $sql->setTable($tablename);
+            $sql->setWhere('id = :id', ['id' => $id]);
+            $sql->select();
+
+            if ($sql->getRows()) {
+                $iSql = \rex_sql::factory();
+                $iSql->setTable($tablename);
+                foreach ($sql->getFieldNames() as $field) {
+                    if ($field == 'status') {
+                        $iSql->setValue($field, 0);
+                    } elseif ($field != 'id') {
+                        $iSql->setValue($field, $sql->getValue($field));
+                    }
+                }
+                $iSql->insert();
+            }
+        }
+    }
+
     public static function installTableSets($installPath)
     {
         $tablePrefix = \rex::getTablePrefix();
@@ -109,10 +149,14 @@ class Usability
         } else {
             $createValues['type_name'] = $typeName;
         }
-        $fieldId = $sql->getArray($query, [
-            'tname' => $tableName,
-            'fname' => $fieldName,
-        ], \PDO::FETCH_COLUMN);
+        $fieldId = $sql->getArray(
+            $query,
+            [
+                'tname' => $tableName,
+                'fname' => $fieldName,
+            ],
+            \PDO::FETCH_COLUMN
+        );
 
         $sql->setTable('rex_yform_field');
 
@@ -140,86 +184,124 @@ class Usability
 
     public static function ensureStatusField($table, $prio, $default = 1)
     {
-        self::ensureValueField($table, 'status', 'choice', [
-            'list_hidden' => 1,
-            'search'      => 0,
-            'label'       => 'translate:status',
-            'prio'        => $prio++,
-        ], [
-            'db_type'  => 'int',
-            'expanded' => 0,
-            'multiple' => 0,
-            'default'  => $default,
-            'choices'  => json_encode([
-                'translate:active'   => 1,
-                'translate:inactive' => 0,
-            ]),
-        ]);
+        self::ensureValueField(
+            $table,
+            'status',
+            'choice',
+            [
+                'list_hidden' => 1,
+                'search'      => 0,
+                'label'       => 'translate:status',
+                'prio'        => $prio++,
+            ],
+            [
+                'db_type'  => 'int',
+                'expanded' => 0,
+                'multiple' => 0,
+                'default'  => $default,
+                'choices'  => json_encode(
+                    [
+                        'translate:active'   => 1,
+                        'translate:inactive' => 0,
+                    ]
+                ),
+            ]
+        );
     }
 
     public static function ensurePriorityField($table, $prio)
     {
-        self::ensureValueField($table, 'prio', 'prio', [
-            'label' => 'translate:priority',
-            'prio'  => $prio++,
-        ], [
-            'db_type'     => 'int',
-            'list_hidden' => 1,
-            'search'      => 0,
-        ]);
+        self::ensureValueField(
+            $table,
+            'prio',
+            'prio',
+            [
+                'label' => 'translate:priority',
+                'prio'  => $prio++,
+            ],
+            [
+                'db_type'     => 'int',
+                'list_hidden' => 1,
+                'search'      => 0,
+            ]
+        );
     }
 
     public static function ensureUserFields($table, $prio)
     {
-        self::ensureValueField($table, 'createuser', 'be_user', [
-            'label' => 'translate:created_by',
-            'prio'  => $prio++,
-        ], [
-            'db_type'     => 'varchar(191)',
-            'list_hidden' => 1,
-            'search'      => 0,
-            'only_empty'  => 1,
-            'show_value'  => 1,
-        ]);
+        self::ensureValueField(
+            $table,
+            'createuser',
+            'be_user',
+            [
+                'label' => 'translate:created_by',
+                'prio'  => $prio++,
+            ],
+            [
+                'db_type'     => 'varchar(191)',
+                'list_hidden' => 1,
+                'search'      => 0,
+                'only_empty'  => 1,
+                'show_value'  => 1,
+            ]
+        );
 
-        self::ensureValueField($table, 'updateuser', 'be_user', [
-            'label' => 'translate:updated_by',
-            'prio'  => $prio++,
-        ], [
-            'db_type'     => 'varchar(191)',
-            'list_hidden' => 1,
-            'search'      => 0,
-            'only_empty'  => 0,
-            'show_value'  => 1,
-        ]);
+        self::ensureValueField(
+            $table,
+            'updateuser',
+            'be_user',
+            [
+                'label' => 'translate:updated_by',
+                'prio'  => $prio++,
+            ],
+            [
+                'db_type'     => 'varchar(191)',
+                'list_hidden' => 1,
+                'search'      => 0,
+                'only_empty'  => 0,
+                'show_value'  => 1,
+            ]
+        );
     }
 
     public static function ensureDateFields($table, $prio)
     {
-        self::ensureValueField($table, 'createdate', 'datestamp', [
-            'list_hidden' => 0,
-            'search'      => 0,
-            'show_value'  => 1,
-            'label'       => 'translate:created_at',
-            'prio'        => $prio++,
-        ], [
-            'db_type'    => 'datetime',
-            'format'     => 'Y-m-d H:i:s',
-            'only_empty' => 1,
-            'no_db'      => 0,
-        ]);
+        self::ensureValueField(
+            $table,
+            'createdate',
+            'datestamp',
+            [
+                'list_hidden' => 0,
+                'search'      => 0,
+                'show_value'  => 1,
+                'label'       => 'translate:created_at',
+                'prio'        => $prio++,
+            ],
+            [
+                'db_type'    => 'datetime',
+                'format'     => 'Y-m-d H:i:s',
+                'only_empty' => 1,
+                'no_db'      => 0,
+            ]
+        );
 
-        self::ensureValueField($table, 'updatedate', 'datestamp', [
-            'list_hidden' => 1,
-            'search'      => 0,
-            'show_value'  => 1,
-            'label'       => 'translate:updated_at',
-            'prio'        => $prio++,
-        ], [
-            'db_type'    => 'datetime',
-            'format'     => 'Y-m-d H:i:s',
-            'only_empty' => 0,
-            'no_db'      => 0,
-        ]);
+        self::ensureValueField(
+            $table,
+            'updatedate',
+            'datestamp',
+            [
+                'list_hidden' => 1,
+                'search'      => 0,
+                'show_value'  => 1,
+                'label'       => 'translate:updated_at',
+                'prio'        => $prio++,
+            ],
+            [
+                'db_type'    => 'datetime',
+                'format'     => 'Y-m-d H:i:s',
+                'only_empty' => 0,
+                'no_db'      => 0,
+            ]
+        );
     }
 }

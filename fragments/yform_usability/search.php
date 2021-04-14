@@ -55,7 +55,7 @@ if ($openerData) {
         </select>
 
         <div class="input-wrapper">
-            <input type="text" name="yfu-term" class="form-control" onkeyup="return YformUsability.doYformSearch(this, event)" value="<?= rex_request('yfu-term', 'string') ?>">
+            <input type="text" name="yfu-term" class="form-control" value="<?= rex_request('yfu-term', 'string') ?>" onfocus="this.selectionStart = this.selectionEnd = this.value.length;">
             <i class="fa fa-times-circle filter-reset" onclick="YformUsability.resetYformSearch(this)"></i>
         </div>
 

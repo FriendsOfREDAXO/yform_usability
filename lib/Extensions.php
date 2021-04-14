@@ -16,195 +16,75 @@ namespace yform\usability;
 
 class Extensions
 {
-    protected static $manager   = null;
-    protected static $hasSearch = false;
 
-    public static function rex_list_get(\rex_extension_point $ep)
+    protected static function addDuplication($list)
     {
-        $list    = $ep->getSubject();
-        $lparams = $list->getParams();
-        $list->addFormAttribute('class', 'sortable-list');
-
-        if ($lparams['page'] == 'yform/manager/table_field') {
-            $first_col_name = $list->getColumnNames()[0];
-            $table_name     = \rex_yform_manager_field::table();
-
-            $list->setColumnLayout($first_col_name, ['<th class="rex-table-icon">###VALUE###</th>', '###VALUE###']); // ###VALUE###
-            $list->setColumnFormat($first_col_name, 'custom', function ($params) {
-                $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
-
-                switch ($params['list']->getValue('type_id')) {
-                    case 'validate':
-                        $style = 'color:#aaa;'; // background-color:#cfd9d9;
-                        break;
-                    case 'action':
-                        $style = 'background-color:#cfd9d9;';
-                        break;
-                    default:
-                        $style = 'background-color:#eff9f9;';
-                        break;
-                }
-                return '
-                    <td class="rex-table-icon" style="' . $style . '">
-                        <i class="rex-icon fa fa-bars sort-icon" 
-                            data-id="###id###" 
-                            data-table-type="db_table"
-                            data-table-sort-field="prio"
-                            data-table-sort-order="asc"
-                            data-table="' . $params['params']['table'] . '" 
-                            data-filter="' . implode(',', $filters) . '"></i>
-                    </td>
-                ';
-            }, ['yform_table' => $lparams['table_name'], 'table' => $table_name]);
-        }
-    }
-
-    public static function yform_data_list(\rex_extension_point $ep)
-    {
-        $list           = $ep->getSubject();
-        $table          = $ep->getParam('table');
-        $default_config = \rex_addon::get('yform_usability')
-            ->getProperty('default_config');
-        $config         = \rex_addon::get('yform_usability')
-            ->getConfig(null, $default_config);
-        $is_opener      = rex_get('rex_yform_manager_opener', 'array');
-
-        $has_duplicate = count((array)$config['duplicate_tables']) && (in_array('all', $config['duplicate_tables']) || in_array($table->getTableName(), $config['duplicate_tables']));
-        $has_status    = count((array)$config['status_tables']) && (in_array('all', $config['status_tables']) || in_array($table->getTableName(), $config['status_tables']));
-        $has_sorting   = count((array)$config['sorting_tables']) && (in_array('all', $config['sorting_tables']) || in_array($table->getTableName(), $config['sorting_tables']));
-
-        if ($has_duplicate && empty ($is_opener) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDuplication', true, ['list' => $list, 'table' => $table]))) {
-            $list = self::addDuplication($list, $table);
-        }
-        if ($has_status && count($table->getFields(['name' => 'status'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', true, ['list' => $list, 'table' => $table]))) {
-            $list = self::addStatusToggle($list, $table);
-        }
-        if ($has_sorting && empty ($is_opener) && count($table->getFields(['name' => 'prio'])) && \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', true, ['list' => $list, 'table' => $table]))) {
-            $list = self::addDragNDropSort($list, $table);
-        }
+        $list->addColumn(
+            'func_duplication',
+            '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_i18n::msg('yform_usability_action.duplicate') . '</div>',
+            count($list->getColumnNames())
+        );
+        $list->setColumnLabel('func_duplication', '');
+        $list->setColumnParams('func_duplication', ['yfu-action' => 'duplicate', 'id' => '###id###']);
         return $list;
     }
 
-    public static function yform_data_list_sql(\rex_extension_point $ep)
+    protected static function addStatusToggle($list, $table)
     {
-        $sql = $ep->getSubject();
+        $list->addColumn('status_toggle', '', count($list->getColumnNames()));
+        $list->setColumnLabel('status_toggle', 'Status');
+        $list->setColumnFormat(
+            'status_toggle',
+            'custom',
+            function ($params) {
+                $value   = $params['list']->getValue('status');
+                $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
 
-        if (\rex_request('yfu-action', 'string') == 'search') {
-            $where       = [];
-            $table       = $ep->getParam('table');
-            $sql_o       = \rex_sql::factory();
-            $fields      = explode(',', \rex_request('yfu-searchfield', 'string'));
-            $term        = trim(\rex_request('yfu-term', 'string'));
-            $isEmptyTerm = $term == '!' || $term == '#';
-            $sprogIsAvl  = \rex_addon::get('sprog')
-                ->isAvailable();
+                return strtr(
+                    $tparams['element'],
+                    [
+                        '{{ID}}'    => $params['list']->getValue('id'),
+                        '{{TABLE}}' => $params['params']['table']->getTableName(),
+                    ]
+                );
+            },
+            ['table' => $table]
+        );
+        return $list;
+    }
 
-            if ($term == '') {
-                return $sql;
-            }
+    protected static function addDragNDropSort($list, $table)
+    {
+        $firstColName = current($list->getColumnNames());
+        $orderBy      = rex_get('sort', 'string', $table->getSortFieldName());
 
 
-            foreach ($fields as $fieldname) {
-                $field = $table->getFields(['name' => $fieldname])[0];
-
-                if ($field) {
-                    if ($field->getTypename() == 'be_manager_relation') {
-                        if ($isEmptyTerm) {
-                            $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ""';
-                        } else {
-                            $relWhere  = [];
-                            $query     = "
-                                SELECT id
-                                FROM {$field->getElement('table')}
-                                WHERE {$field->getElement('field')} LIKE :term
-                            ";
-                            $relResult = $sql_o->getArray($query, ['term' => "%{$term}%"]);
-
-                            foreach ($relResult as $item) {
-                                $relWhere[] = $item['id'];
-                            }
-
-                            $relWhere = $relWhere ?: [-1];
-                            $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
-                        }
-                    } else if ($field->getTypename() == 'choice') {
-
-                        if ($isEmptyTerm) {
-                            $_term = '""';
-                        } else {
-                            $list    = new \rex_yform_choice_list([]);
-                            $choices = $field->getElement('choices');
-
-                            if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
-                                $list->createListFromSqlArray($sql_o->getArray($choices));
-                            } else if (is_string($choices) && strlen(trim($choices)) > 0 && substr(trim($choices), 0, 1) == '{') {
-                                $list->createListFromJson($choices);
-                            } else {
-                                $list->createListFromStringArray(self::getArrayFromString($choices));
-                            }
-
-                            foreach ($list->getChoicesByValues() as $value => $item) {
-                                if (stripos($item, $term) !== false) {
-                                    $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($value);
-                                } else if ($sprogIsAvl) {
-                                    $label = \Wildcard::get(strtr($item, [
-                                        \Wildcard::getOpenTag()  => '',
-                                        \Wildcard::getCloseTag() => '',
-                                    ]));
-
-                                    if (stripos($label, $term) !== false) {
-                                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($value);
-                                    }
-                                }
-                            }
-
-                            $_term = $sql_o->escape('%' . $term . '%');
-                        }
-                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
-                    } else if ($field->getTypename() == 'be_link') {
-                        if ($isEmptyTerm) {
-                            $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ""';
-                        } else {
-                            $relWhere = [];
-                            $query    = "
-                                SELECT id
-                                FROM rex_article
-                                WHERE 
-                                  name LIKE :term
-                                  OR id = :id
-                            ";
-
-                            $relResult = $sql_o->getArray($query, [
-                                'term' => "%{$term}%",
-                                'id'   => $term,
-                            ]);
-
-                            foreach ($relResult as $item) {
-                                $relWhere[] = $item['id'];
-                            }
-
-                            $relWhere = $relWhere ?: [-1];
-                            $where[]  = $sql_o->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
-                        }
-                    } else {
-                        $_term    = $isEmptyTerm ? '""' : $sql_o->escape('%' . $term . '%');
-                        $where[] = $sql_o->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
-                    }
-                } else if ($fieldname == 'id') {
-                    $where[] = $sql_o->escapeIdentifier($fieldname) . ' = ' . $sql_o->escape($term);
-                }
-            }
-
-            if (count($where)) {
-                if (strrpos($sql, 'where') !== false) {
-                    $sql = str_replace(' where ', ' where (' . implode(' OR ', $where) . ') AND ', $sql);
-                } else {
-                    $sql = str_replace(' ORDER BY ', ' WHERE (' . implode(' OR ', $where) . ') ORDER BY ', $sql);
-                }
-            }
+        if ($firstColName != 'id' && $orderBy == 'prio') {
+            $list->addFormAttribute('class', 'sortable-list');
+            $list->setColumnFormat(
+                $firstColName,
+                'custom',
+                function ($params) {
+                    $filters = \rex_extension::registerPoint(
+                        new \rex_extension_point(
+                            'yform/usability.addDragNDropSort.filters', [], [
+                                                                          'list_params' => $params,
+                                                                          'table'       => $table,
+                                                                      ]
+                        )
+                    );
+                    return '
+                        <i class="rex-icon fa fa-bars sort-icon" 
+                            data-id="###id###" 
+                            data-table-type="orm_model"
+                            data-table="' . $params['params']['table']->getTableName() . '" 
+                            data-filter="' . implode(',', $filters) . '"></i>
+                    ';
+                },
+                ['table' => $table]
+            );
         }
-
-        return $sql;
+        return $list;
     }
 
     public static function getArrayFromString($string)
@@ -233,87 +113,237 @@ class Extensions
         return $options;
     }
 
-    public static function yform_manager_rex_info(\rex_extension_point $ep)
+    public static function ext_rexListGet(\rex_extension_point $ep): void
     {
-        $content = $ep->getSubject();
+        $list    = $ep->getSubject();
+        $lparams = $list->getParams();
 
-        if (self::$hasSearch) {
+        if ($lparams['page'] == 'yform/manager/table_field') {
+            $list->addFormAttribute('class', 'sortable-list');
+
+            $firstColName = current($list->getColumnNames());
+            $tableName   = \rex_yform_manager_field::table();
+
+
+            $list->setColumnLayout($firstColName, ['<th class="rex-table-icon">###VALUE###</th>', '###VALUE###']);
+            $list->setColumnFormat(
+                $firstColName,
+                'custom',
+                function ($params) {
+                    $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
+
+                    switch ($params['list']->getValue('type_id')) {
+                        case 'validate':
+                            $style = 'color:#aaa;'; // background-color:#cfd9d9;
+                            break;
+                        case 'action':
+                            $style = 'background-color:#cfd9d9;';
+                            break;
+                        default:
+                            $style = 'background-color:#eff9f9;';
+                            break;
+                    }
+                    return '
+                    <td class="rex-table-icon" style="' . $style . '">
+                        <i class="rex-icon fa fa-bars sort-icon" 
+                            data-id="###id###" 
+                            data-table-type="db_table"
+                            data-table-sort-field="prio"
+                            data-table-sort-order="asc"
+                            data-table="' . $params['params']['yform_table'] . '" 
+                            data-filter="' . implode(',', $filters) . '"></i>
+                    </td>
+                ';
+                },
+                ['yform_table' => $lparams['table_name'], 'table' => $tableName]
+            );
+        }
+    }
+
+    public static function ext_yformManagerRexInfo(\rex_extension_point $ep): void
+    {
+        if ($manager = \rex::getProperty('yform_usability.searchTableManager')) {
+            $content = $ep->getSubject();
             // search bar
             $fragment = new \rex_fragment();
-            $fragment->setVar('manager', self::$manager);
+            $fragment->setVar('manager', $manager);
             $partial = $fragment->parse('yform_usability/search.php');
 
             $fragment = new \rex_fragment();
             $fragment->setVar('body', $partial, false);
             $fragment->setVar('class', 'info');
             $content .= $fragment->parse('core/page/section.php');
+            $ep->setSubject($content);
         }
-        return $content;
     }
 
-    public static function yform_manager_data_page(\rex_extension_point $ep)
+    public static function ext_yformManagerDataPage(\rex_extension_point $ep): void
     {
         $manager = $ep->getSubject();
 
-        if ($manager->table->isSearchable()) {
+        if ($manager->table->isSearchable() && Usability::getConfig('use_inline_search') == '|1|') {
             $functions = $manager->dataPageFunctions;
             $sIndex    = array_search('search', $functions);
 
             if ($sIndex !== false) {
-                self::$manager   = $manager;
-                self::$hasSearch = true;
+                \rex::setProperty('yform_usability.searchTableManager', $manager);
                 unset($functions[$sIndex]);
                 $functions[] = 'yform_search';
                 $manager->setDataPageFunctions($functions);
+                $ep->setSubject($manager);
             }
         }
-        return $manager;
     }
 
-    protected static function addStatusToggle($list, $table)
+    public static function ext_yformDataList(\rex_extension_point $ep): void
     {
-        $list->addColumn('status_toggle', '', count($list->getColumnNames()));
-        $list->setColumnLabel('status_toggle', 'Status');
-        $list->setColumnFormat('status_toggle', 'custom', function ($params) {
-            $value   = $params['list']->getValue('status');
-            $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
+        $config    = Usability::getConfig();
+        $list      = $ep->getSubject();
+        $table     = $ep->getParam('table');
+        $tableName = $table->getTableName();
+        $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
-            return strtr($tparams['element'], [
-                '{{ID}}'    => $params['list']->getValue('id'),
-                '{{TABLE}}' => $params['params']['table']->getTableName(),
-            ]);
-        }, ['table' => $table]);
-        return $list;
-    }
+        $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array($tableName, explode('|', trim($config['duplicate_tables'], '|')));
+        $hasStatus    = $config['status_tables_all'] == '|1|' || in_array($tableName, explode('|', trim($config['status_tables'], '|')));
+        $hasSorting   = $config['sorting_tables_all'] == '|1|' || in_array($tableName, explode('|', trim($config['sorting_tables'], '|')));
 
-    protected static function addDragNDropSort($list, $table)
-    {
-        $columns        = $list->getColumnNames();
-        $first_col_name = array_shift($columns);
-        $orderBy        = rex_get('sort', 'string', $table->getSortFieldName());
+        $hasDuplicate = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDuplication', $hasDuplicate, ['list' => $list, 'table' => $table]));
+        $hasStatus    = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', $hasStatus, ['list' => $list, 'table' => $table]));
+        $hasSorting   = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', $hasSorting, ['list' => $list, 'table' => $table]));
 
-        if ($first_col_name != 'id' && $orderBy == 'prio') {
-            $list->addFormAttribute('class', 'sortable-list');
-            $list->setColumnFormat($first_col_name, 'custom', function ($params) {
-                $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
-                return '
-                        <i class="rex-icon fa fa-bars sort-icon" 
-                            data-id="###id###" 
-                            data-table-type="orm_model"
-                            data-table="' . $params['params']['table']->getTableName() . '" 
-                            data-filter="' . implode(',', $filters) . '"></i>
-                    ';
-            }, ['table' => $table]);
+        if ($hasDuplicate && empty ($isOpener)) {
+            $list = self::addDuplication($list);
         }
-        return $list;
+        if ($hasStatus && count($table->getFields(['name' => 'status']))) {
+            $list = self::addStatusToggle($list, $table);
+        }
+        if ($hasSorting && empty ($isOpener) && count($table->getFields(['name' => 'prio']))) {
+            $list = self::addDragNDropSort($list, $table);
+        }
+        $ep->setSubject($list);
     }
 
-    protected static function addDuplication($list, $table)
+    public static function ext_yformDataListSql(\rex_extension_point $ep): void
     {
-        $list->addColumn('func_duplication', '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_addon::get('yform_usability')
-                ->i18n('action.duplicate') . '</div>', count($list->getColumnNames()));
-        $list->setColumnLabel('func_duplication', '');
-        $list->setColumnParams('func_duplication', ['func' => 'duplicate', 'id' => '###id###', 'page' => 'yform/manager/yform-usability']);
-        return $list;
+        if (\rex_request('yfu-action', 'string') == 'search') {
+            $term = trim(\rex_request('yfu-term', 'string'));
+
+            if ($term != '') {
+                $isEmptyTerm = $term == '!' || $term == '#';
+                $listSql     = $ep->getSubject();
+                $table       = $ep->getParam('table');
+                $sql         = \rex_sql::factory();
+                $sprogIsAvl  = \rex_addon::get('sprog')->isAvailable();
+                $fields      = explode(',', \rex_request('yfu-searchfield', 'string'));
+
+                $where = [];
+                foreach ($fields as $fieldname) {
+                    $field = $table->getFields(['name' => $fieldname])[0];
+
+                    if ($field) {
+                        if ($field->getTypename() == 'be_manager_relation') {
+                            if ($isEmptyTerm) {
+                                $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
+                            } else {
+                                $relWhere  = [];
+                                $query     = "
+                                SELECT id
+                                FROM {$field->getElement('table')}
+                                WHERE {$field->getElement('field')} LIKE :term
+                            ";
+                                $relResult = $sql->getArray($query, ['term' => "%{$term}%"]);
+                                
+                                foreach ($relResult as $item) {
+                                    $relWhere[] = $item['id'];
+                                }
+
+                                $relWhere = $relWhere ?: [0];
+                                $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
+                            }
+                        } elseif ($field->getTypename() == 'choice') {
+                            if ($isEmptyTerm) {
+                                $_term = '""';
+                            } else {
+                                $list    = new \rex_yform_choice_list([]);
+                                $choices = $field->getElement('choices');
+
+                                if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
+                                    $list->createListFromSqlArray($sql->getArray($choices));
+                                } elseif (is_string($choices) && strlen(trim($choices)) > 0 && substr(trim($choices), 0, 1) == '{') {
+                                    $list->createListFromJson($choices);
+                                } else {
+                                    $list->createListFromStringArray(self::getArrayFromString($choices));
+                                }
+
+                                foreach ($list->getChoicesByValues() as $value => $item) {
+                                    if (stripos($item, $term) !== false) {
+                                        $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape($value);
+                                    } elseif ($sprogIsAvl) {
+                                        $label = \Wildcard::get(
+                                            strtr(
+                                                $item,
+                                                [
+                                                    \Wildcard::getOpenTag()  => '',
+                                                    \Wildcard::getCloseTag() => '',
+                                                ]
+                                            )
+                                        );
+
+                                        if (stripos($label, $term) !== false) {
+                                            $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape($value);
+                                        }
+                                    }
+                                }
+
+                                $_term = $sql->escape('%' . $term . '%');
+                            }
+                            $where[] = $sql->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
+                        } elseif ($field->getTypename() == 'be_link') {
+                            if ($isEmptyTerm) {
+                                $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
+                            } else {
+                                $relWhere = [];
+                                $query    = "
+                                SELECT id
+                                FROM rex_article
+                                WHERE 
+                                  name LIKE :term
+                                  OR id = :id
+                            ";
+
+                                $relResult = $sql->getArray(
+                                    $query,
+                                    [
+                                        'term' => "%{$term}%",
+                                        'id'   => $term,
+                                    ]
+                                );
+
+                                foreach ($relResult as $item) {
+                                    $relWhere[] = $item['id'];
+                                }
+
+                                $relWhere = $relWhere ?: [-1];
+                                $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
+                            }
+                        } else {
+                            $_term   = $isEmptyTerm ? '""' : $sql->escape('%' . $term . '%');
+                            $where[] = $sql->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
+                        }
+                    } elseif ($fieldname == 'id') {
+                        $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape($term);
+                    }
+                }
+
+                if (count($where)) {
+                    if (strrpos($listSql, 'where') !== false) {
+                        $listSql = str_replace(' where ', ' where (' . implode(' OR ', $where) . ') AND ', $listSql);
+                    } else {
+                        $listSql = str_replace(' ORDER BY ', ' WHERE (' . implode(' OR ', $where) . ') ORDER BY ', $listSql);
+                    }
+                }
+                $ep->setSubject($listSql);
+            }
+        }
     }
 }

@@ -26,8 +26,7 @@ class rex_api_yform_usability_api extends rex_api_function
         }
         try {
             $this->$_method();
-        }
-        catch (ErrorException $ex) {
+        } catch (ErrorException $ex) {
             throw new rex_api_exception($ex->getMessage());
         }
         $this->response['method'] = strtolower($method);
@@ -37,15 +36,14 @@ class rex_api_yform_usability_api extends rex_api_function
     private function __changestatus()
     {
         $status  = rex_post('status', 'string');
-        $data_id = (int) rex_post('data_id', 'int');
+        $data_id = (int)rex_post('data_id', 'int');
         $table   = rex_post('table', 'string');
         $sql     = rex_sql::factory();
 
         $sql->setTable($table)->setValue('status', $status)->setWhere(['id' => $data_id]);
         try {
             $sql->update();
-        }
-        catch (\rex_sql_exception $ex) {
+        } catch (\rex_sql_exception $ex) {
             throw new rex_api_exception($ex->getMessage());
         }
         // flush url path file
@@ -56,20 +54,27 @@ class rex_api_yform_usability_api extends rex_api_function
         $modelClass = \rex_yform_manager_dataset::getModelClass($table);
 
         if ($modelClass) {
-            rex_extension::registerPoint(new rex_extension_point('YFORM_DATA_STATUS_CHANGED', null, [
-                'data'     => $modelClass::get($data_id),
-                'old_data' => true
-            ]));
+            rex_extension::registerPoint(
+                new rex_extension_point(
+                    'YFORM_DATA_STATUS_CHANGED', null, [
+                                                   'data'     => $modelClass::get($data_id),
+                                                   'old_data' => true,
+                                               ]
+                )
+            );
         }
 
 
         $tparams = \yform\usability\Utils::getStatusColumnParams(rex_yform_manager_table::get($table), $status);
 
-        $tparams['element'] = strtr($tparams['element'], [
-            '{{ID}}'    => $data_id,
-            '{{TABLE}}' => $table,
-        ]);
-        $this->response = array_merge($this->response, $tparams);
+        $tparams['element'] = strtr(
+            $tparams['element'],
+            [
+                '{{ID}}'    => $data_id,
+                '{{TABLE}}' => $table,
+            ]
+        );
+        $this->response     = array_merge($this->response, $tparams);
     }
 
     private function __updatesort()
@@ -77,15 +82,18 @@ class rex_api_yform_usability_api extends rex_api_function
         $tablename = rex_post('table', 'string');
 
         if ($tablename != '') {
+            $sql     = \rex_sql::factory();
             $data_id = rex_post('data_id', 'int');
             $next_id = rex_post('next_id', 'int');
             $filter  = rex_post('filter', 'string');
             $filter  = strlen($filter) ? explode(',', $filter) : [];
 
             if (rex_post('table_type') == 'db_table') {
-                $sql    = rex_sql::factory();
-                $sort   = rex_post('table_sort_order', 'string', 'asc');
-                $sfield = rex_post('table_sort_field', 'string', 'prio');
+                $sql       = rex_sql::factory();
+                $filter[]  = 'table_name = ' . $sql->escape($tablename);
+                $tablename = rex::getTable('yform_field');
+                $sort      = rex_post('table_sort_order', 'string', 'asc');
+                $sfield    = rex_post('table_sort_field', 'string', 'prio');
 
 
                 if ($next_id) {
@@ -93,25 +101,24 @@ class rex_api_yform_usability_api extends rex_api_function
                     $sql->setWhere('id = :id', ['id' => $next_id]);
                     $sql->select($sfield);
                     $prio = @$sql->getValue($sfield);
-                }
-                else {
-                    $prio = @$sql->getArray("
+                } else {
+                    $prio = @$sql->getArray(
+                        "
                         SELECT {$sfield} 
                         FROM {$tablename} 
-                        ORDER BY {$sfield} ". ($sort == 'asc' ? 'desc' : 'asc') ." 
+                        ORDER BY {$sfield} " . ($sort == 'asc' ? 'desc' : 'asc') . " 
                         LIMIT 1
-                    ")[0]['prio'];
+                    "
+                    )[0]['prio'];
                 }
                 rex_yform_manager_table::deleteCache();
-            }
-            else {
+            } else {
                 $tableobject = rex_yform_manager_table::get($tablename);
                 $sort        = strtolower($tableobject->getSortOrderName());
 
                 if ($next_id) {
                     $prio = $tableobject->query()->findId($next_id)->getValue('prio');
-                }
-                else {
+                } else {
                     $prio = $tableobject->query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne()->getValue('prio');
                 }
             }
@@ -121,7 +128,6 @@ class rex_api_yform_usability_api extends rex_api_function
                         SET prio = {$prio}
                         WHERE id = :id
                     ";
-                $sql   = \rex_sql::factory();
                 $sql->setQuery($query, ['id' => $data_id]);
 
                 if (strlen($sql->getError())) {
@@ -141,8 +147,7 @@ class rex_api_yform_usability_api extends rex_api_function
                 if (strlen($sql->getError())) {
                     throw new rex_api_exception($sql->getError());
                 }
-            }
-            catch (\rex_sql_exception $ex) {
+            } catch (\rex_sql_exception $ex) {
                 throw new rex_api_exception($ex->getMessage());
             }
         }
