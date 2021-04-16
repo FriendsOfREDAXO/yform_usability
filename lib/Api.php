@@ -57,6 +57,8 @@ class rex_api_yform_usability_api extends rex_api_function
             rex_extension::registerPoint(
                 new rex_extension_point(
                     'YFORM_DATA_STATUS_CHANGED', null, [
+                                                   'data_id'  => $data_id,
+                                                   'table'    => rex_yform_manager_table::get($table),
                                                    'data'     => $modelClass::get($data_id),
                                                    'old_data' => true,
                                                ]
