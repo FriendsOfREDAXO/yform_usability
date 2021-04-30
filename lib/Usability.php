@@ -163,9 +163,6 @@ class Usability
         foreach ($updateValues as $key => $value) {
             $sql->setValue($key, $value);
         }
-        foreach ($createValues as $key => $value) {
-            $sql->setValue($key, $value);
-        }
         if ($fieldId) {
             if (count($updateValues)) {
                 $sql->setWhere(['id' => current($fieldId)]);
