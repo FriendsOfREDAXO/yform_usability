@@ -99,4 +99,13 @@ class Model extends \rex_yform_manager_dataset
         }
         return $found;
     }
+
+
+    public function save()
+    {
+        if (\rex::isFrontend()) {
+            unset($_POST['FORM']);
+        }
+        return parent::save();
+    }
 }
