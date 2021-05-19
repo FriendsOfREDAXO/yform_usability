@@ -11,8 +11,14 @@ var YformUsability = (function ($) {
 
     function initSelect2() {
         if ($().select2) {
-            $('#rex-page-yform-manager-table-field select').select2();
-            $('#rex-page-yform-manager-usability select').select2();
+            window.setTimeout(function() {
+                $('#rex-page-yform-manager-table-field select').each(function() {
+                    if ($(this).children('option').length > 6) {
+                        $(this).select2();
+                    }
+                });
+                $('#rex-page-yform-manager-usability select').select2();
+            }, 500);
         }
     }
 
