@@ -21,6 +21,7 @@ class Extensions
     public static function init(): void
     {
         \rex_extension::register('URL_PROFILE_QUERY', [Extensions::class, 'ext__urlQuery']);
+        \rex_extension::register('YFORM_DATA_UPDATED', [Extensions::class, 'ext__dataUpdated']);
     }
 
     protected static function addDuplication($list)
@@ -361,6 +362,18 @@ class Extensions
             $query = $ep->getSubject();
             $class::addQueryDefaultFilters($query, 'data');
             $ep->setSubject($query);
+        }
+    }
+
+    public static function ext__dataUpdated(\rex_extension_point $ep): void
+    {
+        $data    = $ep->getParam('data');
+        $oldData = $ep->getParam('old_data');
+
+        if ($data->getValue('status') != $oldData['status']) {
+            \rex_extension::registerPoint(
+                new \rex_extension_point('YFORM_DATA_STATUS_CHANGED', null, $ep->getParams())
+            );
         }
     }
 }
