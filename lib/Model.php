@@ -100,6 +100,10 @@ class Model extends \rex_yform_manager_dataset
         return $found;
     }
 
+    public static function addQueryDefaultFilters(\rex_yform_manager_query $query, $alias = 'm'): void
+    {
+        $query->where("{$alias}.status", 1);
+    }
 
     public function save()
     {

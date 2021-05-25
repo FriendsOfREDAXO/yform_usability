@@ -17,6 +17,12 @@ namespace yform\usability;
 class Extensions
 {
 
+
+    public static function init(): void
+    {
+        \rex_extension::register('URL_PROFILE_QUERY', [Extensions::class, 'ext__urlQuery']);
+    }
+
     protected static function addDuplication($list)
     {
         $list->addColumn(
@@ -344,6 +350,17 @@ class Extensions
                 }
                 $ep->setSubject($listSql);
             }
+        }
+    }
+
+    public static function ext__urlQuery(\rex_extension_point $ep): void
+    {
+        $profile = $ep->getParam('profile');
+
+        if ($class = Model::getModelClass($profile->getTableName())) {
+            $query = $ep->getSubject();
+            $class::addQueryDefaultFilters($query, 'data');
+            $ep->setSubject($query);
         }
     }
 }

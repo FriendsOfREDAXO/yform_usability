@@ -13,6 +13,9 @@
 namespace yform\usability;
 
 
+// init all extension points
+Extensions::init();
+
 \rex_extension::register('PAGE_CHECKED', function ($params) {
     if (\rex_request('rex-api-call', 'string') == 'yform_usability_api') {
         // api endpoint
