@@ -65,9 +65,10 @@ class Model extends \rex_yform_manager_dataset
         return array_filter((array)$result);
     }
 
-    public function getName($langId = true)
+    public function getName(int $langId = null)
     {
-        $name = $this->getValue('name', $langId);
+        $langId = $langId ?? \rex_clang::getCurrentId();
+        $name   = $this->getValue('name', $langId);
 
 
         if ($name === null) {
@@ -82,6 +83,26 @@ class Model extends \rex_yform_manager_dataset
             }
         }
         return $name;
+    }
+
+    public function getDescription(int $langId = null)
+    {
+        $langId      = $langId ?? \rex_clang::getCurrentId();
+        $description = $this->getValue('description', $langId);
+
+
+        if ($description === null) {
+            $description = $this->getValue('text', $langId);
+
+            if ($description === null) {
+                $description = $this->getValue('description');
+
+                if ($description === null) {
+                    $description = $this->getValue('text');
+                }
+            }
+        }
+        return $description;
     }
 
     public static function hasUrlProfile($langId = null): bool
