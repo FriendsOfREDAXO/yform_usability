@@ -33,7 +33,7 @@ Extensions::init();
 
 
 if (\rex::isBackend() && \rex::getUser()) {
-    if ($this->getProperty('compile') || \rex_addon::get('project')->getProperty('compile') || !file_exists($this->getAssetsPath('styles.css'))) {
+    if (1 == rex_get('compile', 'int') || !file_exists($this->getAssetsPath('styles.css'))) {
         $compiler   = new \rex_scss_compiler();
         $scss_files = [$this->getPath('assets/scss/styles.scss')];
         $compiler->setRootDir($this->getPath('assets/'));
