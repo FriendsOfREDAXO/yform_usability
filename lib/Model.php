@@ -105,6 +105,16 @@ class Model extends \rex_yform_manager_dataset
         return $description;
     }
 
+    public function getCreateDate()
+    {
+        return strtotime($this->getValue('createdate'));
+    }
+
+    public function getUpdateDate()
+    {
+        return strtotime($this->getValue('updatedate'));
+    }
+
     public static function hasUrlProfile($langId = null): bool
     {
         $found    = false;
