@@ -22,6 +22,10 @@ class Extensions
     {
         \rex_extension::register('URL_PROFILE_QUERY', [Extensions::class, 'ext__urlQuery']);
         \rex_extension::register('YFORM_DATA_UPDATED', [Extensions::class, 'ext__dataUpdated']);
+
+        if (\rex::isBackend()) {
+            \rex_extension::register('SLICE_UPDATED', [\ModYform::class, 'ext__updateSlice']);
+        }
     }
 
     protected static function addDuplication($list)
