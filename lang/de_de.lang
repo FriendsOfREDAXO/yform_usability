@@ -1,15 +1,21 @@
 yform_usability.search_in_all = in allen
 yform_usability.partial = HTML-Partial
 
-yform_usability.tab_start = START: vor das erste sprachabhängige Feld setzen
-yform_usability.tab_break = BREAK: dient dazu um verschiedene Felder von Sprachen zu trennen
-yform_usability.tab_end = END: nach dem letzten sprachabhängigen Feld setzen
+yform_usability.tab_start = START: vor das erste Feld setzen
+yform_usability.tab_break = SEPARATOR: dient dazu um die Tab-Inhalte zu trennen
+yform_usability.tab_end = END: nach dem letzten Feld setzen
 yform_usability.lang_tabs_description = Erstellt Tabs für alle Sprachen und ermöglicht somit das gruppieren von Sprachfeldern
+yform_usability.tab_wrapper_description = Ist ein Container für Tab-Inhalte
 yform_usability.table_config = Tabellen-Einstellungen
 yform_usability.all_tables = Alle Tabellen
 yform_usability.addon_settings = Addon-Einstellungen
 yform_usability.search = Yform-Suche
 yform_usability.use_inline_search = Inline-Suche verwenden
+yform_usability.tab_wrapper_options = Tab Labels mit Beistrich getrennt (wird nur bei START benötigt)
+
+yform_usability.repeater_wrapper_description = Ermöglicht Felder x-fach wiederholen zu können
+yform_usability.repeater_start = Start
+yform_usability.repeater_end = Ende
 
 yform_label.online_status = Online/Offline Status anzeigen
 yform_label.sorting = Sortierung aktiv

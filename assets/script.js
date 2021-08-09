@@ -11,8 +11,8 @@ var YformUsability = (function ($) {
 
     function initSelect2() {
         if ($().select2) {
-            window.setTimeout(function() {
-                $('#rex-page-yform-manager-table-field select').each(function() {
+            window.setTimeout(function () {
+                $('#rex-page-yform-manager-table-field select').each(function () {
                     if ($(this).children('option').length > 6) {
                         $(this).select2();
                     }
@@ -149,6 +149,18 @@ var YformUsability = (function ($) {
             var $form = $(_this).parents('form');
             $form.find('[name=yfu-term]').val('');
             $form.submit();
+        },
+
+        addYformRepeatedBlock: function (_this, name) {
+            var $wrapper = $(_this).parents('[data-repeater-wrapper]');
+
+            $.pjax({
+                container: '#rex-yform',
+                fragment: '#rex-yform',
+                push: false,
+                url: $wrapper.data('url')
+            });
+            return false;
         }
     };
 })(jQuery);

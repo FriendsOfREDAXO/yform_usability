@@ -13,40 +13,40 @@ $tabIds = rex::getProperty('yform_usability.lang_tab_ids', []);
 
 ?>
 <?php if ($this->getElement('partial') == 'start'): ?>
-<div class="nav rex-page-nav yform-lang-tabs">
-    <ul class="nav nav-tabs">
-        <?php
-        $langs   = rex_clang::getAll();
-        $clangId = rex_clang::getCurrentId();
-        ?>
-        <?php foreach ($langs as $lang): ?>
+    <div class="nav rex-page-nav yform-lang-tabs">
+        <ul class="nav nav-tabs">
             <?php
-            $tabId    = $this->getFieldId() .'-'. $lang->getId();
-            $tabIds[] = $tabId;
+            $langs   = rex_clang::getAll();
+            $clangId = rex_clang::getCurrentId();
             ?>
-            <li class="<?= $lang->getId() == $clangId ? 'active' : '' ?>">
-                <a href="#form-tab-content-col-<?= $tabId ?>" data-toggle="tab">
-                    <?= $lang->getName() ?>
-                </a>
-            </li>
-        <?php endforeach; ?>
-    </ul>
+            <?php foreach ($langs as $lang): ?>
+                <?php
+                $tabId    = $this->getFieldId() .'-'. $lang->getId();
+                $tabIds[] = $tabId;
+                ?>
+                <li class="<?= $lang->getId() == $clangId ? 'active' : '' ?>">
+                    <a href="#form-tab-content-col-<?= $tabId ?>" data-toggle="tab">
+                        <?= $lang->getName() ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
 
-    <div class="tab-content">
-        <div class="tab-pane fade in active" id="form-tab-content-col-<?= array_shift($tabIds) ?>">
-        <?php endif; ?>
+        <div class="tab-content">
+            <div class="tab-pane fade in active" id="form-tab-content-col-<?= array_shift($tabIds) ?>">
+<?php endif; ?>
 
 
-        <?php if ($this->getElement('partial') == 'break'): ?>
-        </div>
-        <div class="tab-pane fade" id="form-tab-content-col-<?= array_shift($tabIds) ?>">
-        <?php endif; ?>
+<?php if ($this->getElement('partial') == 'break'): ?>
+            </div>
+            <div class="tab-pane fade" id="form-tab-content-col-<?= array_shift($tabIds) ?>">
+            <?php endif; ?>
 
 
-        <?php if ($this->getElement('partial') == 'end'): ?>
+            <?php if ($this->getElement('partial') == 'end'): ?>
+            </div>
         </div>
     </div>
-</div>
 <?php endif; ?>
 
 <?php
