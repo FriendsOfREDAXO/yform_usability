@@ -138,6 +138,23 @@ var YformUsability = (function ($) {
         });
     }
 
+    function submitYformModuleInput(data, url) {
+        var $form = $('#REX_FORM');
+        data.formData = $form.serialize();
+
+        $.ajax({
+            url: url || $form.attr('action'),
+            headers: {'x-pjax': true},
+            cache: false,
+            data: data
+        }).done(function (response) {
+            var content = $(response).find('#rex-yform-module-input').html();
+            $('#rex-yform-module-input').html(content);
+            $(document).trigger('pjax:end');
+        });
+        return false;
+    }
+
     return {
         doYformSearch: function (_this, event) {
             if ($('#yform_usability-search').find('[name=yfu-term]').val() != '') {
@@ -151,15 +168,37 @@ var YformUsability = (function ($) {
             $form.submit();
         },
 
-        addYformRepeatedBlock: function (_this, name) {
+        addYformRepeatedBlock: function (_this) {
             var $wrapper = $(_this).parents('[data-repeater-wrapper]');
 
-            $.pjax({
-                container: '#rex-yform',
-                fragment: '#rex-yform',
-                push: false,
-                url: $wrapper.data('url')
-            });
+            submitYformModuleInput({
+                sliceValue: $wrapper.data('repeater-id'),
+                action: 'add-repeated-field',
+                appendIndex: $(_this).parent().index()
+            }, $wrapper.data('ajax-url'));
+            return false;
+        },
+
+        rmYformRepeatedBlock: function (_this) {
+            var $wrapper = $(_this).parents('[data-repeater-wrapper]');
+
+            submitYformModuleInput({
+                sliceValue: $wrapper.data('repeater-id'),
+                action: 'rm-repeated-field',
+                index: $(_this).parents('[data-repeater-item]').index() - 1
+            }, $wrapper.data('ajax-url'));
+            return false;
+        },
+
+        toggleYformRepeatedBlock: function (_this, nextStatus) {
+            var $wrapper = $(_this).parents('[data-repeater-wrapper]');
+
+            submitYformModuleInput({
+                sliceValue: $wrapper.data('repeater-id'),
+                action: 'toggle-repeated-field-status',
+                nextStatus: nextStatus,
+                index: $(_this).parents('[data-repeater-item]').index() - 1
+            }, $wrapper.data('ajax-url'));
             return false;
         }
     };

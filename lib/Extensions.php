@@ -14,6 +14,10 @@
 namespace yform\usability;
 
 
+use yform\usability\Module\Form;
+use yform\usability\Module\RepeaterWrapper;
+
+
 class Extensions
 {
 
@@ -24,7 +28,8 @@ class Extensions
         \rex_extension::register('YFORM_DATA_UPDATED', [Extensions::class, 'ext__dataUpdated']);
 
         if (\rex::isBackend()) {
-            \rex_extension::register('SLICE_UPDATED', [\ModYform::class, 'ext__updateSlice']);
+            \rex_extension::register('SLICE_UPDATED', [Form::class, 'ext__updateSlice']);
+            \rex_extension::register('yform/usability/Module/Form.loadedData', [RepeaterWrapper::class, 'ext__loadedData']);
         }
     }
 

@@ -97,4 +97,41 @@
 }
 
 .yform-repeater {
+    background: #dfe3e9;
+
+    .repeater-item {
+        position: relative;
+
+        &.offline {
+            &:after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.2);
+                z-index: 4;
+            }
+        }
+
+        .toolbar {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            z-index: 5;
+        }
+
+        .form-fields {
+            padding: 10px;
+        }
+    }
+
+    .add-block-btn {
+        display: block;
+        float: none;
+        width: 100%;
+        border-radius: 0;
+        padding: 2px;
+    }
 }

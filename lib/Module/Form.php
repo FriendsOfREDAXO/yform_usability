@@ -11,26 +11,57 @@
  * file that was distributed with this source code.
  */
 
+namespace yform\usability\Module;
 
-class ModYform extends rex_yform
+
+use rex;
+use rex_extension_point;
+use rex_request;
+use rex_sql;
+use rex_var;
+use rex_yform;
+use yform\usability\Model\ArticleSlice;
+
+
+class Form extends rex_yform
 {
     protected int   $repeaterValueId   = 0;
     protected array $values            = [];
     protected array $loadedData        = [];
     protected array $formValues        = [];
     protected array $fields            = [];
-    protected array $repeatedFields    = [];
     protected array $tabLabels         = [];
     protected bool  $collectTabContent = false;
 
     public function __construct(array $params = [])
     {
         $params['form_action']              = '';
+        $params['csrf_protection']          = false;
         $params['submit_btn_show']          = false;
+        $params['real_field_names']         = true;
         $params['form_showformafterupdate'] = true;
+        $params['form_wrap_id']             = 'rex-yform-module-input';
         $params['form_ytemplate']           = 'backend,bootstrap,classic';
 
         parent::__construct($params);
+    }
+
+    public function getFieldByName(string $name)
+    {
+        return $this->fields[$name];
+    }
+
+    public static function isRequestForRepeater()
+    {
+        $action = rex_request::get('action', 'string');
+        return rex_request::isXmlHttpRequest() && in_array(
+                $action,
+                [
+                    'add-repeated-field',
+                    'rm-repeated-field',
+                    'toggle-repeated-field-status',
+                ]
+            );
     }
 
     public function getForm()
@@ -55,38 +86,16 @@ class ModYform extends rex_yform
                 $this->addValueField($field['type'], $field['valueId'], $field['name'], $field['params']);
 
                 if ($field['type'] == 'repeater_wrapper') {
-                    $amount = rex_request::get('rAmount', 'array')[$field['name']] ?? 1;
-
-                    for ($i = 0; $i < $amount; $i++) {
-                        if ($i > 0) {
-                            $_separatorParams            = $field['params'];
-                            $_separatorParams['name']    = "separator-{$_separatorParams['name']}";
-                            $_separatorParams['partial'] = 'separator';
-                            $this->addValueField($field['type'], $field['valueId'], $field['name'], $_separatorParams);
-                        }
-
-                        foreach ($this->repeatedFields[$field['valueId']] as $_field) {
-                            $_field['params']['name'] = str_replace('{{INDEX}}', $i, $_field['params']['name']);
-                            $this->addValueField(
-                                $_field['type'],
-                                $_field['valueId'],
-                                $_field['name'],
-                                $_field['params']
-                            );
-                        }
-                    }
-
-                    $_endParams            = $field['params'];
-                    $_endParams['name']    = "end-{$_endParams['name']}";
-                    $_endParams['partial'] = 'end';
-                    $this->addValueField($field['type'], $field['valueId'], $field['name'], $_endParams);
+                    $field['wrapper']->appendFieldsToForm($this);
                 }
             }
         }
 
         $this->setObjectparams('data', empty($_POST) ? $this->formValues : false);
         rex_set_session('yform_usability_modyform', $this);
-        return parent::getForm();
+        $formOutput = parent::getForm();
+
+        return $formOutput;
     }
 
     public function setValueField($type = '', $values = [])
@@ -102,42 +111,59 @@ class ModYform extends rex_yform
         ];
 
         if ($this->repeaterValueId > 0) {
-            $valueId                       = $this->repeaterValueId;
-            $fieldParams['valueId']        = $valueId;
-            $fieldParams['params']['name'] = "{$valueId}.{{INDEX}}.{$name}";
-            //$values['default'] = $item[$name] ?? $values['default'];
-            $this->repeatedFields[$this->repeaterValueId][] = $fieldParams;
+            $wrapper = end($this->fields)['wrapper'];
+            $wrapper->setValueField($fieldParams);
         } else {
-            $this->fields[] = $fieldParams;
+            $this->fields[$name] = $fieldParams;
         }
     }
 
-    private function addValueField($type, $valueId, $name, $params, $repeaterIndex = null)
+    public function addValueField($type, $valueId, $name, $params, $repeaterIndex = null)
     {
-        $data = $this->loadData($valueId);
+        $data = $this->getValuesFromSliceValueId($valueId);
 
-        if ($repeaterIndex !== null) {
-            $value = $data[$repeaterIndex][$name];
-        } else {
+        if ($repeaterIndex === null) {
+            $_key  = "form--{$valueId}.{$name}";
             $value = $data[$name];
+        } else {
+            $_key  = "form--{$valueId}.{$repeaterIndex}.{$name}";
+            $value = $data[$repeaterIndex][$name];
         }
         if (!isset($params['name'])) {
             $params['name'] = $name;
         }
+        $params['values']  = $data;
+        $params['valueId'] = $valueId;
+        $params['name']    = "form--{$params['name']}";
 
-        $this->formValues["{$valueId}.{$name}"] = $value;
+        $this->formValues[$_key] = $value;
         parent::setValueField($type, $params);
+    }
+
+    public function getValuesFromSliceValueId(int $sliceValueId)
+    {
+        return $this->loadData($sliceValueId);
     }
 
     private function loadData(int $valueId)
     {
         if (!isset($this->loadedData[$valueId])) {
-            $key     = "value{$valueId}";
-            $sliceId = rex_request::get('slice_id', 'int');
-            $query   = \yform\usability\Model\ArticleSlice::query();
-            $query->select([$key]);
-            $query->where('id', $sliceId);
-            $this->loadedData[$valueId] = rex_var::toArray($query->findOne()->getValue($key));
+            $epString         = 'yform/usability/Module/Form.loadedData';
+            $this->loadedData = \rex_extension::registerPoint(
+                new \rex_extension_point($epString, $this->loadedData, ['sliceValueId' => $valueId, 'form' => $this])
+            );
+
+            if (!isset($this->loadedData[$valueId])) {
+                $key     = "value{$valueId}";
+                $sliceId = rex_request::get('slice_id', 'int');
+                $query   = ArticleSlice::query();
+                $query->select([$key]);
+                $query->where('id', $sliceId);
+                $collection = $query->findOne();
+                $data       = $collection ? rex_var::toArray($collection->getValue($key)) : null;
+
+                $this->loadedData[$valueId] = $data;
+            }
         }
         return $this->loadedData[$valueId];
     }
@@ -148,11 +174,13 @@ class ModYform extends rex_yform
             // close the previous tab
             $this->closeTab();
         } elseif (empty($this->tabLabels)) {
-            $this->fields[] = [
+            $name = "tab-{$name}";
+
+            $this->fields[$name] = [
                 'fieldType' => 'value',
                 'type'      => 'tab_wrapper',
                 'valueId'   => 1,
-                'name'      => 'tab-' . $name,
+                'name'      => $name,
                 'params'    => ['partial' => 'head'],
             ];
         }
@@ -164,11 +192,13 @@ class ModYform extends rex_yform
     public function closeTab()
     {
         if ($this->collectTabContent) {
-            $this->fields[] = [
+            $name = 'tab-' . end($this->tabLabels);
+
+            $this->fields[$name] = [
                 'fieldType' => 'value',
                 'type'      => 'tab_wrapper',
                 'valueId'   => 1,
-                'name'      => 'tab-' . end($this->tabLabels),
+                'name'      => $name,
                 'params'    => [],
             ];
         }
@@ -177,15 +207,18 @@ class ModYform extends rex_yform
 
     public function fieldRepeaterStart(int $sliceValueId): void
     {
-        $this->repeaterValueId = $sliceValueId;
-
-        $this->fields[] = [
+        $params  = [
             'fieldType' => 'value',
             'type'      => 'repeater_wrapper',
             'valueId'   => $sliceValueId,
             'name'      => "repeater-{$sliceValueId}",
-            'params'    => ['partial' => 'start'],
+            'params'    => ['partial' => 'start', 'repeaterIndex' => 0],
         ];
+        $wrapper = new RepeaterWrapper($this, $sliceValueId, $params);
+
+        $params['wrapper']             = $wrapper;
+        $this->fields[$params['name']] = $params;
+        $this->repeaterValueId         = $sliceValueId;
     }
 
     public function repeaterEnd(): void
@@ -205,7 +238,7 @@ class ModYform extends rex_yform
             $sql->setTable(rex::getTable('article_slice'));
 
             foreach ($form->objparams['value_pool']['sql'] as $key => $value) {
-                [$valueId, $repeaterIndex, $name] = explode('.', $key);
+                [$valueId, $repeaterIndex, $name] = explode('.', substr($key, 6));
 
                 if (isset($name)) {
                     $values[$valueId][$repeaterIndex][$name] = $value;
@@ -213,6 +246,7 @@ class ModYform extends rex_yform
                     $values[$valueId][$repeaterIndex] = $value;
                 }
             }
+
             foreach ($values as $valueId => $data) {
                 $sql->setValue("value{$valueId}", json_encode($data));
             }

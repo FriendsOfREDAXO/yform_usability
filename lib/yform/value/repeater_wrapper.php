@@ -10,11 +10,18 @@ class rex_yform_value_repeater_wrapper extends rex_yform_value_abstract
 
     function enterObject()
     {
-        $amount = rex_request::get('rAmount', 'array')[$this->getName()] ?? 1;
-        $addUrl = rex_url::currentBackendPage(array_merge($_GET, ['rAmount' => [$this->getName() => $amount + 1]]));
+        $index    = $this->getElement('repeaterIndex');
+        $values   = $this->getElement('values')[$index];
+        $settings = json_decode($values['__settings'], true);
+        unset($values['__settings']);
 
-        $this->setElement('addUrl', $addUrl);
+        if (empty($settings)) {
+            $settings['status'] = 1;
+        }
 
+        $this->setElement('repeaterValues', $values);
+        $this->setElement('repeaterSettings', $settings);
+        $this->setElement('ajaxUrl', rex_url::currentBackendPage($_GET));
         $this->params['form_output'][$this->getId()] = $this->parse('value.repeater_wrapper.tpl.php');
     }
 
