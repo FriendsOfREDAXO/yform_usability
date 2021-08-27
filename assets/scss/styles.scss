@@ -102,19 +102,6 @@
     .repeater-item {
         position: relative;
 
-        &.offline {
-            &:after {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.2);
-                z-index: 4;
-            }
-        }
-
         .toolbar {
             position: absolute;
             top: 5px;
@@ -123,7 +110,21 @@
         }
 
         .form-fields {
+            position: relative;
             padding: 10px;
+        }
+
+        &.offline {
+            .form-fields:after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 4;
+            }
         }
     }
 

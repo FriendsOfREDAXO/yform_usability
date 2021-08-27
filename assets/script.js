@@ -145,12 +145,16 @@ var YformUsability = (function ($) {
         $.ajax({
             url: url || $form.attr('action'),
             headers: {'x-pjax': true},
+            method: 'get',
             cache: false,
             data: data
         }).done(function (response) {
-            var content = $(response).find('#rex-yform-module-input').html();
-            $('#rex-yform-module-input').html(content);
-            $(document).trigger('pjax:end');
+            var content = $(response).find('#rex-yform-module-input').html(),
+                $container = $('#rex-yform-module-input');
+
+            $container.html(content);
+            $(document).trigger('rex:ready', [$(document)]);
+            //$(document).trigger('pjax:end');
         });
         return false;
     }

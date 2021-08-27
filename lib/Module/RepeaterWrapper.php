@@ -35,7 +35,6 @@ class RepeaterWrapper
         $values                  = (array)$form->getValuesFromSliceValueId($sliceValueId);
 
         if (Form::isRequestForRepeater()) {
-            $action   = rex_request::get('action', 'string');
             $rowCount = (int)$wrappers[$sliceValueId]['repetitions'];
         } else {
             $rowCount = count($values);
