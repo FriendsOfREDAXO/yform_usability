@@ -68,6 +68,21 @@ class Csv
         $this->rows[] = $rowValues;
     }
 
+    public function getRows(): array
+    {
+        return $this->rows;
+    }
+
+    public function setRows(array $rows): void
+    {
+        $this->rows = $rows;
+    }
+
+    public function getIndexByHeadColumnName(string $name)
+    {
+        return array_search($name, $this->headColumns);
+    }
+
     public function writeFile(string $filePath): void
     {
         $folderPath = dirname($filePath);
