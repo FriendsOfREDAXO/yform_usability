@@ -125,4 +125,19 @@ class Csv
         fwrite($this->stream, $this->enclosure . implode($glue, $data) . $this->enclosure . $this->lineEnding);
     }
 
+    public function sendHtml(): void
+    {
+        rex_response::cleanOutputBuffers();
+        $html = [
+            '<table cellpadding="5" cellspacing="0" style="width:100%;" border="1">',
+            '<tr><th>' . implode('</th><th>', $this->headColumns) . '</th></tr>',
+        ];
+        foreach ($this->rows as $row) {
+            $html[] = '<tr><td>' . implode('</td><td>', $row) . '</td></tr>';
+        }
+        $html[] = '</table>';
+        echo implode('', $html);
+        exit;
+    }
+
 }
