@@ -43,7 +43,7 @@ var YformUsability = (function ($) {
 
     function updateDatasetStatus($this, status, callback) {
         $('#rex-js-ajax-loader').addClass('rex-visible');
-        var url = $('<textarea/>').html(rex.ajax_url).text;
+        var url = $('<textarea/>').html(rex.ajax_url).text();
 
         $.post(url + '&rex-api-call=yform_usability_api&method=changeStatus', {
             data_id: $this.data('id'),
