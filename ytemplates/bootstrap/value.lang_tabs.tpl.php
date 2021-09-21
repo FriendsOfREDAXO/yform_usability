@@ -32,7 +32,7 @@ $tabIds = rex::getProperty('yform_usability.lang_tab_ids', []);
         <?php endforeach; ?>
     </ul>
 
-    <div class="tab-content">
+    <div class="tab-content lang-tab-content">
         <div class="tab-pane fade in active" id="form-tab-content-col-<?= array_shift($tabIds) ?>">
         <?php endif; ?>
 

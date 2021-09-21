@@ -124,11 +124,19 @@ class Usability
 
     public static function ensureValueField($tableName, $fieldName, $typeName, $createValues, $updateValues = [])
     {
+        if ('force-create' == rex_get('yfu-action', 'string')) {
+            $updateValues = array_merge($createValues, $updateValues);
+            $createValues = [];
+        }
         self::ensureYformField('value', $tableName, $fieldName, $typeName, $createValues, $updateValues);
     }
 
     public static function ensureValidateField($tableName, $fieldName, $typeName, $createValues, $updateValues = [])
     {
+        if ('force-create' == rex_get('yfu-action', 'string')) {
+            $updateValues = array_merge($createValues, $updateValues);
+            $createValues = [];
+        }
         $updateValues['list_hidden'] = 1;
         $updateValues['search']      = 0;
         $updateValues['no_db']       = 0;
@@ -224,7 +232,7 @@ class Usability
         );
     }
 
-    public static function ensureUserFields($table, $prio)
+    public static function ensureUserFields($table, &$prio)
     {
         self::ensureValueField(
             $table,
@@ -261,7 +269,7 @@ class Usability
         );
     }
 
-    public static function ensureDateFields($table, $prio)
+    public static function ensureDateFields($table, &$prio)
     {
         self::ensureValueField(
             $table,
