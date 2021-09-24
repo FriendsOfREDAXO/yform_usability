@@ -47,7 +47,7 @@ if (\rex::isBackend() && \rex::getUser()) {
         \rex_file::copy($this->getPath('assets/script.js'), $this->getAssetsPath('script.js'));
     }
 
-    \rex_view::setJsProperty('ajax_url', \rex_url::backendPage('yform/manager/usability', \rex_csrf_token::factory('rex_api_yform_usability_api')->getUrlParams()));
+    \rex_view::setJsProperty('ajax_url', \rex_url::frontendController(\rex_csrf_token::factory('rex_api_yform_usability_api')->getUrlParams()));
     \rex_view::addCssFile($this->getAssetsUrl('styles.css?mtime=' . filemtime($this->getAssetsPath('styles.css'))));
     \rex_view::addJsFile($this->getAssetsUrl('vendor/Sortable.min.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
     \rex_view::addJsFile($this->getAssetsUrl('script.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
