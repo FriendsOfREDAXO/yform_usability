@@ -22,13 +22,22 @@ class Extensions
     {
         \rex_extension::register('URL_PROFILE_QUERY', [Extensions::class, 'ext__urlQuery']);
         \rex_extension::register('YFORM_DATA_UPDATED', [Extensions::class, 'ext__dataUpdated']);
+
+        if (\rex::isBackend()) {
+            \rex_extension::register(
+                'yform/usability.getStatusColumnParams.options',
+                [Extensions::class, 'ext__getStatusColumnOptions']
+            );
+        }
     }
 
     protected static function addDuplication($list)
     {
         $list->addColumn(
             'func_duplication',
-            '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_i18n::msg('yform_usability_action.duplicate') . '</div>',
+            '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_i18n::msg(
+                'yform_usability_action.duplicate'
+            ) . '</div>',
             count($list->getColumnNames())
         );
         $list->setColumnLabel('func_duplication', '');
@@ -130,7 +139,7 @@ class Extensions
             $list->addFormAttribute('class', 'sortable-list');
 
             $firstColName = current($list->getColumnNames());
-            $tableName   = \rex_yform_manager_field::table();
+            $tableName    = \rex_yform_manager_field::table();
 
 
             $list->setColumnLayout($firstColName, ['<th class="rex-table-icon">###VALUE###</th>', '###VALUE###']);
@@ -138,7 +147,11 @@ class Extensions
                 $firstColName,
                 'custom',
                 function ($params) {
-                    $filters = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]));
+                    $filters = \rex_extension::registerPoint(
+                        new \rex_extension_point(
+                            'yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]
+                        )
+                    );
 
                     switch ($params['list']->getValue('type_id')) {
                         case 'validate':
@@ -211,13 +224,43 @@ class Extensions
         $tableName = $table->getTableName();
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
-        $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array($tableName, explode('|', trim($config['duplicate_tables'], '|')));
-        $hasStatus    = $config['status_tables_all'] == '|1|' || in_array($tableName, explode('|', trim($config['status_tables'], '|')));
-        $hasSorting   = $config['sorting_tables_all'] == '|1|' || in_array($tableName, explode('|', trim($config['sorting_tables'], '|')));
+        $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
+                $tableName,
+                explode(
+                    '|',
+                    trim($config['duplicate_tables'], '|')
+                )
+            );
+        $hasStatus    = $config['status_tables_all'] == '|1|' || in_array(
+                $tableName,
+                explode(
+                    '|',
+                    trim($config['status_tables'], '|')
+                )
+            );
+        $hasSorting   = $config['sorting_tables_all'] == '|1|' || in_array(
+                $tableName,
+                explode(
+                    '|',
+                    trim($config['sorting_tables'], '|')
+                )
+            );
 
-        $hasDuplicate = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDuplication', $hasDuplicate, ['list' => $list, 'table' => $table]));
-        $hasStatus    = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addStatusToggle', $hasStatus, ['list' => $list, 'table' => $table]));
-        $hasSorting   = \rex_extension::registerPoint(new \rex_extension_point('yform/usability.addDragNDropSort', $hasSorting, ['list' => $list, 'table' => $table]));
+        $hasDuplicate = \rex_extension::registerPoint(
+            new \rex_extension_point(
+                'yform/usability.addDuplication', $hasDuplicate, ['list' => $list, 'table' => $table]
+            )
+        );
+        $hasStatus    = \rex_extension::registerPoint(
+            new \rex_extension_point(
+                'yform/usability.addStatusToggle', $hasStatus, ['list' => $list, 'table' => $table]
+            )
+        );
+        $hasSorting   = \rex_extension::registerPoint(
+            new \rex_extension_point(
+                'yform/usability.addDragNDropSort', $hasSorting, ['list' => $list, 'table' => $table]
+            )
+        );
 
         if ($hasDuplicate && empty ($isOpener)) {
             $list = self::addDuplication($list);
@@ -260,7 +303,7 @@ class Extensions
                                 WHERE {$field->getElement('field')} LIKE :term
                             ";
                                 $relResult = $sql->getArray($query, ['term' => "%{$term}%"]);
-                                
+
                                 foreach ($relResult as $item) {
                                     $relWhere[] = $item['id'];
                                 }
@@ -277,7 +320,11 @@ class Extensions
 
                                 if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
                                     $list->createListFromSqlArray($sql->getArray($choices));
-                                } elseif (is_string($choices) && strlen(trim($choices)) > 0 && substr(trim($choices), 0, 1) == '{') {
+                                } elseif (is_string($choices) && strlen(trim($choices)) > 0 && substr(
+                                        trim($choices),
+                                        0,
+                                        1
+                                    ) == '{') {
                                     $list->createListFromJson($choices);
                                 } else {
                                     $list->createListFromStringArray(self::getArrayFromString($choices));
@@ -298,7 +345,9 @@ class Extensions
                                         );
 
                                         if (stripos($label, $term) !== false) {
-                                            $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape($value);
+                                            $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape(
+                                                    $value
+                                                );
                                         }
                                     }
                                 }
@@ -347,7 +396,11 @@ class Extensions
                     if (strrpos($listSql, 'where') !== false) {
                         $listSql = str_replace(' where ', ' where (' . implode(' OR ', $where) . ') AND ', $listSql);
                     } else {
-                        $listSql = str_replace(' ORDER BY ', ' WHERE (' . implode(' OR ', $where) . ') ORDER BY ', $listSql);
+                        $listSql = str_replace(
+                            ' ORDER BY ',
+                            ' WHERE (' . implode(' OR ', $where) . ') ORDER BY ',
+                            $listSql
+                        );
                     }
                 }
                 $ep->setSubject($listSql);
@@ -375,6 +428,18 @@ class Extensions
             \rex_extension::registerPoint(
                 new \rex_extension_point('YFORM_DATA_STATUS_CHANGED', null, $ep->getParams())
             );
+        }
+    }
+
+    public static function ext__getStatusColumnOptions(\rex_extension_point $ep): void
+    {
+        if (\rex_addon::exists('sprog') && \rex_addon::get('sprog')->isAvailable()) {
+            $options = $ep->getSubject();
+
+            foreach ($options as &$option) {
+                $option = \Wildcard::parse($option);
+            }
+            $ep->setSubject($options);
         }
     }
 }
