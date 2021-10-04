@@ -24,6 +24,11 @@ class Usability
         }
     }
 
+    public static function includeAutoload()
+    {
+        require_once \rex_addon::get('yform_usability')->getPath('vendor/autoload.php');
+    }
+
     public static function getConfig($key = null)
     {
         return \rex_config::get('yform_usability', $key);

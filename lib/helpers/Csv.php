@@ -15,23 +15,20 @@ namespace yform\usability\lib\helpers;
 use rex_dir;
 use rex_file;
 use rex_response;
+use Symfony\Component\Serializer\Encoder\CsvEncoder;
+use yform\usability\Usability;
 
 
 class Csv
 {
-    protected        $stream;
     protected array  $headColumns = [];
     protected array  $rows        = [];
     protected string $separator   = ';';
     protected string $enclosure   = '"';
     protected string $escape      = "\\";
     protected string $lineEnding  = "\n";
+    protected bool   $useUTF8Bom  = false;
 
-
-    public function __construct()
-    {
-        $this->stream = fopen('php://temp', 'r+');
-    }
 
     public function setHeadColumns(array $headColumns): void
     {
@@ -78,6 +75,11 @@ class Csv
         $this->rows = $rows;
     }
 
+    public function useUTF8Bom(bool $option): void
+    {
+        $this->useUTF8Bom = $option;
+    }
+
     public function getIndexByHeadColumnName(string $name)
     {
         return array_search($name, $this->headColumns);
@@ -102,27 +104,34 @@ class Csv
 
     protected function getStream(): ?string
     {
-        // Add BOM to fix UTF-8 in Excel
-        fwrite($this->stream, chr(0xEF) . chr(0xBB) . chr(0xBF));
-        // set headline
-        $this->fPutCsv($this->headColumns);
-        foreach ($this->rows as $item) {
-            if ($this->enclosure == '"') {
-                foreach ($item as &$value) {
-                    $value = str_replace('"', '""', $value);
-                }
-            }
-            $this->fPutCsv($item);
-        }
-        rewind($this->stream);
-        $stream = stream_get_contents($this->stream);
-        return false === $stream ? null : $stream;
-    }
+        Usability::includeAutoload();
 
-    protected function fPutCsv(array $data): void
-    {
-        $glue = $this->enclosure . $this->separator . $this->enclosure;
-        fwrite($this->stream, $this->enclosure . implode($glue, $data) . $this->enclosure . $this->lineEnding);
+        $_rows = [];
+        foreach ($this->rows as $row) {
+            $_row = [];
+            foreach ($row as $column => $value) {
+                $_row[$this->headColumns[$column]] = $value;
+            }
+            $_rows[] = $_row;
+        }
+
+        $encoder = new CsvEncoder();
+        return $encoder->encode(
+            $_rows,
+            'csv',
+            [
+                CsvEncoder::DELIMITER_KEY       => $this->separator,
+                CsvEncoder::ENCLOSURE_KEY       => $this->enclosure,
+                CsvEncoder::END_OF_LINE         => $this->lineEnding,
+                CsvEncoder::ESCAPE_CHAR_KEY     => $this->escape,
+                CsvEncoder::HEADERS_KEY         => $this->headColumns,
+                CsvEncoder::OUTPUT_UTF8_BOM_KEY => $this->useUTF8Bom,
+                CsvEncoder::ESCAPE_FORMULAS_KEY => false,
+                CsvEncoder::NO_HEADERS_KEY      => false,
+                CsvEncoder::AS_COLLECTION_KEY   => true,
+                CsvEncoder::KEY_SEPARATOR_KEY   => '.',
+            ]
+        );
     }
 
     public function sendHtml(): void
