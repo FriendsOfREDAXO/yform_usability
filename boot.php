@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the yform/usability package.
  *
@@ -49,10 +50,17 @@ if (\rex::isBackend() && \rex::getUser()) {
 
     \rex_view::setJsProperty('ajax_url', \rex_url::frontendController(\rex_csrf_token::factory('rex_api_yform_usability_api')->getUrlParams()));
     \rex_view::addCssFile($this->getAssetsUrl('styles.css?mtime=' . filemtime($this->getAssetsPath('styles.css'))));
-    \rex_view::addJsFile($this->getAssetsUrl('vendor/Sortable.min.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
-    \rex_view::addJsFile($this->getAssetsUrl('script.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
-    \rex_yform::addTemplatePath($this->getPath('ytemplates'));
 
+    switch (\rex_be_controller::getCurrentPagePart(1)) {
+        case 'content':
+            break;
+        default:
+            \rex_view::addJsFile($this->getAssetsUrl('vendor/Sortable.min.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
+            \rex_view::addJsFile($this->getAssetsUrl('script.js?mtime=' . filemtime($this->getAssetsPath('script.js'))));
+            break;
+    }
+
+    \rex_yform::addTemplatePath($this->getPath('ytemplates'));
     \rex_extension::register('PACKAGES_INCLUDED', [Usability::class, 'init']);
     \rex_extension::register('YFORM_MANAGER_DATA_PAGE', [Extensions::class, 'ext_yformManagerDataPage']);
     \rex_extension::register('YFORM_DATA_LIST', [Extensions::class, 'ext_yformDataList']);
