@@ -44,6 +44,11 @@ class Model extends \rex_yform_manager_dataset
         return $value;
     }
 
+    public function getObjectValue($key, $langId = false)
+    {
+        return unserialize($this->getValue($key, $langId));
+    }
+
     public function getArrayValue($key, $langId = false, $default = [], $separator = ','): array
     {
         $result = $default;
