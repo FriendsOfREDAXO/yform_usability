@@ -31,7 +31,7 @@ class Model extends \rex_yform_manager_dataset
     public function valueIsset($key, $langId = false)
     {
         $value = $this->getValue($key, $langId);
-        return strlen($value) > 0;
+        return is_object($value) || strlen($value) > 0;
     }
 
     public function getValue($key, $langId = false, $default = '')
