@@ -102,7 +102,7 @@ class Csv
         exit;
     }
 
-    protected function getStream(): ?string
+    public function getStream(): ?string
     {
         Usability::includeAutoload();
 
