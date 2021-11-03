@@ -29,6 +29,10 @@ class Csv
     protected string $lineEnding  = "\n";
     protected bool   $useUTF8Bom  = false;
 
+    public function hasRows(): bool
+    {
+        return count($this->rows) > 0;
+    }
 
     public function setHeadColumns(array $headColumns): void
     {
