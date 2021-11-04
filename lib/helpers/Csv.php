@@ -89,11 +89,11 @@ class Csv
         return array_search($name, $this->headColumns);
     }
 
-    public function writeFile(string $filePath): void
+    public function writeFile(string $filePath): bool
     {
         $folderPath = dirname($filePath);
         rex_dir::create($folderPath);
-        rex_file::put($filePath, $this->getStream());
+        return rex_file::put($filePath, $this->getStream());
     }
 
     public function sendFile(string $fileName): void
