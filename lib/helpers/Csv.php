@@ -110,13 +110,17 @@ class Csv
     {
         Usability::includeAutoload();
 
-        $_rows = [];
-        foreach ($this->rows as $row) {
-            $_row = [];
-            foreach ($row as $column => $value) {
-                $_row[$this->headColumns[$column]] = $value;
+        if (empty($this->headColumns)) {
+            $_rows = $this->rows;
+        } else {
+            $_rows = [];
+            foreach ($this->rows as $row) {
+                $_row = [];
+                foreach ($row as $column => $value) {
+                    $_row[$this->headColumns[$column]] = $value;
+                }
+                $_rows[] = $_row;
             }
-            $_rows[] = $_row;
         }
 
         $encoder = new CsvEncoder();
@@ -130,8 +134,8 @@ class Csv
                 CsvEncoder::ESCAPE_CHAR_KEY     => $this->escape,
                 CsvEncoder::HEADERS_KEY         => $this->headColumns,
                 CsvEncoder::OUTPUT_UTF8_BOM_KEY => $this->useUTF8Bom,
+                CsvEncoder::NO_HEADERS_KEY      => empty($this->headColumns),
                 CsvEncoder::ESCAPE_FORMULAS_KEY => false,
-                CsvEncoder::NO_HEADERS_KEY      => false,
                 CsvEncoder::AS_COLLECTION_KEY   => true,
                 CsvEncoder::KEY_SEPARATOR_KEY   => '.',
             ]
@@ -141,12 +145,13 @@ class Csv
     public function sendHtml(): void
     {
         rex_response::cleanOutputBuffers();
-        $html = [
-            '<table cellpadding="5" cellspacing="0" style="width:100%;" border="1">',
-            '<tr><th>' . implode('</th><th>', $this->headColumns) . '</th></tr>',
-        ];
+        $html = ['<table cellpadding="5" cellspacing="0" style="width:100%;" border="1">'];
+
+        if (count($this->headColumns)) {
+            $html = ['<tr><th>' . implode('</th><th>', $this->headColumns) . '</th></tr>'];
+        }
         foreach ($this->rows as $row) {
-            $html[] = '<tr><td>' . implode('</td><td>', $row) . '</td></tr>';
+            $html[] = '<tr><td style="white-space:nowrap">' . implode('</td><td style="white-space:nowrap;">', $row) . '</td></tr>';
         }
         $html[] = '</table>';
         echo implode('', $html);
