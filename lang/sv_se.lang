@@ -1,9 +1,19 @@
 yform_usability.search_in_all = i alla
+yform_usability.partial = HTML-Partial
+
+yform_usability.tab_start = START: lägg framför det första språkberoende fältet
+yform_usability.tab_break = BREAK: används för att separera olika språkfält
+yform_usability.tab_end = SLUT: inställt efter det sista språkberoende fältet
+yform_usability.lang_tabs_description = Skapar flikar för alla språk och gör att språkfält kan grupperas
+yform_usability.table_config = Tabelinställningar
+yform_usability.all_tables = Alla tabeller
+yform_usability.addon_settings = Addon inställningar
+yform_usability.search = YForm sök
+yform_usability.use_inline_search = Använd inline-sök
 
 yform_label.online_status = Visa online / offline-status
 yform_label.sorting = Sortering aktiv
 yform_label.duplication = Duplicera poster
-yform_label.all = Alla
 
 yform_usability_action.duplicate = Duplicera
 
