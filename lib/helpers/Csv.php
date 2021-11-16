@@ -148,7 +148,7 @@ class Csv
         $html = ['<table cellpadding="5" cellspacing="0" style="width:100%;" border="1">'];
 
         if (count($this->headColumns)) {
-            $html = ['<tr><th>' . implode('</th><th>', $this->headColumns) . '</th></tr>'];
+            $html[] = '<tr><th>' . implode('</th><th>', $this->headColumns) . '</th></tr>';
         }
         foreach ($this->rows as $row) {
             $html[] = '<tr><td style="white-space:nowrap">' . implode('</td><td style="white-space:nowrap;">', $row) . '</td></tr>';
