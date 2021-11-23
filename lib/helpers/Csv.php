@@ -39,6 +39,11 @@ class Csv
         $this->headColumns = $headColumns;
     }
 
+    public function getHeadColumns(): array
+    {
+        return $this->headColumns;
+    }
+
     public function addHeadColumn(string $columnName): void
     {
         $this->headColumns[] = $columnName;

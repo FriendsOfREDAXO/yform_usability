@@ -12,6 +12,7 @@
 namespace yform\usability\lib\yform;
 
 
+use Sprog\Wildcard;
 use yform\usability\lib\helpers\Csv;
 
 
@@ -63,15 +64,16 @@ class Export
 
     protected function setFields(): void
     {
-        $this->yTable = \rex_yform_manager_table::get($this->tableName);
+        $this->yTable = $this->query->getTable();
         $fields       = array_merge(
             [
                 new \rex_yform_manager_field(
                     [
-                        'type_id'   => 'value',
-                        'type_name' => 'integer',
-                        'name'      => 'id',
-                        'label'     => 'ID',
+                        'type_id'    => 'value',
+                        'type_name'  => 'integer',
+                        'name'       => 'id',
+                        'label'      => 'ID',
+                        'table_name' => $this->yTable->getTableName(),
                     ]
                 ),
             ],
@@ -103,61 +105,90 @@ class Export
     protected function getQuery()
     {
         if (!$this->query) {
-            $this->setFields();
             /** @var $model \rex_yform_manager_dataset */
             $model       = \rex_yform_manager_dataset::getModelClass($this->tableName);
             $this->query = $model::query();
-            $this->query->alias('m');
-            $this->query->resetSelect();
-            $this->query->resetOrderBy();
-            $this->query->orderBy("m.{$this->yTable->getSortFieldName()}", $this->yTable->getSortOrderName());
+        }
 
-            foreach ($this->fields as $index => $field) {
-                $this->fieldLabels[] = $field->getLabel();
+        $this->setFields();
+        $this->query->alias('m');
+        $this->query->resetSelect();
+        $this->query->resetOrderBy();
+        $this->query->orderBy("m.{$this->yTable->getSortFieldName()}", $this->yTable->getSortOrderName());
 
-                if ($field->getTypeName() == 'be_manager_relation' && isset(
-                        $this->fullRelationFields[$field->getName()]
-                    )) {
-                    $_class    = get_class($this);
-                    $fullField = $this->fullRelationFields[$field->getName()];
-                    $_export   = new $_class($field->getElement('table'));
-                    $_export->setExcludedFields($fullField['excludedFields']);
-                    $_export->getQuery();
+        foreach ($this->fields as $index => $field) {
+            $fieldAlias                     = "{$this->tableName}___{$field->getName()}";
+            $this->fieldLabels[$fieldAlias] = self::getFieldLabel($field);
 
-                    array_pop($this->fieldLabels);
+            if ($field->getTypeName() == 'be_manager_relation' && isset(
+                    $this->fullRelationFields[$field->getName()]
+                )) {
+                $_class    = get_class($this);
+                $fullField = $this->fullRelationFields[$field->getName()];
+                $_export   = new $_class($field->getElement('table'));
+                $_export->setExcludedFields($fullField['excludedFields']);
+                $_export->getQuery();
 
-                    foreach ($_export->getFields() as $_field) {
-                        $this->fieldLabels[] = $_field->getLabel();
-                        $this->query->select(
-                            'jtl' . $index . '.' . $_field->getName(),
-                            $field->getElement('table') . '_' . $_field->getName()
-                        );
+                array_pop($this->fieldLabels);
+
+                foreach ($_export->getFields() as $_field) {
+                    if ('' == $_field->getElement('relation_table') || 1 != $_field->getElement('type')) {
+                        if (!in_array($_field, $_export->excludedFields)) {
+                            $_fieldAlias                     = "{$field->getElement('table')}___{$_field->getName()}";
+                            $this->fieldLabels[$_fieldAlias] = self::getFieldLabel($_field);
+                            $this->query->select('jtl' . $index . '.' . $_field->getName(), $_fieldAlias);
+                        }
                     }
-                    $this->query->leftJoinRelation($field->getName(), 'jtl' . $index);
-                } elseif ($field->getTypeName() == 'be_manager_relation') {
-                    $this->query->leftJoin(
-                        $field->getElement('table'),
-                        "jt{$index}",
-                        "jt{$index}.id",
-                        "m.{$field->getName()}"
-                    );
-                    $this->query->selectRaw("CONCAT(jt{$index}.{$field->getElement('field')}, '')", $field->getName());
-                } elseif ($field->getTypeName() == 'choice') {
-                    $values = \rex_yform_value_choice::getListValues(
-                        [
-                            'field'  => $field->getName(),
-                            'params' => ['field' => $field],
-                        ]
-                    );
-
-                    $choiceValues[$field->getName()] = $values;
-                    $this->query->select("m.{$field->getName()}");
-                } else {
-                    $this->query->select("m.{$field->getName()}");
                 }
+                $this->query->leftJoinRelation($field->getName(), 'jtl' . $index);
+            } elseif ($field->getTypeName() == 'be_manager_relation') {
+                $this->query->leftJoin(
+                    $field->getElement('table'),
+                    "jt{$index}",
+                    "jt{$index}.id",
+                    "m.{$field->getName()}"
+                );
+                $_fieldAlias = "{$field->getElement('table')}___{$field->getName()}";
+                $this->query->selectRaw("CONCAT(jt{$index}.{$field->getElement('field')}, '')", $_fieldAlias);
+            } elseif ($field->getTypeName() == 'choice') {
+                $values = \rex_yform_value_choice::getListValues(
+                    [
+                        'field'  => $field->getName(),
+                        'params' => ['field' => $field],
+                    ]
+                );
+
+                $choiceValues[$field->getName()] = $values;
+                $this->query->select("m.{$field->getName()}", $fieldAlias);
+            } else {
+                $this->query->select("m.{$field->getName()}", $fieldAlias);
             }
         }
         return $this->query;
+    }
+
+    private static function getFieldLabel($field): string
+    {
+        $currentTable = \rex_yform_manager_table::get($field->getElement('table') ?: $field->getElement('table_name'));
+
+        $tablePrefix  = is_object($currentTable) ? $currentTable->getName() : '';
+        if (str_contains($tablePrefix, 'translate:')) {
+            $tablePrefix = \rex_i18n::translate($tablePrefix, false);
+        }
+        $fieldPrefix = $tablePrefix ? $tablePrefix . ': ' : '';
+
+        return $fieldPrefix . Wildcard::parse($field->getLabel()) . self::getFieldLanguageSuffix($field->getName());
+    }
+
+    private static function getFieldLanguageSuffix($fieldName): string
+    {
+        $languages = \rex_clang::getAll(true);
+        foreach ($languages as $language) {
+            if (array_reverse(explode('_', $fieldName))[0] == $language->getId()) {
+                return " ({$language->getCode()})";
+            }
+        }
+        return '';
     }
 
     public function getAsArray(): array
@@ -177,12 +208,22 @@ class Export
         $query      = $this->getQuery();
         $collection = $query->find();
 
+        $csvHeadColumns = array_filter(
+            \rex_extension::registerPoint(
+                new \rex_extension_point('yform/usability.Export.csvHeadColumns', $this->fieldLabels)
+            )
+        );
+
         $csv = new Csv();
-        $csv->setHeadColumns($this->fieldLabels);
+        $csv->setHeadColumns($csvHeadColumns);
 
         foreach ($collection as $item) {
-            $csv->addRow($item->getData());
+            $rowData = \rex_extension::registerPoint(
+                new \rex_extension_point('yform/usability.Export.rowData', $item->getData())
+            );
+            $csv->addRow($rowData);
         }
+
         return $csv;
     }
 }
