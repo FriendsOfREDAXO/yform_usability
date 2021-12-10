@@ -13,6 +13,7 @@ namespace yform\usability;
 
 
 use Url\Profile;
+use yform\usability\lib\Sql;
 
 
 class Model extends \rex_yform_manager_dataset
@@ -21,6 +22,40 @@ class Model extends \rex_yform_manager_dataset
     public static function get($id, $isOnline = false): ?\rex_yform_manager_dataset
     {
         return (int)$id > 0 ? parent::get((int)$id) : null;
+    }
+
+    public static function getDbTable(): string
+    {
+        return str_replace('{PREFIX}', \rex::getTablePrefix(), static::TABLE);
+    }
+
+    public static function getSql(): Sql
+    {
+        $sql = Sql::factory();
+        $sql->setTable(static::getDbTable());
+        return $sql;
+    }
+
+    public function inserUpdate(): Sql
+    {
+        $sql = self::getSql();
+
+        foreach ($this->getData() as $key => $value) {
+            $sql->setValue($key, $value);
+        }
+
+        try {
+            if ($_id = $this->getId()) {
+                $sql->setWhere('id = :id', ['id' => $_id]);
+                $sql->update();
+            } else {
+                $sql->insert();
+                $this->setId($sql->getLastId());
+            }
+        } catch (\rex_sql_exception $ex) {
+            // error is passed by getError method
+        }
+        return $sql;
     }
 
     public function getRawValue($key)
@@ -125,7 +160,7 @@ class Model extends \rex_yform_manager_dataset
         $found    = false;
         $caller   = get_called_class();
         $langId   = $langId ?? \rex_clang::getCurrentId();
-        $profiles = Profile::getByTableName($caller::TABLE);
+        $profiles = Profile::getByTableName($caller::getDbTable());
 
         foreach ($profiles as $profile) {
             if (null == $profile->getArticleClangId() || $profile->getArticleClangId() == $langId) {
