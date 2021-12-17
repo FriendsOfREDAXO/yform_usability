@@ -36,7 +36,7 @@ class Model extends \rex_yform_manager_dataset
         return $sql;
     }
 
-    public function inserUpdate(): Sql
+    public function insertUpdate(): Sql
     {
         $sql = self::getSql();
 
