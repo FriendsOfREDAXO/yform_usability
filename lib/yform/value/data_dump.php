@@ -27,7 +27,7 @@ class rex_yform_value_data_dump extends rex_yform_value_abstract
         $this->params['value_pool']['sql'][$this->getName()]   = $this->getValue();
     }
 
-    public function getDefinitions($values = [])
+    public function getDefinitions($values = []): array
     {
         return [
             'type'          => 'value',
