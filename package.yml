@@ -8,7 +8,7 @@ requires:
     php:
         version: '>=7, <9'
     packages:
-        yform/manager: '>=2'
+        yform/manager: '>=2,<4'
 
 pages:
     yform/manager/usability:
