@@ -296,12 +296,22 @@ class Extensions
                             if ($isEmptyTerm) {
                                 $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
                             } else {
+                                $_whereChunks = [];
+                                foreach (explode(',', $field->getElement('field')) as $_field) {
+                                    $_field = trim($_field, '"');
+                                    $_field = trim($_field);
+
+                                    if ('' != $_field) {
+                                        $_whereChunks[] = "{$_field} LIKE :term";
+                                    }
+                                }
+
                                 $relWhere  = [];
                                 $query     = "
-                                SELECT id
-                                FROM {$field->getElement('table')}
-                                WHERE {$field->getElement('field')} LIKE :term
-                            ";
+                                    SELECT id
+                                    FROM {$field->getElement('table')}
+                                    WHERE " . implode(' OR ', $_whereChunks) . "
+                                ";
                                 $relResult = $sql->getArray($query, ['term' => "%{$term}%"]);
 
                                 foreach ($relResult as $item) {
