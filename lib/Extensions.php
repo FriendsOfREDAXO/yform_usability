@@ -318,7 +318,7 @@ class Extensions
                                     $relWhere[] = $item['id'];
                                 }
 
-                                $relWhere = $relWhere ?: [0];
+                                $relWhere = $relWhere ?: [-1];
                                 $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                             }
                         } elseif ($field->getTypename() == 'choice') {
