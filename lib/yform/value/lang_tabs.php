@@ -13,12 +13,12 @@ class rex_yform_value_lang_tabs extends rex_yform_value_abstract
         $this->params['form_output'][$this->getId()] = $this->parse('value.lang_tabs.tpl.php');
     }
 
-    function getDescription()
+    function getDescription(): string
     {
         return htmlspecialchars('tab_start');
     }
 
-    function getDefinitions($values = [])
+    function getDefinitions($values = []): string
     {
         return [
             'type'            => 'value',
