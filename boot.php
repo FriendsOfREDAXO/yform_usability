@@ -17,7 +17,6 @@ namespace yform\usability;
 // init all extension points
 Extensions::init();
 
-\rex_extension::register('PAGE_CHECKED', function ($params) {
     if (\rex_request('rex-api-call', 'string') == 'yform_usability_api') {
         // api endpoint
         $api_result = \rex_api_yform_usability_api::factory();
@@ -30,7 +29,6 @@ Extensions::init();
             exit;
         }
     }
-}, \rex_extension::EARLY);
 
 
 if (\rex::isBackend() && \rex::getUser()) {
