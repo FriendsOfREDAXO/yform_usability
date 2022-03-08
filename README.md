@@ -21,7 +21,7 @@ Mit diesem Addon wird die Bearbeitung von YForm-Datensätzen erleichtert.
 ## Lizenz, Autor, Credits
 
 ## Hilfe anfordern
-Bitte versuche den REDAXO [Slack-Chat](https://www.redaxo.org/support/community/#slack)
+Bitte besuche den REDAXO [Slack-Chat](https://www.redaxo.org/support/community/#slack)
 
 ## Fehler melden
 Du hast einen Fehler gefunden oder wünscht dir ein Feature? Lege ein Issue auf Github an.
