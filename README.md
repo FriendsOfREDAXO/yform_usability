@@ -1,4 +1,4 @@
-# YForm Usability für REDAXO 5 mit YForm 3/4
+# YForm Usability für REDAXO 5 mit YForm ab Version 4
 
 Mit diesem Addon wird die Bearbeitung von YForm-Datensätzen erleichtert.
 
