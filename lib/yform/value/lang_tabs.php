@@ -18,7 +18,9 @@ class rex_yform_value_lang_tabs extends rex_yform_value_abstract
         return htmlspecialchars('tab_start');
     }
 
+
    public function getDefinitions($values = []) :array
+
     {
         return [
             'type'            => 'value',
