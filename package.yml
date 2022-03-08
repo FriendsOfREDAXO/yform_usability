@@ -16,6 +16,10 @@ pages:
         perm: admin[]
 
 default_config:
-    duplicate_tables: '["all"]'
-    sorting_tables: '["all"]'
-    status_tables: '["all"]'
+    duplicate_tables: NULL
+    sorting_tables: NULL
+    status_tables: NULL
+    duplicate_tables_all: '|1|'
+    sorting_tables_all: '|1|'
+    status_tables_all: '|1|'
+    use_inline_search: NULL
