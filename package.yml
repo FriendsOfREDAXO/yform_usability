@@ -14,3 +14,12 @@ pages:
     yform/manager/usability:
         title: 'Usability'
         perm: admin[]
+
+default_config:
+    duplicate_tables: NULL
+    sorting_tables: NULL
+    status_tables: NULL
+    duplicate_tables_all: '|1|'
+    sorting_tables_all: '|1|'
+    status_tables_all: '|1|'
+    use_inline_search: NULL
