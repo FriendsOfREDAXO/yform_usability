@@ -2,9 +2,9 @@ package: yform_usability
 version: '1.10.6'
 author: 'Friends Of REDAXO'
 supportpage: https://github.com/FriendsOfREDAXO/yform_usability
-compile: 0
 
 requires:
+    redaxo: '^5'
     php:
         version: '>=7, <9'
     packages:
