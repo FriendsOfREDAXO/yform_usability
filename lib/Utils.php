@@ -79,7 +79,7 @@ class Utils
         }
 
         return [
-            'current_label' => $options[$currentValue],
+            'current_label' => $options[$currentValue] ?? "",
             'intern_status' => $istatus,
             'toggle_value'  => $nvalue,
             'element'       => $element,
