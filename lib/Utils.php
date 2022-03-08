@@ -62,7 +62,7 @@ class Utils
 
 
         if (count($options) > 2) {
-            $element = '<select class="status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">';
+            $element = '<select class="form-control status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">';
             foreach ($options as $key => $option) {
                 $element .= '<option value="' . $key . '" ' . ((string)$currentValue === (string)$key ? 'selected="selected"' : '') . '>' . \rex_i18n::translate($option) . '</option>';
             }
