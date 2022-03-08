@@ -13,11 +13,8 @@
 
 namespace yform\usability;
 
-
 class Extensions
 {
-
-
     public static function init(): void
     {
         \rex_extension::register('URL_PROFILE_QUERY', [Extensions::class, 'ext__urlQuery']);
@@ -29,20 +26,6 @@ class Extensions
                 [Extensions::class, 'ext__getStatusColumnOptions']
             );
         }
-    }
-
-    protected static function addDuplication($list)
-    {
-        $list->addColumn(
-            'func_duplication',
-            '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_i18n::msg(
-                'yform_usability_action.duplicate'
-            ) . '</div>',
-            count($list->getColumnNames())
-        );
-        $list->setColumnLabel('func_duplication', '');
-        $list->setColumnParams('func_duplication', ['yfu-action' => 'duplicate', 'id' => '###id###']);
-        return $list;
     }
 
     protected static function addStatusToggle($list, $table)
@@ -84,9 +67,11 @@ class Extensions
                 function ($params) {
                     $filters = \rex_extension::registerPoint(
                         new \rex_extension_point(
-                            'yform/usability.addDragNDropSort.filters', [], [
+                            'yform/usability.addDragNDropSort.filters',
+                            [],
+                            [
                                                                           'list_params' => $params,
-                                                                          'table'       => $table,
+                                                                          'table'       => $params['params']['table'],
                                                                       ]
                         )
                     );
@@ -149,7 +134,9 @@ class Extensions
                 function ($params) {
                     $filters = \rex_extension::registerPoint(
                         new \rex_extension_point(
-                            'yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]
+                            'yform/usability.addDragNDropSort.filters',
+                            [],
+                            ['list_params' => $params]
                         )
                     );
 
@@ -225,55 +212,86 @@ class Extensions
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
         $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
-                $tableName,
-                explode(
-                    '|',
-                    trim($config['duplicate_tables'], '|')
-                )
-            );
-        $hasStatus    = $config['status_tables_all'] == '|1|' || in_array(
-                $tableName,
-                explode(
-                    '|',
-                    trim($config['status_tables'], '|')
-                )
-            );
-        $hasSorting   = $config['sorting_tables_all'] == '|1|' || in_array(
-                $tableName,
-                explode(
-                    '|',
-                    trim($config['sorting_tables'], '|')
-                )
-            );
-
-        $hasDuplicate = \rex_extension::registerPoint(
-            new \rex_extension_point(
-                'yform/usability.addDuplication', $hasDuplicate, ['list' => $list, 'table' => $table]
+            $tableName,
+            explode(
+                '|',
+                trim($config['duplicate_tables'], '|')
             )
         );
+        $hasStatus    = $config['status_tables_all'] == '|1|' || in_array(
+            $tableName,
+            explode(
+                '|',
+                trim($config['status_tables'], '|')
+            )
+        );
+        $hasSorting   = $config['sorting_tables_all'] == '|1|' || in_array(
+            $tableName,
+            explode(
+                '|',
+                trim($config['sorting_tables'], '|')
+            )
+        );
+
         $hasStatus    = \rex_extension::registerPoint(
             new \rex_extension_point(
-                'yform/usability.addStatusToggle', $hasStatus, ['list' => $list, 'table' => $table]
+                'yform/usability.addStatusToggle',
+                $hasStatus,
+                ['list' => $list, 'table' => $table]
             )
         );
         $hasSorting   = \rex_extension::registerPoint(
             new \rex_extension_point(
-                'yform/usability.addDragNDropSort', $hasSorting, ['list' => $list, 'table' => $table]
+                'yform/usability.addDragNDropSort',
+                $hasSorting,
+                ['list' => $list, 'table' => $table]
             )
         );
-
-        if ($hasDuplicate && empty ($isOpener)) {
-            $list = self::addDuplication($list);
-        }
+        
         if ($hasStatus && count($table->getFields(['name' => 'status']))) {
             $list = self::addStatusToggle($list, $table);
         }
-        if ($hasSorting && empty ($isOpener) && count($table->getFields(['name' => 'prio']))) {
+        if ($hasSorting && empty($isOpener) && count($table->getFields(['name' => 'prio']))) {
             $list = self::addDragNDropSort($list, $table);
         }
         $ep->setSubject($list);
     }
 
+    
+    public static function yform_data_list_action_buttons(\rex_extension_point $ep)
+    {
+        $buttons        = $ep->getSubject();
+        $table          = $ep->getParam('table');
+        $default_config = \rex_addon::get('yform_usability')->getProperty('default_config');
+        $config         = \rex_addon::get('yform_usability')->getConfig(null, $default_config);
+        $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
+
+        $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
+            $tableName,
+            explode(
+                '|',
+                trim($config['duplicate_tables'], '|')
+            )
+        );
+
+        if ($hasDuplicate && empty($isOpener)) {
+            $_csrf_key = $table->getCSRFKey();
+            $token = \rex_csrf_token::factory($_csrf_key)->getUrlParams();
+
+            $params = array();
+            $params['table_name'] = $table->getTableName();
+            $params['rex_yform_manager_popup'] = '0';
+            $params['_csrf_token'] = $token['_csrf_token'];
+            $params['id'] = "___id___";
+            $params['yfu-action'] = 'duplicate';
+
+            $buttons["duplicate"] = '<a href="'.\rex_url::currentBackendPage($params) .'"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
+        }
+        return $buttons;
+    }
+    
+    
+    
     public static function ext_yformDataListSql(\rex_extension_point $ep): void
     {
         if (\rex_request('yfu-action', 'string') == 'search') {
@@ -331,10 +349,10 @@ class Extensions
                                 if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
                                     $list->createListFromSqlArray($sql->getArray($choices));
                                 } elseif (is_string($choices) && strlen(trim($choices)) > 0 && substr(
-                                        trim($choices),
-                                        0,
-                                        1
-                                    ) == '{') {
+                                    trim($choices),
+                                    0,
+                                    1
+                                ) == '{') {
                                     $list->createListFromJson($choices);
                                 } else {
                                     $list->createListFromStringArray(self::getArrayFromString($choices));
@@ -356,8 +374,8 @@ class Extensions
 
                                         if (stripos($label, $term) !== false) {
                                             $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape(
-                                                    $value
-                                                );
+                                                $value
+                                            );
                                         }
                                     }
                                 }
