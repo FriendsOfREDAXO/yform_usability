@@ -13,11 +13,8 @@
 
 namespace yform\usability;
 
-
 class Extensions
 {
-
-
     public static function init(): void
     {
         \rex_extension::register('URL_PROFILE_QUERY', [Extensions::class, 'ext__urlQuery']);
@@ -70,9 +67,11 @@ class Extensions
                 function ($params) {
                     $filters = \rex_extension::registerPoint(
                         new \rex_extension_point(
-                            'yform/usability.addDragNDropSort.filters', [], [
+                            'yform/usability.addDragNDropSort.filters',
+                            [],
+                            [
                                                                           'list_params' => $params,
-                                                                          'table'       => $table,
+                                                                          'table'       => $params['params']['table'],
                                                                       ]
                         )
                     );
@@ -135,7 +134,9 @@ class Extensions
                 function ($params) {
                     $filters = \rex_extension::registerPoint(
                         new \rex_extension_point(
-                            'yform/usability.addDragNDropSort.filters', [], ['list_params' => $params]
+                            'yform/usability.addDragNDropSort.filters',
+                            [],
+                            ['list_params' => $params]
                         )
                     );
 
@@ -211,59 +212,69 @@ class Extensions
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
         $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
-                $tableName,
-                explode(
-                    '|',
-                    trim($config['duplicate_tables'], '|')
-                )
-            );
+            $tableName,
+            explode(
+                '|',
+                trim($config['duplicate_tables'], '|')
+            )
+        );
         $hasStatus    = $config['status_tables_all'] == '|1|' || in_array(
-                $tableName,
-                explode(
-                    '|',
-                    trim($config['status_tables'], '|')
-                )
-            );
+            $tableName,
+            explode(
+                '|',
+                trim($config['status_tables'], '|')
+            )
+        );
         $hasSorting   = $config['sorting_tables_all'] == '|1|' || in_array(
-                $tableName,
-                explode(
-                    '|',
-                    trim($config['sorting_tables'], '|')
-                )
-            );
+            $tableName,
+            explode(
+                '|',
+                trim($config['sorting_tables'], '|')
+            )
+        );
 
         $hasStatus    = \rex_extension::registerPoint(
             new \rex_extension_point(
-                'yform/usability.addStatusToggle', $hasStatus, ['list' => $list, 'table' => $table]
+                'yform/usability.addStatusToggle',
+                $hasStatus,
+                ['list' => $list, 'table' => $table]
             )
         );
         $hasSorting   = \rex_extension::registerPoint(
             new \rex_extension_point(
-                'yform/usability.addDragNDropSort', $hasSorting, ['list' => $list, 'table' => $table]
+                'yform/usability.addDragNDropSort',
+                $hasSorting,
+                ['list' => $list, 'table' => $table]
             )
         );
         
         if ($hasStatus && count($table->getFields(['name' => 'status']))) {
             $list = self::addStatusToggle($list, $table);
         }
-        if ($hasSorting && empty ($isOpener) && count($table->getFields(['name' => 'prio']))) {
+        if ($hasSorting && empty($isOpener) && count($table->getFields(['name' => 'prio']))) {
             $list = self::addDragNDropSort($list, $table);
         }
         $ep->setSubject($list);
     }
 
     
-        public static function yform_data_list_action_buttons(\rex_extension_point $ep)
+    public static function yform_data_list_action_buttons(\rex_extension_point $ep)
     {
         $buttons        = $ep->getSubject();
         $table          = $ep->getParam('table');
         $default_config = \rex_addon::get('yform_usability')->getProperty('default_config');
         $config         = \rex_addon::get('yform_usability')->getConfig(null, $default_config);
-        $is_opener      = rex_get('rex_yform_manager_opener', 'array');
+        $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
-        $has_duplicate = count((array) $config['duplicate_tables']) && (in_array('all', $config['duplicate_tables']) || in_array($table->getTableName(), $config['duplicate_tables']));
-
-        if ($has_duplicate && empty($is_opener)) {
+        $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
+            $tableName,
+            explode(
+                '|',
+                trim($config['duplicate_tables'], '|')
+            )
+        );
+        dump("test");
+        if ($hasDuplicate && empty($isOpener)) {
             $_csrf_key = $table->getCSRFKey();
             $token = \rex_csrf_token::factory($_csrf_key)->getUrlParams();
 
@@ -274,7 +285,7 @@ class Extensions
             $params['id'] = "___id___";
             $params['yfu-action'] = 'duplicate';
 
-            $buttons["duplicate"] = '<a href="'.\rex_url::backendPage("yform/manager/yform-usability", $params) .'"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
+            $buttons["duplicate"] = '<a href="'.\rex_url::currentBackendPage($params) .'"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
         }
         return $buttons;
     }
@@ -338,10 +349,10 @@ class Extensions
                                 if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
                                     $list->createListFromSqlArray($sql->getArray($choices));
                                 } elseif (is_string($choices) && strlen(trim($choices)) > 0 && substr(
-                                        trim($choices),
-                                        0,
-                                        1
-                                    ) == '{') {
+                                    trim($choices),
+                                    0,
+                                    1
+                                ) == '{') {
                                     $list->createListFromJson($choices);
                                 } else {
                                     $list->createListFromStringArray(self::getArrayFromString($choices));
@@ -363,8 +374,8 @@ class Extensions
 
                                         if (stripos($label, $term) !== false) {
                                             $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape(
-                                                    $value
-                                                );
+                                                $value
+                                            );
                                         }
                                     }
                                 }
