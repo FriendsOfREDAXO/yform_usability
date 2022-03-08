@@ -273,7 +273,7 @@ class Extensions
                 trim($config['duplicate_tables'], '|')
             )
         );
-        dump("test");
+
         if ($hasDuplicate && empty($isOpener)) {
             $_csrf_key = $table->getCSRFKey();
             $token = \rex_csrf_token::factory($_csrf_key)->getUrlParams();
