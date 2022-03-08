@@ -50,7 +50,7 @@ class rex_api_yform_usability_api extends rex_api_function
                
         // flush url path file for url < 2
         if (rex_addon::get('url')->isAvailable()) {
-            if (rex_string::versionCompare(rex_addon::get('url')->getVersion(), '2.0.0', '<=')) {
+            if (rex_string::versionCompare(rex_addon::get('url')->getVersion(), '2.0.0', '<')) {
             rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
         }
 
