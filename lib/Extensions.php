@@ -31,20 +31,6 @@ class Extensions
         }
     }
 
-    protected static function addDuplication($list)
-    {
-        $list->addColumn(
-            'func_duplication',
-            '<div class="duplicator"><i class="rex-icon fa-files-o"></i>&nbsp;' . \rex_i18n::msg(
-                'yform_usability_action.duplicate'
-            ) . '</div>',
-            count($list->getColumnNames())
-        );
-        $list->setColumnLabel('func_duplication', '');
-        $list->setColumnParams('func_duplication', ['yfu-action' => 'duplicate', 'id' => '###id###']);
-        return $list;
-    }
-
     protected static function addStatusToggle($list, $table)
     {
         /** @var \rex_list $list */
@@ -246,11 +232,6 @@ class Extensions
                 )
             );
 
-        $hasDuplicate = \rex_extension::registerPoint(
-            new \rex_extension_point(
-                'yform/usability.addDuplication', $hasDuplicate, ['list' => $list, 'table' => $table]
-            )
-        );
         $hasStatus    = \rex_extension::registerPoint(
             new \rex_extension_point(
                 'yform/usability.addStatusToggle', $hasStatus, ['list' => $list, 'table' => $table]
@@ -261,10 +242,7 @@ class Extensions
                 'yform/usability.addDragNDropSort', $hasSorting, ['list' => $list, 'table' => $table]
             )
         );
-
-        if ($hasDuplicate && empty ($isOpener)) {
-            $list = self::addDuplication($list);
-        }
+        
         if ($hasStatus && count($table->getFields(['name' => 'status']))) {
             $list = self::addStatusToggle($list, $table);
         }
@@ -274,6 +252,35 @@ class Extensions
         $ep->setSubject($list);
     }
 
+    
+        public static function yform_data_list_action_buttons(\rex_extension_point $ep)
+    {
+        $buttons        = $ep->getSubject();
+        $table          = $ep->getParam('table');
+        $default_config = \rex_addon::get('yform_usability')->getProperty('default_config');
+        $config         = \rex_addon::get('yform_usability')->getConfig(null, $default_config);
+        $is_opener      = rex_get('rex_yform_manager_opener', 'array');
+
+        $has_duplicate = count((array) $config['duplicate_tables']) && (in_array('all', $config['duplicate_tables']) || in_array($table->getTableName(), $config['duplicate_tables']));
+
+        if ($has_duplicate && empty($is_opener)) {
+            $_csrf_key = $table->getCSRFKey();
+            $token = \rex_csrf_token::factory($_csrf_key)->getUrlParams();
+
+            $params = array();
+            $params['table_name'] = $table->getTableName();
+            $params['rex_yform_manager_popup'] = '0';
+            $params['_csrf_token'] = $token['_csrf_token'];
+            $params['id'] = "___id___";
+            $params['yfu-action'] = 'duplicate';
+
+            $buttons["duplicate"] = '<a href="'.\rex_url::backendPage("yform/manager/yform-usability", $params) .'"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
+        }
+        return $buttons;
+    }
+    
+    
+    
     public static function ext_yformDataListSql(\rex_extension_point $ep): void
     {
         if (\rex_request('yfu-action', 'string') == 'search') {

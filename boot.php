@@ -65,4 +65,6 @@ if (\rex::isBackend() && \rex::getUser()) {
     \rex_extension::register('YFORM_MANAGER_REX_INFO', [Extensions::class, 'ext_yformManagerRexInfo']);
     \rex_extension::register('YFORM_DATA_LIST_SQL', [Extensions::class, 'ext_yformDataListSql']);
     \rex_extension::register('REX_LIST_GET', [Extensions::class, 'ext_rexListGet']);
+    \rex_extension::register('YFORM_DATA_LIST_ACTION_BUTTONS', [Extensions::class, 'yform_data_list_action_buttons']);
+
 }
