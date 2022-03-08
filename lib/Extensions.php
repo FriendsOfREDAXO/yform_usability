@@ -267,7 +267,7 @@ class Extensions
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
         $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
-            $tableName,
+            $table->getTableName(),
             explode(
                 '|',
                 trim($config['duplicate_tables'], '|')
