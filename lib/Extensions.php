@@ -72,7 +72,7 @@ class Extensions
                         new \rex_extension_point(
                             'yform/usability.addDragNDropSort.filters', [], [
                                                                           'list_params' => $params,
-                                                                          'table'       => $table,
+                                                                          'table'       => $params['params']['table'],
                                                                       ]
                         )
                     );
