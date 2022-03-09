@@ -46,25 +46,30 @@ class rex_api_yform_usability_api extends rex_api_function
         } catch (\rex_sql_exception $ex) {
             throw new rex_api_exception($ex->getMessage());
         }
-        
-               
+
+
         // flush url path file for url < 2
         if (rex_addon::get('url')->isAvailable()) {
             if (rex_string::versionCompare(rex_addon::get('url')->getVersion(), '2.0.0', '<')) {
-            rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
+                rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
+            }
         }
+
+
 
         $modelClass = \rex_yform_manager_dataset::getModelClass($table);
 
         if ($modelClass) {
             rex_extension::registerPoint(
                 new rex_extension_point(
-                    'YFORM_DATA_STATUS_CHANGED', null, [
-                                                   'data_id'  => $data_id,
-                                                   'table'    => rex_yform_manager_table::get($table),
-                                                   'data'     => $modelClass::get($data_id),
-                                                   'old_data' => true,
-                                               ]
+                    'YFORM_DATA_STATUS_CHANGED',
+                    null,
+                    [
+                        'data_id'  => $data_id,
+                        'table'    => rex_yform_manager_table::get($table),
+                        'data'     => $modelClass::get($data_id),
+                        'old_data' => true,
+                    ]
                 )
             );
         }
@@ -157,5 +162,4 @@ class rex_api_yform_usability_api extends rex_api_function
             }
         }
     }
-
 }
