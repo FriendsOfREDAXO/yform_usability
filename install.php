@@ -22,7 +22,7 @@ namespace yform\usability;
     ->alter();
 
 \rex_sql_table::get(\rex::getTable('yform_field'))
-    ->ensureColumn(new \rex_sql_column('partial', 'varchar(191)'), 'widget')
+    ->ensureColumn(new \rex_sql_column('partial', 'varchar(191)'), 'choice_attributes')
     ->ensureColumn(new \rex_sql_column('createdate', 'datetime'))
     ->ensureColumn(new \rex_sql_column('updatedate', 'datetime'))
     ->ensureColumn(new \rex_sql_column('createuser', 'varchar(191)'))
