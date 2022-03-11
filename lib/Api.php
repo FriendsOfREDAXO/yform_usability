@@ -40,25 +40,17 @@ class rex_api_yform_usability_api extends rex_api_function
         $table   = rex_post('table', 'string');
         $sql     = rex_sql::factory();
 
-        $sql->setTable($table)->setValue('status', $status)->setWhere(['id' => $data_id]);
+        $dataset = \rex_yform_manager_dataset::get($data_id, $table);
+        $dataset->setValue('status', $status);
+
         try {
-            $sql->update();
+            $dataset->save();
         } catch (\rex_sql_exception $ex) {
-            throw new rex_api_exception($ex->getMessage());
+            throw new rex_api_exception(implode('<br>', $dataset->getMessages()));
         }
-
-
-        // flush url path file for url < 2
-        if (rex_addon::get('url')->isAvailable()) {
-            if (rex_string::versionCompare(rex_addon::get('url')->getVersion(), '2.0.0', '<')) {
-                rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
-            }
-        }
-
-
-
+        
         $modelClass = \rex_yform_manager_dataset::getModelClass($table);
-
+        /*
         if ($modelClass) {
             rex_extension::registerPoint(
                 new rex_extension_point(
@@ -72,7 +64,7 @@ class rex_api_yform_usability_api extends rex_api_function
                     ]
                 )
             );
-        }
+        } */
 
 
         $tparams = \yform\usability\Utils::getStatusColumnParams(rex_yform_manager_table::get($table), $status);
