@@ -15,6 +15,10 @@ pages:
         title: 'Usability'
         perm: admin[]
 
+conflicts:
+    packages:
+        url: '<2'
+        
 default_config:
     duplicate_tables: NULL
     sorting_tables: NULL
