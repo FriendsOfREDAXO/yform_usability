@@ -452,7 +452,7 @@ class Extensions
         $data    = $ep->getParam('data');
         $oldData = $ep->getParam('old_data');
 
-        if ($data->getValue('status') != $oldData['status']) {
+        if (array_key_exists('status', $oldData) && $data->getValue('status') != $oldData['status']) {
             \rex_extension::registerPoint(
                 new \rex_extension_point('YFORM_DATA_STATUS_CHANGED', null, $ep->getParams())
             );
