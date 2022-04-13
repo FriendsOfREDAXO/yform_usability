@@ -211,6 +211,8 @@ class Extensions
         $tableName = $table->getTableName();
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
+        $list->addFormAttribute('class', 'table-responsive');
+
         $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
             $tableName,
             explode(
