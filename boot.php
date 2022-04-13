@@ -21,8 +21,6 @@ Extensions::init();
         // api endpoint
         $api_result = \rex_api_yform_usability_api::factory();
 
-        \rex_api_function::handleCall();
-
         if ($api_result && $api_result->getResult()) {
             \rex_response::cleanOutputBuffers();
             \rex_response::sendContent($api_result->getResult()->toJSON(), 'application/json');
