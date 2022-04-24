@@ -3,6 +3,10 @@
         cursor: pointer;
         white-space: nowrap;
     }
+    
+    .status-select {
+        min-width: 100px;   
+    }
 
     .sort-handle:hover {
         color: #4b9ad9;
