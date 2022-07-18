@@ -148,7 +148,9 @@ class Extensions
                             $style = 'background-color:#cfd9d9;';
                             break;
                         default:
-                            $style = 'background-color:#eff9f9;';
+                            // NOTE: because of dark mode (1st version)
+                            $style = '';
+                            // $style = 'background-color:#eff9f9;';
                             break;
                     }
                     return '

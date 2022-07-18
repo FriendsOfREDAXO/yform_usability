@@ -176,7 +176,7 @@ class Model extends \rex_yform_manager_dataset
         $query->where("{$alias}.status", 1);
     }
 
-    public function save()
+    public function save(): bool
     {
         if (\rex::isFrontend()) {
             unset($_POST['FORM']);
