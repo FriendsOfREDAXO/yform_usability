@@ -92,7 +92,11 @@
 
 .yform-lang-tabs {
     .tab-content {
-        background: #fff;
+        // due to dark-mode
+        @media (prefers-color-scheme: light) {
+            background: #fff;
+        }
+
         border-bottom: 2px solid #c1c9d4;
         padding: 20px 12px 12px 12px;
 
