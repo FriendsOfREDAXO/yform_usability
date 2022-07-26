@@ -21,7 +21,7 @@ class Utils
     {
         try {
             ob_start();
-            $page->getDataPage();
+            echo $page->getDataPage();
             $output = ob_get_clean();
             $output = preg_replace('/<header[^>]*>(.+?)<\/header>/is', '', $output);
         } catch (\Exception $e) {
