@@ -70,9 +70,9 @@ class Extensions
                             'yform/usability.addDragNDropSort.filters',
                             [],
                             [
-                                                                          'list_params' => $params,
-                                                                          'table'       => $params['params']['table'],
-                                                                      ]
+                                'list_params' => $params,
+                                'table'       => $params['params']['table'],
+                            ]
                         )
                     );
                     return '
@@ -148,9 +148,7 @@ class Extensions
                             $style = 'background-color:#cfd9d9;';
                             break;
                         default:
-                            // NOTE: because of dark mode (1st version)
-                            $style = '';
-                            // $style = 'background-color:#eff9f9;';
+                            $style = 'background-color:#eff9f9;';
                             break;
                     }
                     return '
@@ -251,7 +249,7 @@ class Extensions
                 ['list' => $list, 'table' => $table]
             )
         );
-        
+
         if ($hasStatus && count($table->getFields(['name' => 'status']))) {
             $list = self::addStatusToggle($list, $table);
         }
@@ -261,7 +259,7 @@ class Extensions
         $ep->setSubject($list);
     }
 
-    
+
     public static function yform_data_list_action_buttons(\rex_extension_point $ep)
     {
         $buttons        = $ep->getSubject();
@@ -289,27 +287,27 @@ class Extensions
             $params['id'] = "___id___";
             $params['yfu-action'] = 'duplicate';
 
-            $buttons["duplicate"] = '<a href="'.\rex_url::currentBackendPage($params) .'"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
+            $buttons["duplicate"] = '<a href="' . \rex_url::currentBackendPage($params) . '"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
         }
         return $buttons;
     }
-    
-    
-    
+
+
+
     public static function ext_yformDataListSql(\rex_extension_point $ep): void
     {
         if (\rex_request('yfu-action', 'string') == 'search') {
             $term = trim(\rex_request('yfu-term', 'string'));
-
             if ($term != '') {
                 $isEmptyTerm = $term == '!' || $term == '#';
                 $listSql     = $ep->getSubject();
-                $table       = $ep->getParam('table');
+                $tableName   = $listSql->getTableName();
+                $table       = \rex_yform_manager_table::get($tableName);
                 $sql         = \rex_sql::factory();
                 $sprogIsAvl  = \rex_addon::get('sprog')->isAvailable();
                 $fields      = explode(',', \rex_request('yfu-searchfield', 'string'));
-
                 $where = [];
+
                 foreach ($fields as $fieldname) {
                     $field = $table->getFields(['name' => $fieldname])[0];
 
@@ -425,16 +423,14 @@ class Extensions
                 }
 
                 if (count($where)) {
-                    if (strrpos($listSql, 'where') !== false) {
-                        $listSql = str_replace(' where ', ' where (' . implode(' OR ', $where) . ') AND ', $listSql);
+
+                    if (strrpos($listSql->getQuery(), 'where') !== false) {
+                        $listSql->whereRaw(' AND (' . implode(' OR ', $where) . ') ');
                     } else {
-                        $listSql = str_replace(
-                            ' ORDER BY ',
-                            ' WHERE (' . implode(' OR ', $where) . ') ORDER BY ',
-                            $listSql
-                        );
+                        $listSql->whereRaw(' (' . implode(' OR ', $where) . ') ');
                     }
                 }
+
                 $ep->setSubject($listSql);
             }
         }
