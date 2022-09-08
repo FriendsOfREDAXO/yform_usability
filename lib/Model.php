@@ -36,6 +36,15 @@ class Model extends \rex_yform_manager_dataset
         return $sql;
     }
 
+    /*
+     * only for backwards compatibility, use insertUpdate instead
+     * @deprecated
+     */
+    public function inserUpdate(): Sql
+    {
+        return $this->insertUpdate();
+    }
+
     public function insertUpdate(): Sql
     {
         $sql = self::getSql();
