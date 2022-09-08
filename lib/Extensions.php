@@ -298,13 +298,14 @@ class Extensions
     
     public static function ext_yformDataListSql(\rex_extension_point $ep): void
     {
+        // TODO convert where queries into yorm
         if (\rex_request('yfu-action', 'string') == 'search') {
             $term = trim(\rex_request('yfu-term', 'string'));
 
             if ($term != '') {
                 $isEmptyTerm = $term == '!' || $term == '#';
-                $listSql     = $ep->getSubject();
-                $table       = $ep->getParam('table');
+                $mainQuery     = $ep->getSubject();
+                $table       = $mainQuery->getTable();
                 $sql         = \rex_sql::factory();
                 $sprogIsAvl  = \rex_addon::get('sprog')->isAvailable();
                 $fields      = explode(',', \rex_request('yfu-searchfield', 'string'));
@@ -425,17 +426,9 @@ class Extensions
                 }
 
                 if (count($where)) {
-                    if (strrpos($listSql, 'where') !== false) {
-                        $listSql = str_replace(' where ', ' where (' . implode(' OR ', $where) . ') AND ', $listSql);
-                    } else {
-                        $listSql = str_replace(
-                            ' ORDER BY ',
-                            ' WHERE (' . implode(' OR ', $where) . ') ORDER BY ',
-                            $listSql
-                        );
-                    }
+                    $mainQuery->whereRaw('(' . implode(' OR ', $where) . ')');
                 }
-                $ep->setSubject($listSql);
+                $ep->setSubject($mainQuery);
             }
         }
     }
