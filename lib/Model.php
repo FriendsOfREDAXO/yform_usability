@@ -54,7 +54,8 @@ class Model extends \rex_yform_manager_dataset
         }
 
         try {
-            if ($_id = $this->getId()) {
+            if ($this->exists()) {
+                $_id = $this->getId();
                 $sql->setWhere('id = :id', ['id' => $_id]);
                 $sql->update();
             } else {
