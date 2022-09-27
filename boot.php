@@ -68,3 +68,8 @@ if (\rex::isBackend() && \rex::getUser()) {
     \rex_extension::register('YFORM_DATA_LIST_ACTION_BUTTONS', [Extensions::class, 'yform_data_list_action_buttons']);
 
 }
+
+// includes ytemplates in cli environment(for cronjob tasks)
+if ('cli' === PHP_SAPI && !\rex::isSetup()) {
+    \rex_yform::addTemplatePath($this->getPath('ytemplates'));
+}
