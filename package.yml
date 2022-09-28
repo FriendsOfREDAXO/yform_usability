@@ -2,6 +2,7 @@ package: yform_usability
 version: '2.0.6'
 author: 'Friends Of REDAXO'
 supportpage: https://github.com/FriendsOfREDAXO/yform_usability
+compile: 0
 
 requires:
     redaxo: '^5'
