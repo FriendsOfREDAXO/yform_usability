@@ -19,6 +19,13 @@ var YformUsability = (function ($) {
                 });
                 $('#rex-page-yform-manager-usability select').select2();
             }, 500);
+        }else{
+            // not select2 -> listen for yfu-term enter event
+            $('#yform_usability-search').find('[name=yfu-term]').on("keypress", function(event) {
+                if (event.key === "Enter") {
+                    $(this).closest('form').submit();
+                }
+            });
         }
     }
 
