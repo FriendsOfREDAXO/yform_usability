@@ -276,7 +276,7 @@ class Extensions
             )
         );
 
-        if ($hasDuplicate && empty($isOpener) && $table->isGranted('EDIT', \rex::getUser())) {
+        if ($hasDuplicate && empty($isOpener) && $this->hasDataPageFunction('add') && $table->isGranted('EDIT', \rex::getUser())) {
             $_csrf_key = $table->getCSRFKey();
             $token = \rex_csrf_token::factory($_csrf_key)->getUrlParams();
 
