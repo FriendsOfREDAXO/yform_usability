@@ -148,7 +148,9 @@ class Extensions
                             $style = 'background-color:#cfd9d9;';
                             break;
                         default:
-                            $style = 'background-color:#eff9f9;';
+                            // NOTE: because of dark mode (1st version)
+                            $style = '';
+                            // $style = 'background-color:#eff9f9;';
                             break;
                     }
                     return '
@@ -296,8 +298,10 @@ class Extensions
 
     public static function ext_yformDataListSql(\rex_extension_point $ep): void
     {
+        // TODO convert where queries into yorm
         if (\rex_request('yfu-action', 'string') == 'search') {
             $term = trim(\rex_request('yfu-term', 'string'));
+
             if ($term != '') {
                 $isEmptyTerm = $term == '!' || $term == '#';
                 $listSql     = $ep->getSubject();
@@ -306,8 +310,8 @@ class Extensions
                 $sql         = \rex_sql::factory();
                 $sprogIsAvl  = \rex_addon::get('sprog')->isAvailable();
                 $fields      = explode(',', \rex_request('yfu-searchfield', 'string'));
-                $where = [];
 
+                $where = [];
                 foreach ($fields as $fieldname) {
                     $field = $table->getFields(['name' => $fieldname])[0];
 
