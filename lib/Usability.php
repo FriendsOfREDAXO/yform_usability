@@ -38,24 +38,26 @@ class Usability
     {
         $id        = rex_get('id', 'int');
         $tablename = rex_get('table_name', 'string');
+        $table = \rex_yform_manager_table::get($tablename);
+        if ($table->isGranted('EDIT', \rex::getUser())) {
+            if ($id > 0) {
+                $sql = \rex_sql::factory();
+                $sql->setTable($tablename);
+                $sql->setWhere('id = :id', ['id' => $id]);
+                $sql->select();
 
-        if ($id > 0) {
-            $sql = \rex_sql::factory();
-            $sql->setTable($tablename);
-            $sql->setWhere('id = :id', ['id' => $id]);
-            $sql->select();
-
-            if ($sql->getRows()) {
-                $iSql = \rex_sql::factory();
-                $iSql->setTable($tablename);
-                foreach ($sql->getFieldNames() as $field) {
-                    if ($field == 'status') {
-                        $iSql->setValue($field, 0);
-                    } elseif ($field != 'id') {
-                        $iSql->setValue($field, $sql->getValue($field));
+                if ($sql->getRows()) {
+                    $iSql = \rex_sql::factory();
+                    $iSql->setTable($tablename);
+                    foreach ($sql->getFieldNames() as $field) {
+                        if ($field == 'status') {
+                            $iSql->setValue($field, 0);
+                        } elseif ($field != 'id') {
+                            $iSql->setValue($field, $sql->getValue($field));
+                        }
                     }
+                    $iSql->insert();
                 }
-                $iSql->insert();
             }
         }
     }
