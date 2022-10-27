@@ -76,10 +76,10 @@ class Extensions
                         )
                     );
                     return '
-                        <i class="rex-icon fa fa-bars sort-icon" 
-                            data-id="###id###" 
+                        <i class="rex-icon fa fa-bars sort-icon"
+                            data-id="###id###"
                             data-table-type="orm_model"
-                            data-table="' . $params['params']['table']->getTableName() . '" 
+                            data-table="' . $params['params']['table']->getTableName() . '"
                             data-filter="' . implode(',', $filters) . '"></i>
                     ';
                 },
@@ -155,12 +155,12 @@ class Extensions
                     }
                     return '
                     <td class="rex-table-icon" style="' . $style . '">
-                        <i class="rex-icon fa fa-bars sort-icon" 
-                            data-id="###id###" 
+                        <i class="rex-icon fa fa-bars sort-icon"
+                            data-id="###id###"
                             data-table-type="db_table"
                             data-table-sort-field="prio"
                             data-table-sort-order="asc"
-                            data-table="' . $params['params']['yform_table'] . '" 
+                            data-table="' . $params['params']['yform_table'] . '"
                             data-filter="' . implode(',', $filters) . '"></i>
                     </td>
                 ';
@@ -251,7 +251,7 @@ class Extensions
                 ['list' => $list, 'table' => $table]
             )
         );
-        
+
         if ($hasStatus && count($table->getFields(['name' => 'status']))) {
             $list = self::addStatusToggle($list, $table);
         }
@@ -261,7 +261,7 @@ class Extensions
         $ep->setSubject($list);
     }
 
-    
+
     public static function yform_data_list_action_buttons(\rex_extension_point $ep)
     {
         $buttons        = $ep->getSubject();
@@ -278,7 +278,7 @@ class Extensions
             )
         );
 
-        if ($hasDuplicate && empty($isOpener)) {
+        if ($hasDuplicate && empty($isOpener) && $table->isGranted('EDIT', \rex::getUser())) {
             $_csrf_key = $table->getCSRFKey();
             $token = \rex_csrf_token::factory($_csrf_key)->getUrlParams();
 
@@ -293,9 +293,9 @@ class Extensions
         }
         return $buttons;
     }
-    
-    
-    
+
+
+
     public static function ext_yformDataListSql(\rex_extension_point $ep): void
     {
         // TODO convert where queries into yorm
@@ -396,7 +396,7 @@ class Extensions
                                 $query    = "
                                 SELECT id
                                 FROM rex_article
-                                WHERE 
+                                WHERE
                                   name LIKE :term
                                   OR id = :id
                             ";
