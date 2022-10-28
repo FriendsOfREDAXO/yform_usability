@@ -1,15 +1,15 @@
 package: yform_usability
-version: '2.0.6-beta'
+version: '2.0.6-beta2'
 author: 'Friends Of REDAXO'
 supportpage: https://github.com/FriendsOfREDAXO/yform_usability
 compile: 0
 
 requires:
-    redaxo: '^5'
+    redaxo: '^5.14.1'
     php:
         version: '>=7, <9'
     packages:
-        yform/manager: '^4'
+        yform/manager: '^4.0.2'
 
 pages:
     yform/manager/usability:

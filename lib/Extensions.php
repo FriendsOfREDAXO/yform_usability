@@ -70,9 +70,9 @@ class Extensions
                             'yform/usability.addDragNDropSort.filters',
                             [],
                             [
-                                                                          'list_params' => $params,
-                                                                          'table'       => $params['params']['table'],
-                                                                      ]
+                                'list_params' => $params,
+                                'table'       => $params['params']['table'],
+                            ]
                         )
                     );
                     return '
@@ -289,7 +289,7 @@ class Extensions
             $params['id'] = "___id___";
             $params['yfu-action'] = 'duplicate';
 
-            $buttons["duplicate"] = '<a href="'.\rex_url::currentBackendPage($params) .'"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
+            $buttons["duplicate"] = '<a href="' . \rex_url::currentBackendPage($params) . '"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
         }
         return $buttons;
     }
@@ -304,8 +304,9 @@ class Extensions
 
             if ($term != '') {
                 $isEmptyTerm = $term == '!' || $term == '#';
-                $mainQuery     = $ep->getSubject();
-                $table       = $mainQuery->getTable();
+                $listSql     = $ep->getSubject();
+                $tableName   = $listSql->getTableName();
+                $table       = \rex_yform_manager_table::get($tableName);
                 $sql         = \rex_sql::factory();
                 $sprogIsAvl  = \rex_addon::get('sprog')->isAvailable();
                 $fields      = explode(',', \rex_request('yfu-searchfield', 'string'));
@@ -426,9 +427,15 @@ class Extensions
                 }
 
                 if (count($where)) {
-                    $mainQuery->whereRaw('(' . implode(' OR ', $where) . ')');
+
+                    if (strrpos($listSql->getQuery(), 'where') !== false) {
+                        $listSql->whereRaw(' AND (' . implode(' OR ', $where) . ') ');
+                    } else {
+                        $listSql->whereRaw(' (' . implode(' OR ', $where) . ') ');
+                    }
                 }
-                $ep->setSubject($mainQuery);
+
+                $ep->setSubject($listSql);
             }
         }
     }
