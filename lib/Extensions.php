@@ -219,21 +219,21 @@ class Extensions
             $tableName,
             explode(
                 '|',
-                trim($config['duplicate_tables'], '|')
+                trim($config['duplicate_tables'] ?? '', '|')
             )
         );
         $hasStatus    = $config['status_tables_all'] == '|1|' || in_array(
             $tableName,
             explode(
                 '|',
-                trim($config['status_tables'], '|')
+                trim($config['status_tables'] ?? '', '|')
             )
         );
         $hasSorting   = $config['sorting_tables_all'] == '|1|' || in_array(
             $tableName,
             explode(
                 '|',
-                trim($config['sorting_tables'], '|')
+                trim($config['sorting_tables'] ?? '', '|')
             )
         );
 
@@ -274,7 +274,7 @@ class Extensions
             $table->getTableName(),
             explode(
                 '|',
-                trim($config['duplicate_tables'], '|')
+                trim($config['duplicate_tables'] ?? '', '|')
             )
         );
 
@@ -300,7 +300,7 @@ class Extensions
     {
         // TODO convert where queries into yorm
         if (\rex_request('yfu-action', 'string') == 'search') {
-            $term = trim(\rex_request('yfu-term', 'string'));
+            $term = trim(\rex_request('yfu-term', 'string', ''));
 
             if ($term != '') {
                 $isEmptyTerm = $term == '!' || $term == '#';
