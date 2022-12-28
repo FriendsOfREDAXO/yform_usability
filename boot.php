@@ -33,7 +33,7 @@ Extensions::init();
 
 
 if (\rex::isBackend() && \rex::getUser()) {
-    if ($addon->getProperty('compile') || !file_exists($this->getAssetsPath('styles.css'))) {
+    if ($addon->getProperty('compile') || !file_exists($addon->getAssetsPath('styles.css'))) {
         $compiler   = new \rex_scss_compiler();
         $scss_files = [$addon->getPath('assets/scss/styles.scss')];
         $compiler->setRootDir($addon->getPath('assets/'));
