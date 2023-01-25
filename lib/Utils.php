@@ -58,6 +58,7 @@ class Utils
 
         $okeys   = count($options) ? array_keys($options) : explode(',', $Field->getElement('values'));
         $cur_idx = array_search($currentValue, $okeys);
+        if (!$cur_idx) { $currentValue = $okeys[0]; }
         $nvalue  = isset($okeys[$cur_idx + 1]) ? $okeys[$cur_idx + 1] : $okeys[0];
 
 
