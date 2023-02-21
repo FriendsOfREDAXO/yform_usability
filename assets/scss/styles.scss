@@ -92,11 +92,7 @@
 
 .yform-lang-tabs {
     .tab-content {
-        // due to dark-mode
-        @media (prefers-color-scheme: light) {
-            background: #fff;
-        }
-
+        background: #fff;
         border-bottom: 2px solid #c1c9d4;
         padding: 20px 12px 12px 12px;
 
@@ -110,3 +106,20 @@
 .table-responsive {
     padding-bottom: 120px;
 }
+
+@mixin _dark-yform-lang-tabs {
+    .yform-lang-tabs .tab-content{
+        background: inherit;
+    }
+}
+
+body.rex-theme-dark {
+    @include _dark-yform-lang-tabs;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.rex-theme-light) {
+        @include _dark-yform-lang-tabs;
+    }
+}
+
