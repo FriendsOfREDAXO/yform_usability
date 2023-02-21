@@ -28,7 +28,7 @@ class Extensions
         }
     }
 
-    protected static function addStatusToggle($list, $table): \rex_list
+    protected static function addStatusToggle($list, $table)
     {
         /** @var \rex_list $list */
         $list->addColumn('status_toggle', '', count($list->getColumnNames()));
