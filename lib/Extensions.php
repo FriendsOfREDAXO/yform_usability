@@ -27,9 +27,8 @@ class Extensions
         }
     }
 
-    protected static function addStatusToggle($list, $table): \rex_list
+    protected static function addStatusToggle($list, $table): \rex_yform_list
     {
-        /** @var \rex_list $list */
         $list->addColumn('status_toggle', '', count($list->getColumnNames()));
         $list->setColumnLabel('status_toggle', $list->getColumnLabel('status', \rex_i18n::msg('status')));
         $list->setColumnFormat(
