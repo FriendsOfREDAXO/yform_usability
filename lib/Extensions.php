@@ -262,6 +262,11 @@ class Extensions
 
     public static function yform_data_list_action_buttons(\rex_extension_point $ep)
     {
+        // return early if yform version is 4.1 or higher
+        if (\rex_version::compare(\rex_addon::get('yform')->getVersion(), '4.1.0', '>=')) {
+            return $ep->getSubject();
+        }
+
         $buttons        = $ep->getSubject();
         $table          = $ep->getParam('table');
         $default_config = \rex_addon::get('yform_usability')->getProperty('default_config');
