@@ -311,7 +311,7 @@ class Extensions
 
                 $where = [];
                 foreach ($fields as $fieldname) {
-                    $field = $table->getFields(['name' => $fieldname])[0];
+                    $field = !empty($table->getFields(['name' => $fieldname])) ? $table->getFields(['name' => $fieldname])[0] : null;
 
                     if ($field) {
                         if ($field->getTypename() == 'be_manager_relation') {
