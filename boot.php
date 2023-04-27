@@ -41,7 +41,7 @@ if (\rex::isBackend() && \rex::getUser()) {
         $compiler->setCssFile($addon->getPath('assets/styles.css'));
         $compiler->compile();
         \rex_file::copy($addon->getPath('assets/styles.css'), $addon->getAssetsPath('styles.css'));
-        \rex_file::delete($addon->getPath('assets/styles.css'));
+        //\rex_file::delete($addon->getPath('assets/styles.css'));
 
         \rex_file::copy($addon->getPath('assets/vendor/Sortable.min.js'), $addon->getAssetsPath('vendor/Sortable.min.js'));
         \rex_file::copy($addon->getPath('assets/script.js'), $addon->getAssetsPath('script.js'));
