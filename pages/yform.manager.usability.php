@@ -79,12 +79,17 @@ $form->addFieldset($addon->i18n('yform_usability.table_config'));
     $select->addOptions($tables);
     $form->addRawField('</div>');
 }
-
-$form->addFieldset($addon->i18n('yform_usability.addon_settings'));
 {
-    $field = $form->addCheckboxField('use_inline_search');
+    $form->addRawField('<div data-toggle-wrapper>');
+    $field = $form->addCheckboxField('use_inline_search', empty($config) ? 1 : null);
     $field->setLabel($addon->i18n('yform_usability.search'));
-    $field->addOptions([1 => $addon->i18n('yform_usability.use_inline_search')]);
+    $field->addOptions([1 => $addon->i18n('yform_usability.all_tables')]);
+
+    $field  = $form->addSelectField('search_tables');
+    $select = $field->getSelect();
+    $select->setMultiple(true);
+    $select->addOptions($tables);
+    $form->addRawField('</div>');
 }
 
 $fragment = new \rex_fragment();

@@ -188,10 +188,19 @@ class Extensions
     public static function ext_yformManagerDataPage(\rex_extension_point $ep): void
     {
         $manager = $ep->getSubject();
+        $config = Usability::getConfig();
 
-        if ($manager->table->isSearchable() && Usability::getConfig('use_inline_search') == '|1|') {
+        $hasSearch = $config['use_inline_search'] == '|1|' || in_array(
+                $manager->table->getTableName(),
+                explode(
+                    '|',
+                    trim($config['search_tables'] ?? '', '|')
+                )
+            );
+
+        if ($manager->table->isSearchable() && $hasSearch) {
             $functions = $manager->dataPageFunctions;
-            $sIndex    = array_search('search', $functions);
+            $sIndex = array_search('search', $functions);
 
             if ($sIndex !== false) {
                 \rex::setProperty('yform_usability.searchTableManager', $manager);
