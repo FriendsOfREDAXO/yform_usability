@@ -198,6 +198,7 @@ class Extensions
                 unset($functions[$sIndex]);
                 $functions[] = 'yform_search';
                 $manager->setDataPageFunctions($functions);
+                $manager->setLinkVars(self::getLinkVars());
                 $ep->setSubject($manager);
             }
         }
@@ -460,5 +461,21 @@ class Extensions
             }
             $ep->setSubject($options);
         }
+    }
+
+    private static function getLinkVars(): array
+    {
+        // NOTE all params that yform usability uses for filtering
+        $params = [
+            'yfu-term',
+            'yfu-action',
+            'yfu-searchfield'
+        ];
+
+        $linkVars = [];
+        foreach ($params as $param) {
+            $linkVars[$param] = rex_get($param, 'string', '');
+        }
+        return $linkVars;
     }
 }
