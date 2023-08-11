@@ -118,21 +118,19 @@ class Model extends \rex_yform_manager_dataset
     public function getName(int $langId = null)
     {
         $langId = $langId ?? \rex_clang::getCurrentId();
-        $name   = $this->getValue('name', $langId);
-
-
-        if ($name === null) {
-            $name = $this->getValue('title', $langId);
-
-            if ($name === null) {
-                $name = $this->getValue('name');
-
-                if ($name === null) {
-                    $name = $this->getValue('title');
-                }
-            }
+        if ($this->hasValue("name_$langId")) {
+            return $this->getValue('name', $langId);
         }
-        return $name;
+        if ($this->hasValue("title_$langId")) {
+            return $this->getValue('title', $langId);
+        }
+        if ($this->hasValue('name')) {
+            return $this->getValue('name');
+        }
+        if ($this->hasValue('title')) {
+            return $this->getValue('title');
+        }
+        return null;
     }
 
     public function getDescription(int $langId = null)
