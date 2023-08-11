@@ -10,7 +10,9 @@ class rex_yform_value_lang_tabs extends rex_yform_value_abstract
 
     function enterObject()
     {
-        $this->params['form_output'][$this->getId()] = $this->parse('value.lang_tabs.tpl.php');
+        if (rex::isBackend()) {
+            $this->params['form_output'][$this->getId()] = $this->parse('value.lang_tabs.tpl.php');
+        }
     }
 
     function getDescription(): string
