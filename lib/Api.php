@@ -1,5 +1,7 @@
 <?php
 
+use yform\usability\Utils;
+
 /**
  * This file is part of the yform/usability package.
  *
@@ -35,56 +37,51 @@ class rex_api_yform_usability_api extends rex_api_function
 
     private function __changestatus()
     {
-        $status  = rex_post('status', 'string');
-        $data_id = (int)rex_post('data_id', 'int');
-        $table   = rex_post('table', 'string');
-        $sql     = rex_sql::factory();
+        $status = rex_post('status', 'string');
+        $data_id = (int) rex_post('data_id', 'int');
+        $table = rex_post('table', 'string');
 
-        $sql->setTable($table)->setValue('status', $status)->setWhere(['id' => $data_id]);
-        try {
-            $sql->update();
-        } catch (\rex_sql_exception $ex) {
-            throw new rex_api_exception($ex->getMessage());
+        /** @var rex_yform_manager_dataset|null $modelClass */
+        $modelClass = rex_yform_manager_dataset::get($data_id, $table);
+        if ($modelClass) {
+            $modelClass->setValue('status', $status);
+            if ($modelClass->save()) {
+                // NOTE: needed because on yorm save we cannot detect, if the status has changed
+                // (old data always same as live data)
+                // @see https://github.com/yakamara/redaxo_yform/issues/1443
+                rex_extension::registerPoint(
+                    new rex_extension_point(
+                        'YFORM_DATA_STATUS_CHANGED',
+                        null,
+                        [
+                            'data_id' => $data_id,
+                            'table' => rex_yform_manager_table::get($table),
+                            'data' => $modelClass->getData(),
+                            'old_data' => true,
+                        ]
+                    )
+                );
+            }
         }
 
-
+        // DEPRECATED
         // flush url path file for url < 2
         if (rex_addon::get('url')->isAvailable()) {
-            if (rex_string::versionCompare(rex_addon::get('url')->getVersion(), '2.0.0', '<')) {
+            if (rex_string::versionCompare(rex_addon::get('url')->getVersion(), '2.0.0')) {
                 rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
             }
         }
 
-
-
-        $modelClass = \rex_yform_manager_dataset::getModelClass($table);
-
-        if ($modelClass) {
-            rex_extension::registerPoint(
-                new rex_extension_point(
-                    'YFORM_DATA_STATUS_CHANGED',
-                    null,
-                    [
-                        'data_id'  => $data_id,
-                        'table'    => rex_yform_manager_table::get($table),
-                        'data'     => $modelClass::get($data_id),
-                        'old_data' => true,
-                    ]
-                )
-            );
-        }
-
-
-        $tparams = \yform\usability\Utils::getStatusColumnParams(rex_yform_manager_table::get($table), $status);
+        $tparams = Utils::getStatusColumnParams(rex_yform_manager_table::get($table), $status);
 
         $tparams['element'] = strtr(
             $tparams['element'],
             [
-                '{{ID}}'    => $data_id,
+                '{{ID}}' => $data_id,
                 '{{TABLE}}' => $table,
             ]
         );
-        $this->response     = array_merge($this->response, $tparams);
+        $this->response = array_merge($this->response, $tparams);
     }
 
     private function __updatesort()
@@ -114,9 +111,9 @@ class rex_api_yform_usability_api extends rex_api_function
                 } else {
                     $prio = @$sql->getArray(
                         "
-                        SELECT {$sfield} 
-                        FROM {$tablename} 
-                        ORDER BY {$sfield} " . ($sort == 'asc' ? 'desc' : 'asc') . " 
+                        SELECT {$sfield}
+                        FROM {$tablename}
+                        ORDER BY {$sfield} " . ($sort == 'asc' ? 'desc' : 'asc') . "
                         LIMIT 1
                     "
                     )[0]['prio'];

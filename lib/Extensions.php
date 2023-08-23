@@ -19,6 +19,22 @@ class Extensions
     {
         \rex_extension::register('YFORM_DATA_UPDATED', [Extensions::class, 'ext__dataUpdated']);
 
+        \rex_extension::register('PACKAGES_INCLUDED', function (){
+            if (rex_request('rex-api-call', 'string') == 'yform_usability_api') {
+                // api endpoint
+                $api_result = \rex_api_yform_usability_api::factory();
+
+                \rex_api_function::handleCall();
+
+                if ($api_result && $api_result->getResult()) {
+                    \rex_response::cleanOutputBuffers();
+                    \rex_response::setStatus(\rex_response::HTTP_OK);
+                    \rex_response::sendContent($api_result->getResult()->toJSON(), 'application/json');
+                    exit;
+                }
+            }
+        });
+
         if (\rex::isBackend()) {
             \rex_extension::register(
                 'yform/usability.getStatusColumnParams.options',
