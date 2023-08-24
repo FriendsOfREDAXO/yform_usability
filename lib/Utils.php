@@ -14,6 +14,9 @@
 namespace yform\usability;
 
 
+use rex_api_yform_usability_api;
+use rex_url;
+
 class Utils
 {
 
@@ -61,9 +64,10 @@ class Utils
         if (!$cur_idx) { $currentValue = $okeys[0]; }
         $nvalue  = isset($okeys[$cur_idx + 1]) ? $okeys[$cur_idx + 1] : $okeys[0];
 
+        $url = rex_url::currentBackendPage(['method' => 'changeStatus'] + rex_api_yform_usability_api::getUrlParams());
 
         if (count($options) > 2) {
-            $element = '<select class="form-control status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}">';
+            $element = '<select class="form-control status-select rex-status-' . $currentValue . '" data-id="{{ID}}" data-api-url="'.$url . '" data-status="' . $nvalue . '" data-table="{{TABLE}}">';
             foreach ($options as $key => $option) {
                 $element .= '<option value="' . $key . '" ' . ((string)$currentValue === (string)$key ? 'selected="selected"' : '') . '>' . \rex_i18n::translate($option) . '</option>';
             }
@@ -73,7 +77,7 @@ class Utils
         } else {
             $istatus = isset($options[$currentValue]) && $currentValue != 0 && $currentValue != '' ? 'online' : 'offline';
             $element = '
-                <a class="rex-link-expanded status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-status="' . $nvalue . '" data-table="{{TABLE}}" href="#!">
+                <a class="rex-link-expanded status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-api-url="'.$url . '" data-status="' . $nvalue . '" data-table="{{TABLE}}" href="#!">
                     <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . \rex_i18n::translate($options[$currentValue]) . '</span>
                 </a>
             ';

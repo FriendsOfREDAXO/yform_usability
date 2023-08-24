@@ -48,11 +48,9 @@ var YformUsability = (function ($) {
         }
     }
 
-    function updateDatasetStatus($this, status, callback) {
+    function updateDatasetStatus($this, status, url, callback) {
         $('#rex-js-ajax-loader').addClass('rex-visible');
-        var url = $('<textarea/>').html(rex.ajax_url).text();
-
-        $.post(url + '&rex-api-call=yform_usability_api&method=changeStatus', {
+        $.post(url, {
             data_id: $this.data('id'),
             table: $this.data('table'),
             status: status
@@ -67,8 +65,9 @@ var YformUsability = (function ($) {
         if (container.find('.status-toggle').length) {
             var statusToggle = function () {
                 var $this = $(this);
+                var url = container.find('.status-toggle').data('api-url');
 
-                updateDatasetStatus($this, $this.data('status'), function (resp) {
+                updateDatasetStatus($this, $this.data('status'), url, function (resp) {
                     var $parent = $this.parent();
                     $parent.html(resp.message.element);
                     $parent.children('a:first').click(statusToggle);
@@ -83,8 +82,9 @@ var YformUsability = (function ($) {
         if (container.find('.status-select').length) {
             var statusChange = function () {
                 var $this = $(this);
+                var url = container.find('.status-toggle').data('api-url');
 
-                updateDatasetStatus($this, $this.val(), function (resp) {
+                updateDatasetStatus($this, $this.val(), url, function (resp) {
                     var $parent = $this.parent();
                     $parent.html(resp.message.element);
                     $parent.children('select:first').change(statusChange);
