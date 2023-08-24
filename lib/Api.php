@@ -20,6 +20,10 @@ class rex_api_yform_usability_api extends rex_api_function
 
     public function execute()
     {
+        if (!rex::isBackend() || !rex_backend_login::hasSession()) {
+            exit;
+        }
+
         $method  = rex_request('method', 'string', null);
         $_method = '__' . $method;
 
