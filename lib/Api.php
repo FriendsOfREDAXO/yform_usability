@@ -93,7 +93,7 @@ class rex_api_yform_usability_api extends rex_api_function
         $tablename = rex_post('table', 'string');
 
         if ($tablename != '') {
-            $sql     = \rex_sql::factory();
+            $sql     = rex_sql::factory();
             $data_id = rex_post('data_id', 'int');
             $next_id = rex_post('next_id', 'int');
             $filter  = rex_post('filter', 'string');
@@ -158,7 +158,7 @@ class rex_api_yform_usability_api extends rex_api_function
                 if (strlen($sql->getError())) {
                     throw new rex_api_exception($sql->getError());
                 }
-            } catch (\rex_sql_exception $ex) {
+            } catch (rex_sql_exception $ex) {
                 throw new rex_api_exception($ex->getMessage());
             }
         }
