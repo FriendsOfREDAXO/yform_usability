@@ -347,6 +347,17 @@ class Extensions
 
     public static function ext_yformDataListSql(rex_extension_point $ep): void
     {
+        // NOTE: filter should only be active on overview page, not default page
+        $isDetailPage = rex_get('data_id', 'int', 0) > 0;
+        if ($isDetailPage) {
+            return;
+        }
+        $isYFormEditPage = rex_get('page', 'string', '') == 'yform/manager/data_edit';
+        if (!$isYFormEditPage) {
+            return;
+        }
+
+
         // TODO convert where queries into yorm
         if (rex_request('yfu-action', 'string') == 'search') {
             $term = trim(rex_request('yfu-term', 'string'));
