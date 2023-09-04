@@ -13,40 +13,60 @@
 
 namespace yform\usability;
 
+use rex;
+use rex_addon;
+use rex_api_function;
+use rex_api_yform_usability_api;
+use rex_csrf_token;
+use rex_extension;
+use rex_extension_point;
+use rex_fragment;
+use rex_i18n;
+use rex_response;
+use rex_sql;
+use rex_url;
+use rex_version;
+use rex_yform_choice_list;
+use rex_yform_list;
+use rex_yform_manager_field;
+use rex_yform_manager_table;
+use Wildcard;
+use function rex_request;
+
 class Extensions
 {
     public static function init(): void
     {
-        \rex_extension::register('YFORM_DATA_UPDATED', [Extensions::class, 'ext__dataUpdated']);
+        rex_extension::register('YFORM_DATA_UPDATED', [Extensions::class, 'ext__dataUpdated']);
 
-        \rex_extension::register('PACKAGES_INCLUDED', function (){
+        rex_extension::register('PACKAGES_INCLUDED', function (){
             if (rex_request('rex-api-call', 'string') == 'yform_usability_api') {
                 // api endpoint
-                $api_result = \rex_api_yform_usability_api::factory();
+                $api_result = rex_api_yform_usability_api::factory();
 
-                \rex_api_function::handleCall();
+                rex_api_function::handleCall();
 
                 if ($api_result && $api_result->getResult()) {
-                    \rex_response::cleanOutputBuffers();
-                    \rex_response::setStatus(\rex_response::HTTP_OK);
-                    \rex_response::sendContent($api_result->getResult()->toJSON(), 'application/json');
+                    rex_response::cleanOutputBuffers();
+                    rex_response::setStatus(rex_response::HTTP_OK);
+                    rex_response::sendContent($api_result->getResult()->toJSON(), 'application/json');
                     exit;
                 }
             }
         });
 
-        if (\rex::isBackend()) {
-            \rex_extension::register(
+        if (rex::isBackend()) {
+            rex_extension::register(
                 'yform/usability.getStatusColumnParams.options',
                 [Extensions::class, 'ext__getStatusColumnOptions']
             );
         }
     }
 
-    protected static function addStatusToggle($list, $table): \rex_yform_list
+    protected static function addStatusToggle($list, $table): rex_yform_list
     {
         $list->addColumn('status_toggle', '', count($list->getColumnNames()));
-        $list->setColumnLabel('status_toggle', $list->getColumnLabel('status', \rex_i18n::msg('status')));
+        $list->setColumnLabel('status_toggle', $list->getColumnLabel('status', rex_i18n::msg('status')));
         $list->setColumnFormat(
             'status_toggle',
             'custom',
@@ -79,8 +99,8 @@ class Extensions
                 $firstColName,
                 'custom',
                 function ($params) {
-                    $filters = \rex_extension::registerPoint(
-                        new \rex_extension_point(
+                    $filters = rex_extension::registerPoint(
+                        new rex_extension_point(
                             'yform/usability.addDragNDropSort.filters',
                             [],
                             [
@@ -129,7 +149,7 @@ class Extensions
         return $options;
     }
 
-    public static function ext_rexListGet(\rex_extension_point $ep): void
+    public static function ext_rexListGet(rex_extension_point $ep): void
     {
         $list    = $ep->getSubject();
         $lparams = $list->getParams();
@@ -138,7 +158,7 @@ class Extensions
             $list->addFormAttribute('class', 'sortable-list');
 
             $firstColName = current($list->getColumnNames());
-            $tableName    = \rex_yform_manager_field::table();
+            $tableName    = rex_yform_manager_field::table();
 
 
             $list->setColumnLayout($firstColName, ['<th class="rex-table-icon">###VALUE###</th>', '###VALUE###']);
@@ -146,8 +166,8 @@ class Extensions
                 $firstColName,
                 'custom',
                 function ($params) {
-                    $filters = \rex_extension::registerPoint(
-                        new \rex_extension_point(
+                    $filters = rex_extension::registerPoint(
+                        new rex_extension_point(
                             'yform/usability.addDragNDropSort.filters',
                             [],
                             ['list_params' => $params]
@@ -184,16 +204,16 @@ class Extensions
         }
     }
 
-    public static function ext_yformManagerRexInfo(\rex_extension_point $ep): void
+    public static function ext_yformManagerRexInfo(rex_extension_point $ep): void
     {
-        if ($manager = \rex::getProperty('yform_usability.searchTableManager')) {
+        if ($manager = rex::getProperty('yform_usability.searchTableManager')) {
             $content = $ep->getSubject();
             // search bar
-            $fragment = new \rex_fragment();
+            $fragment = new rex_fragment();
             $fragment->setVar('manager', $manager);
             $partial = $fragment->parse('yform_usability/search.php');
 
-            $fragment = new \rex_fragment();
+            $fragment = new rex_fragment();
             $fragment->setVar('body', $partial, false);
             $fragment->setVar('class', 'info');
             $content .= $fragment->parse('core/page/section.php');
@@ -201,7 +221,7 @@ class Extensions
         }
     }
 
-    public static function ext_yformManagerDataPage(\rex_extension_point $ep): void
+    public static function ext_yformManagerDataPage(rex_extension_point $ep): void
     {
         $manager = $ep->getSubject();
         $config = Usability::getConfig();
@@ -219,7 +239,7 @@ class Extensions
             $sIndex = array_search('search', $functions);
 
             if ($sIndex !== false) {
-                \rex::setProperty('yform_usability.searchTableManager', $manager);
+                rex::setProperty('yform_usability.searchTableManager', $manager);
                 unset($functions[$sIndex]);
                 $functions[] = 'yform_search';
                 $manager->setDataPageFunctions($functions);
@@ -229,7 +249,7 @@ class Extensions
         }
     }
 
-    public static function ext_yformDataList(\rex_extension_point $ep): void
+    public static function ext_yformDataList(rex_extension_point $ep): void
     {
         $config    = Usability::getConfig();
         $list      = $ep->getSubject();
@@ -261,15 +281,15 @@ class Extensions
             )
         );
 
-        $hasStatus    = \rex_extension::registerPoint(
-            new \rex_extension_point(
+        $hasStatus    = rex_extension::registerPoint(
+            new rex_extension_point(
                 'yform/usability.addStatusToggle',
                 $hasStatus,
                 ['list' => $list, 'table' => $table]
             )
         );
-        $hasSorting   = \rex_extension::registerPoint(
-            new \rex_extension_point(
+        $hasSorting   = rex_extension::registerPoint(
+            new rex_extension_point(
                 'yform/usability.addDragNDropSort',
                 $hasSorting,
                 ['list' => $list, 'table' => $table]
@@ -286,17 +306,17 @@ class Extensions
     }
 
 
-    public static function yform_data_list_action_buttons(\rex_extension_point $ep)
+    public static function yform_data_list_action_buttons(rex_extension_point $ep)
     {
         // return early if yform version is 4.1 or higher
-        if (\rex_version::compare(\rex_addon::get('yform')->getVersion(), '4.1.0', '>=')) {
+        if (rex_version::compare(rex_addon::get('yform')->getVersion(), '4.1.0', '>=')) {
             return $ep->getSubject();
         }
 
         $buttons        = $ep->getSubject();
         $table          = $ep->getParam('table');
-        $default_config = \rex_addon::get('yform_usability')->getProperty('default_config');
-        $config         = \rex_addon::get('yform_usability')->getConfig(null, $default_config);
+        $default_config = rex_addon::get('yform_usability')->getProperty('default_config');
+        $config         = rex_addon::get('yform_usability')->getConfig(null, $default_config);
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
         $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
@@ -307,9 +327,9 @@ class Extensions
             )
         );
 
-        if ($hasDuplicate && empty($isOpener) && $table->isGranted('EDIT', \rex::getUser())) {
+        if ($hasDuplicate && empty($isOpener) && $table->isGranted('EDIT', rex::getUser())) {
             $_csrf_key = $table->getCSRFKey();
-            $token = \rex_csrf_token::factory($_csrf_key)->getUrlParams();
+            $token = rex_csrf_token::factory($_csrf_key)->getUrlParams();
 
             $params = array();
             $params['table_name'] = $table->getTableName();
@@ -318,27 +338,38 @@ class Extensions
             $params['id'] = "___id___";
             $params['yfu-action'] = 'duplicate';
 
-            $buttons["duplicate"] = '<a href="' . \rex_url::currentBackendPage($params) . '"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
+            $buttons["duplicate"] = '<a href="' . rex_url::currentBackendPage($params) . '"><i class="rex-icon fa-files-o"></i> duplizieren</a>';
         }
         return $buttons;
     }
 
 
 
-    public static function ext_yformDataListSql(\rex_extension_point $ep): void
+    public static function ext_yformDataListSql(rex_extension_point $ep): void
     {
+        // NOTE: filter should only be active on overview page, not default page
+        $isDetailPage = rex_get('data_id', 'int', 0) > 0;
+        if ($isDetailPage) {
+            return;
+        }
+        $isYFormEditPage = rex_get('page', 'string', '') == 'yform/manager/data_edit';
+        if (!$isYFormEditPage) {
+            return;
+        }
+
+
         // TODO convert where queries into yorm
-        if (\rex_request('yfu-action', 'string') == 'search') {
-            $term = trim(\rex_request('yfu-term', 'string', ''));
+        if (rex_request('yfu-action', 'string') == 'search') {
+            $term = trim(rex_request('yfu-term', 'string'));
 
             if ($term != '') {
                 $isEmptyTerm = $term == '!' || $term == '#';
                 $listSql     = $ep->getSubject();
                 $tableName   = $listSql->getTableName();
-                $table       = \rex_yform_manager_table::get($tableName);
-                $sql         = \rex_sql::factory();
-                $sprogIsAvl  = \rex_addon::get('sprog')->isAvailable();
-                $fields      = explode(',', \rex_request('yfu-searchfield', 'string'));
+                $table       = rex_yform_manager_table::get($tableName);
+                $sql         = rex_sql::factory();
+                $sprogIsAvl  = rex_addon::get('sprog')->isAvailable();
+                $fields      = explode(',', rex_request('yfu-searchfield', 'string'));
 
                 $where = [];
                 foreach ($fields as $fieldname) {
@@ -378,10 +409,10 @@ class Extensions
                             if ($isEmptyTerm) {
                                 $_term = '""';
                             } else {
-                                $list    = new \rex_yform_choice_list([]);
+                                $list    = new rex_yform_choice_list([]);
                                 $choices = $field->getElement('choices');
 
-                                if (is_string($choices) && \rex_sql::getQueryType($choices) == 'SELECT') {
+                                if (is_string($choices) && rex_sql::getQueryType($choices) == 'SELECT') {
                                     $list->createListFromSqlArray($sql->getArray($choices));
                                 } elseif (is_string($choices) && strlen(trim($choices)) > 0 && substr(
                                     trim($choices),
@@ -397,12 +428,12 @@ class Extensions
                                     if (stripos($item, $term) !== false) {
                                         $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape($value);
                                     } elseif ($sprogIsAvl) {
-                                        $label = \Wildcard::get(
+                                        $label = Wildcard::get(
                                             strtr(
                                                 $item,
                                                 [
-                                                    \Wildcard::getOpenTag()  => '',
-                                                    \Wildcard::getCloseTag() => '',
+                                                    Wildcard::getOpenTag()  => '',
+                                                    Wildcard::getCloseTag() => '',
                                                 ]
                                             )
                                         );
@@ -469,25 +500,25 @@ class Extensions
         }
     }
 
-    public static function ext__dataUpdated(\rex_extension_point $ep): void
+    public static function ext__dataUpdated(rex_extension_point $ep): void
     {
         $data    = $ep->getParam('data');
         $oldData = $ep->getParam('old_data');
 
         if (array_key_exists('status', $oldData) && $data->getValue('status') != $oldData['status']) {
-            \rex_extension::registerPoint(
-                new \rex_extension_point('YFORM_DATA_STATUS_CHANGED', null, $ep->getParams())
+            rex_extension::registerPoint(
+                new rex_extension_point('YFORM_DATA_STATUS_CHANGED', null, $ep->getParams())
             );
         }
     }
 
-    public static function ext__getStatusColumnOptions(\rex_extension_point $ep): void
+    public static function ext__getStatusColumnOptions(rex_extension_point $ep): void
     {
-        if (\rex_addon::exists('sprog') && \rex_addon::get('sprog')->isAvailable()) {
+        if (rex_addon::exists('sprog') && rex_addon::get('sprog')->isAvailable()) {
             $options = $ep->getSubject();
 
             foreach ($options as &$option) {
-                $option = \Wildcard::parse($option);
+                $option = Wildcard::parse($option);
             }
             $ep->setSubject($options);
         }
@@ -504,7 +535,7 @@ class Extensions
 
         $linkVars = [];
         foreach ($params as $param) {
-            $linkVars[$param] = rex_get($param, 'string', '');
+            $linkVars[$param] = rex_get($param, 'string');
         }
         return $linkVars;
     }

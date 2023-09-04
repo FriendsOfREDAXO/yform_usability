@@ -12,7 +12,9 @@
 namespace yform\usability\lib;
 
 
-class Sql extends \rex_sql
+use rex_sql;
+
+class Sql extends rex_sql
 {
 
 

@@ -12,6 +12,15 @@
 namespace yform\usability;
 
 
+use PDO;
+use rex;
+use rex_addon;
+use rex_config;
+use rex_sql;
+use rex_sql_exception;
+use rex_yform_manager_table;
+use rex_yform_manager_table_api;
+
 class Usability
 {
 
@@ -26,28 +35,28 @@ class Usability
 
     public static function includeAutoload()
     {
-        require_once \rex_addon::get('yform_usability')->getPath('vendor/autoload.php');
+        require_once rex_addon::get('yform_usability')->getPath('vendor/autoload.php');
     }
 
     public static function getConfig($key = null)
     {
-        return \rex_config::get('yform_usability', $key);
+        return rex_config::get('yform_usability', $key);
     }
 
     public static function duplicateRow()
     {
         $id        = rex_get('id', 'int');
         $tablename = rex_get('table_name', 'string');
-        $table = \rex_yform_manager_table::get($tablename);
-        if ($table->isGranted('EDIT', \rex::getUser())) {
+        $table = rex_yform_manager_table::get($tablename);
+        if ($table->isGranted('EDIT', rex::getUser())) {
             if ($id > 0) {
-                $sql = \rex_sql::factory();
+                $sql = rex_sql::factory();
                 $sql->setTable($tablename);
                 $sql->setWhere('id = :id', ['id' => $id]);
                 $sql->select();
 
                 if ($sql->getRows()) {
-                    $iSql = \rex_sql::factory();
+                    $iSql = rex_sql::factory();
                     $iSql->setTable($tablename);
                     foreach ($sql->getFieldNames() as $field) {
                         if ($field == 'status') {
@@ -64,21 +73,21 @@ class Usability
 
     public static function installTableSets($installPath)
     {
-        $tablePrefix = \rex::getTablePrefix();
+        $tablePrefix = rex::getTablePrefix();
 
         foreach (glob($installPath) as $filePath) {
             $filename  = basename($filePath);
-            $tableName = \rex::getTable(str_replace('.json', '', $filename));
+            $tableName = rex::getTable(str_replace('.json', '', $filename));
 
 
             try {
-                $tableCols = \rex_sql::showColumns($tableName);
-            } catch (\rex_sql_exception $exception) {
+                $tableCols = rex_sql::showColumns($tableName);
+            } catch (rex_sql_exception $exception) {
                 $sqlEx = $exception->getSql();
                 // Error code 42S02 means: Table does not exist
                 if ($sqlEx && $sqlEx->getErrno() === '42S02') {
                     $tableSet = str_replace('{{TABLE_PREFIX}}', $tablePrefix, file_get_contents($filePath));
-                    \rex_yform_manager_table_api::importTablesets($tableSet);
+                    rex_yform_manager_table_api::importTablesets($tableSet);
                 } else {
                     throw $exception;
                 }
@@ -95,7 +104,7 @@ class Usability
 
     public static function installModules($installPath)
     {
-        $sql = \rex_sql::factory();
+        $sql = rex_sql::factory();
 
         foreach (glob($installPath) as $folder) {
             if (is_dir($folder)) {
@@ -107,7 +116,7 @@ class Usability
 
                 if ($config && ($input || $output)) {
                     // check if already exists
-                    $sql->setTable(\rex::getTable('module'));
+                    $sql->setTable(rex::getTable('module'));
                     $sql->setWhere('`key` = :key OR `name` LIKE :name', ['key' => $config['key'], 'name' => $config['name']]);
                     $sql->select();
                     $_mod = $sql->getArray();
@@ -154,7 +163,7 @@ class Usability
 
     private static function ensureYformField($fieldType, $tableName, $fieldName, $typeName, $createValues, $updateValues)
     {
-        $sql   = \rex_sql::factory();
+        $sql   = rex_sql::factory();
         $query = "SELECT id FROM rex_yform_field WHERE name = :fname AND table_name = :tname AND type_id = '{$fieldType}'";
 
 
@@ -170,7 +179,7 @@ class Usability
                 'tname' => $tableName,
                 'fname' => $fieldName,
             ],
-            \PDO::FETCH_COLUMN
+            PDO::FETCH_COLUMN
         );
 
         $sql->setTable('rex_yform_field');

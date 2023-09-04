@@ -12,21 +12,26 @@
 namespace yform\usability;
 
 
+use rex;
+use rex_clang;
+use rex_sql_exception;
+use rex_yform_manager_dataset;
+use rex_yform_manager_query;
 use Url\Profile;
 use yform\usability\lib\Sql;
 
 
-class Model extends \rex_yform_manager_dataset
+class Model extends rex_yform_manager_dataset
 {
 
-    public static function get($id, $isOnline = false): ?\rex_yform_manager_dataset
+    public static function get($id, $isOnline = false): ?rex_yform_manager_dataset
     {
         return (int)$id > 0 ? parent::get((int)$id) : null;
     }
 
     public static function getDbTable(): string
     {
-        return str_replace('{PREFIX}', \rex::getTablePrefix(), static::TABLE);
+        return str_replace('{PREFIX}', rex::getTablePrefix(), static::TABLE);
     }
 
     public static function getSql(): Sql
@@ -62,7 +67,7 @@ class Model extends \rex_yform_manager_dataset
                 $sql->insert();
                 $this->setId($sql->getLastId());
             }
-        } catch (\rex_sql_exception $ex) {
+        } catch (rex_sql_exception $ex) {
             // error is passed by getError method
         }
         return $sql;
@@ -82,11 +87,10 @@ class Model extends \rex_yform_manager_dataset
     public function getValue($key, $langId = false, $default = '')
     {
         if ($langId) {
-            $key .= '_' . ($langId === true ? \rex_clang::getCurrentId() : $langId);
+            $key .= '_' . ($langId === true ? rex_clang::getCurrentId() : $langId);
         }
         $value = parent::getValue($key);
-        $value = !is_string($value) || strlen($value) ? $value : ($value === null ? null : $default);
-        return $value;
+        return !is_string($value) || strlen($value) ? $value : ($value === null ? null : $default);
     }
 
     public function getObjectValue($key, $langId = false)
@@ -99,7 +103,7 @@ class Model extends \rex_yform_manager_dataset
         $result = $default;
 
         if ($langId) {
-            $key .= '_' . ($langId === true ? \rex_clang::getCurrentId() : $langId);
+            $key .= '_' . ($langId === true ? rex_clang::getCurrentId() : $langId);
         }
         $value = $this->getRawValue($key);
 
@@ -117,7 +121,7 @@ class Model extends \rex_yform_manager_dataset
 
     public function getName(int $langId = null)
     {
-        $langId = $langId ?? \rex_clang::getCurrentId();
+        $langId = $langId ?? rex_clang::getCurrentId();
         if ($this->hasValue("name_$langId")) {
             return $this->getValue('name', $langId);
         }
@@ -135,7 +139,7 @@ class Model extends \rex_yform_manager_dataset
 
     public function getDescription(int $langId = null)
     {
-        $langId      = $langId ?? \rex_clang::getCurrentId();
+        $langId      = $langId ?? rex_clang::getCurrentId();
         $description = $this->getValue('description', $langId);
 
 
@@ -167,7 +171,7 @@ class Model extends \rex_yform_manager_dataset
     {
         $found    = false;
         $caller   = get_called_class();
-        $langId   = $langId ?? \rex_clang::getCurrentId();
+        $langId   = $langId ?? rex_clang::getCurrentId();
         $profiles = Profile::getByTableName($caller::getDbTable());
 
         foreach ($profiles as $profile) {
@@ -179,14 +183,14 @@ class Model extends \rex_yform_manager_dataset
         return $found;
     }
 
-    public static function addQueryDefaultFilters(\rex_yform_manager_query $query, $alias = 'm'): void
+    public static function addQueryDefaultFilters(rex_yform_manager_query $query, $alias = 'm'): void
     {
         $query->where("{$alias}.status", 1);
     }
 
     public function save(): bool
     {
-        if (\rex::isFrontend()) {
+        if (rex::isFrontend()) {
             unset($_POST['FORM']);
         }
         return parent::save();

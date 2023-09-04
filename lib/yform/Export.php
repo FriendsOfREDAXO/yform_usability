@@ -12,6 +12,15 @@
 namespace yform\usability\lib\yform;
 
 
+use rex_clang;
+use rex_extension;
+use rex_extension_point;
+use rex_i18n;
+use rex_yform_manager_dataset;
+use rex_yform_manager_field;
+use rex_yform_manager_query;
+use rex_yform_manager_table;
+use rex_yform_value_choice;
 use Sprog\Wildcard;
 use yform\usability\lib\helpers\Csv;
 
@@ -19,8 +28,8 @@ use yform\usability\lib\helpers\Csv;
 class Export
 {
     protected string                    $tableName          = '';
-    protected ?\rex_yform_manager_table $yTable             = null;
-    protected ?\rex_yform_manager_query $query              = null;
+    protected ?rex_yform_manager_table $yTable             = null;
+    protected ?rex_yform_manager_query $query              = null;
     protected array                     $fields             = [];
     protected array                     $fieldNames         = [];
     protected array                     $fieldLabels        = [];
@@ -67,7 +76,7 @@ class Export
         $this->yTable = $this->query->getTable();
         $fields       = array_merge(
             [
-                new \rex_yform_manager_field(
+                new rex_yform_manager_field(
                     [
                         'type_id'    => 'value',
                         'type_name'  => 'integer',
@@ -97,7 +106,7 @@ class Export
         return $this->fields;
     }
 
-    public function setQuery(\rex_yform_manager_query $query)
+    public function setQuery(rex_yform_manager_query $query)
     {
         $this->query = $query;
     }
@@ -105,8 +114,8 @@ class Export
     protected function getQuery()
     {
         if (!$this->query) {
-            /** @var $model \rex_yform_manager_dataset */
-            $model       = \rex_yform_manager_dataset::getModelClass($this->tableName);
+            /** @var $model rex_yform_manager_dataset */
+            $model       = rex_yform_manager_dataset::getModelClass($this->tableName);
             $this->query = $model::query();
         }
 
@@ -151,14 +160,13 @@ class Export
                 $_fieldAlias = "{$field->getElement('table')}___{$field->getName()}";
                 $this->query->selectRaw("CONCAT(jt{$index}.{$field->getElement('field')}, '')", $_fieldAlias);
             } elseif ($field->getTypeName() == 'choice') {
-                $values = \rex_yform_value_choice::getListValues(
+                $values = rex_yform_value_choice::getListValues(
                     [
                         'field'  => $field->getName(),
                         'params' => ['field' => $field],
                     ]
                 );
 
-                $choiceValues[$field->getName()] = $values;
                 $this->query->select("m.{$field->getName()}", $fieldAlias);
             } else {
                 $this->query->select("m.{$field->getName()}", $fieldAlias);
@@ -169,11 +177,11 @@ class Export
 
     private static function getFieldLabel($field): string
     {
-        $currentTable = \rex_yform_manager_table::get($field->getElement('table') ?: $field->getElement('table_name'));
+        $currentTable = rex_yform_manager_table::get($field->getElement('table') ?: $field->getElement('table_name'));
 
         $tablePrefix  = is_object($currentTable) ? $currentTable->getName() : '';
         if (str_contains($tablePrefix, 'translate:')) {
-            $tablePrefix = \rex_i18n::translate($tablePrefix, false);
+            $tablePrefix = rex_i18n::translate($tablePrefix, false);
         }
         $fieldPrefix = $tablePrefix ? $tablePrefix . ': ' : '';
 
@@ -182,7 +190,7 @@ class Export
 
     private static function getFieldLanguageSuffix($fieldName): string
     {
-        $languages = \rex_clang::getAll(true);
+        $languages = rex_clang::getAll(true);
         foreach ($languages as $language) {
             if (array_reverse(explode('_', $fieldName))[0] == $language->getId()) {
                 return " ({$language->getCode()})";
@@ -209,8 +217,8 @@ class Export
         $collection = $query->find();
 
         $csvHeadColumns = array_filter(
-            \rex_extension::registerPoint(
-                new \rex_extension_point('yform/usability.Export.csvHeadColumns', $this->fieldLabels)
+            rex_extension::registerPoint(
+                new rex_extension_point('yform/usability.Export.csvHeadColumns', $this->fieldLabels)
             )
         );
 
@@ -218,8 +226,8 @@ class Export
         $csv->setHeadColumns($csvHeadColumns);
 
         foreach ($collection as $item) {
-            $rowData = \rex_extension::registerPoint(
-                new \rex_extension_point('yform/usability.Export.rowData', $item->getData())
+            $rowData = rex_extension::registerPoint(
+                new rex_extension_point('yform/usability.Export.rowData', $item->getData())
             );
             $csv->addRow($rowData);
         }
