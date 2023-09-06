@@ -109,7 +109,7 @@ var YformUsability = (function ($) {
                         $next = $(evt.from).children(':eq(' + (evt.newIndex + 1) + ')'),
                         nextId = $next.length ? $next.find('.sort-icon').data('id') : 0;
 
-                    var url = $sortIcon.data('url') || rex.ajax_url + '&rex-api-call=yform_usability_api&method=updateSort';
+                    var url = $sortIcon.data('url');
 
                     $('#rex-js-ajax-loader').addClass('rex-visible');
 

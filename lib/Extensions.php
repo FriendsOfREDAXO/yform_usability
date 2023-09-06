@@ -109,9 +109,11 @@ class Extensions
                             ]
                         )
                     );
+                    $url = rex_url::currentBackendPage(['method' => 'updateSort'] + rex_api_yform_usability_api::getUrlParams());
                     return '
                         <i class="rex-icon fa fa-bars sort-icon"
                             data-id="###id###"
+                            data-url="'.$url . '"
                             data-table-type="orm_model"
                             data-table="' . $params['params']['table']->getTableName() . '"
                             data-filter="' . implode(',', $filters) . '"></i>
