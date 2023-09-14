@@ -189,9 +189,11 @@ class Extensions
                             // $style = 'background-color:#eff9f9;';
                             break;
                     }
+                    $url = rex_url::currentBackendPage(['method' => 'updateSort'] + rex_api_yform_usability_api::getUrlParams());
                     return '
                     <td class="rex-table-icon" style="' . $style . '">
                         <i class="rex-icon fa fa-bars sort-icon"
+                        data-url="' . $url . '"
                             data-id="###id###"
                             data-table-type="db_table"
                             data-table-sort-field="prio"
