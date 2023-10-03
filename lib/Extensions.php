@@ -29,7 +29,6 @@ use rex_version;
 use rex_yform_choice_list;
 use rex_yform_list;
 use rex_yform_manager_field;
-use rex_yform_manager_table;
 use Wildcard;
 use function rex_request;
 
@@ -369,8 +368,7 @@ class Extensions
             if ($term != '') {
                 $isEmptyTerm = $term == '!' || $term == '#';
                 $listSql     = $ep->getSubject();
-                $tableName   = $listSql->getTableName();
-                $table       = rex_yform_manager_table::get($tableName);
+                $table       = $ep->getParam('table');
                 $sql         = rex_sql::factory();
                 $sprogIsAvl  = rex_addon::get('sprog')->isAvailable();
                 $fields      = explode(',', rex_request('yfu-searchfield', 'string'));
@@ -386,14 +384,13 @@ class Extensions
                             } else {
                                 $_whereChunks = [];
                                 foreach (explode(',', $field->getElement('field')) as $_field) {
-                                    $_field = trim($_field, '"');
+                                    $_field = str_replace('"', '', $_field);
                                     $_field = trim($_field);
 
                                     if ('' != $_field) {
                                         $_whereChunks[] = "{$_field} LIKE :term";
                                     }
                                 }
-
                                 $relWhere  = [];
                                 $query     = "
                                     SELECT id
@@ -491,14 +488,16 @@ class Extensions
                 }
 
                 if (count($where)) {
-
-                    if (strrpos($listSql->getQuery(), 'where') !== false) {
-                        $listSql->whereRaw(' AND (' . implode(' OR ', $where) . ') ');
+                    if (strrpos($listSql, 'where') !== false) {
+                        $listSql = str_replace(' where ', ' where (' . implode(' OR ', $where) . ') AND ', $listSql);
                     } else {
-                        $listSql->whereRaw(' (' . implode(' OR ', $where) . ') ');
+                        $listSql = str_replace(
+                            ' ORDER BY ',
+                            ' WHERE (' . implode(' OR ', $where) . ') ORDER BY ',
+                            $listSql
+                        );
                     }
                 }
-
                 $ep->setSubject($listSql);
             }
         }
