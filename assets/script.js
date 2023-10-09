@@ -82,7 +82,7 @@ var YformUsability = (function ($) {
         if (container.find('.status-select').length) {
             var statusChange = function () {
                 var $this = $(this);
-                var url = container.find('.status-toggle').data('api-url');
+                var url = container.find('.status-select').data('api-url');
 
                 updateDatasetStatus($this, $this.val(), url, function (resp) {
                     var $parent = $this.parent();
