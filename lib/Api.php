@@ -141,7 +141,7 @@ class rex_api_yform_usability_api extends rex_api_function
                     ";
                 $sql->setQuery($query, ['id' => $data_id]);
 
-                if (strlen($sql->getError())) {
+                if (!is_null($sql->getError())) {
                     throw new rex_api_exception($sql->getError());
                 }
                 $order = $next_id ? ($sort == 'asc' ? '0, 1' : '1, 0') : ($sort == 'desc' ? '0, 1' : '1, 0');
@@ -155,7 +155,7 @@ class rex_api_yform_usability_api extends rex_api_function
                 $sql->setQuery('SET @count = 0');
                 $sql->setQuery($query, ['id' => $data_id]);
 
-                if (strlen($sql->getError())) {
+                if (!is_null($sql->getError())) {
                     throw new rex_api_exception($sql->getError());
                 }
             } catch (rex_sql_exception $ex) {
