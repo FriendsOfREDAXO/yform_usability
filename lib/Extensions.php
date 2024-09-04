@@ -296,30 +296,34 @@ class Extensions
                             if ($isEmptyTerm) {
                                 $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
                             } else {
-                                $_whereChunks = [];
-                                foreach (explode(',', $field->getElement('field')) as $_field) {
-                                    $_field = trim($_field, '"');
-                                    $_field = trim($_field);
+                                $idChunks = array_filter(explode(',',$term));
 
-                                    if ('' != $_field) {
-                                        $_whereChunks[] = "{$_field} LIKE :term";
+                                if (is_numeric(current($idChunks))) {
+                                    $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $idChunks) . ')';
+                                } else {
+                                    $_whereChunks = [];
+                                    foreach (explode(',', $field->getElement('field')) as $_field) {
+                                        $_field = trim($_field, '"');
+                                        $_field = trim($_field);
+
+                                        if ('' != $_field) {
+                                            $_whereChunks[] = "{$_field} LIKE :term";
+                                        }
                                     }
+                                    $relWhere  = [];
+                                        $query     = "
+                                        SELECT id
+                                        FROM {$field->getElement('table')}
+                                        WHERE " . implode(' OR ', $_whereChunks) . "
+                                    ";
+                                    $relResult = $sql->getArray($query, ['term' => "%{$term}%"]);
+
+                                    foreach ($relResult as $item) {
+                                        $relWhere[] = $item['id'];
+                                    }
+                                    $relWhere = $relWhere ?: [-1];
+                                    $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                                 }
-
-                                $relWhere  = [];
-                                $query     = "
-                                    SELECT id
-                                    FROM {$field->getElement('table')}
-                                    WHERE " . implode(' OR ', $_whereChunks) . "
-                                ";
-                                $relResult = $sql->getArray($query, ['term' => "%{$term}%"]);
-
-                                foreach ($relResult as $item) {
-                                    $relWhere[] = $item['id'];
-                                }
-
-                                $relWhere = $relWhere ?: [-1];
-                                $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                             }
                         } elseif ($field->getTypename() == 'choice') {
                             if ($isEmptyTerm) {
