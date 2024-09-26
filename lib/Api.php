@@ -46,7 +46,8 @@ class rex_api_yform_usability_api extends rex_api_function
         $table = rex_post('table', 'string');
 
         /** @var rex_yform_manager_dataset|null $modelClass */
-        $modelClass = rex_yform_manager_dataset::get($data_id, $table);
+        $class = rex_yform_manager_dataset::getModelClass($table);
+        $modelClass = $class::get($data_id);
         if ($modelClass) {
             $modelClass->setValue('status', $status);
             if ($modelClass->save()) {
