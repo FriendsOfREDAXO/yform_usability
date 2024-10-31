@@ -68,6 +68,9 @@ class Utils
             'list'  => $list,
         ]));
 
+        if (!is_array($options)) {
+            $options = [];
+        }
         $okeys   = count($options) ? array_keys($options) : explode(',', $Field->getElement('values'));
         $cur_idx = array_search($currentValue, $okeys);
         if (!$cur_idx) { $currentValue = $okeys[0]; }
@@ -87,7 +90,7 @@ class Utils
             $istatus = isset($options[$currentValue]) && $currentValue != 0 && $currentValue != '' ? 'online' : 'offline';
             $element = '
                 <a class="rex-link-expanded status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-api-url="'.$url . '" data-status="' . $nvalue . '" data-table="{{TABLE}}" href="#!">
-                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . rex_i18n::translate($options[$currentValue]) . '</span>
+                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . rex_i18n::translate($options[$currentValue] ?? '') . '</span>
                 </a>
             ';
         }
