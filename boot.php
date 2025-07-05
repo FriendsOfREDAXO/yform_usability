@@ -11,6 +11,7 @@
  * file that was distributed with this source code.
  */
 
+ /** TODO: Umstellen auf den korrekten FOR-Namespace */
 namespace yform\usability;
 
 use rex;
@@ -59,6 +60,7 @@ if (rex::isBackend() && rex::getUser()) {
     }
 
     rex_yform::addTemplatePath($addon->getPath('ytemplates'));
+    /** TODO: Umstellen auf First Class Callable Syntax */
     rex_extension::register('PACKAGES_INCLUDED', [Usability::class, 'init']);
     rex_extension::register('YFORM_MANAGER_DATA_PAGE', [Extensions::class, 'ext_yformManagerDataPage']);
     rex_extension::register('YFORM_DATA_LIST', [Extensions::class, 'ext_yformDataList']);
