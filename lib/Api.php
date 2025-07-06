@@ -46,10 +46,11 @@ class rex_api_yform_usability_api extends rex_api_function
         $table = rex_post('table', 'string');
 
         /** @var rex_yform_manager_dataset|null $modelClass */
-        $modelClass = rex_yform_manager_dataset::get($data_id, $table);
+        $modelClass = rex_yform_manager_dataset::getModelClass($table);
         if ($modelClass) {
-            $modelClass->setValue('status', $status);
-            if ($modelClass->save()) {
+            $record = $modelClass::get($data_id);
+            $record->setValue('status', $status);
+            if ($record->save()) {
                 // NOTE: needed because on yorm save we cannot detect, if the status has changed
                 // (old data always same as live data)
                 // @see https://github.com/yakamara/redaxo_yform/issues/1443
@@ -60,12 +61,18 @@ class rex_api_yform_usability_api extends rex_api_function
                         [
                             'data_id' => $data_id,
                             'table' => rex_yform_manager_table::get($table),
-                            'data' => $modelClass->getData(),
+                            'data' => $record->getData(),
                             'old_data' => true,
                         ]
                     )
                 );
             }
+        } else {
+            $sql = rex_sql::factory();
+            $sql->setTable($table);
+            $sql->setWhere('id = :id', ['id' => $data_id]);
+            $sql->setValue('status', $status);
+            $sql->update();
         }
 
         // DEPRECATED
