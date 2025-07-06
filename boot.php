@@ -60,15 +60,13 @@ if (rex::isBackend() && rex::getUser()) {
     }
 
     rex_yform::addTemplatePath($addon->getPath('ytemplates'));
-    /** TODO: Umstellen auf First Class Callable Syntax */
-    rex_extension::register('PACKAGES_INCLUDED', [Usability::class, 'init']);
-    rex_extension::register('YFORM_MANAGER_DATA_PAGE', [Extensions::class, 'ext_yformManagerDataPage']);
-    rex_extension::register('YFORM_DATA_LIST', [Extensions::class, 'ext_yformDataList']);
-    rex_extension::register('YFORM_MANAGER_REX_INFO', [Extensions::class, 'ext_yformManagerRexInfo']);
-    rex_extension::register('YFORM_DATA_LIST_QUERY', [Extensions::class, 'ext_yformDataListSql']);
-    rex_extension::register('REX_LIST_GET', [Extensions::class, 'ext_rexListGet']);
-    rex_extension::register('YFORM_DATA_LIST_ACTION_BUTTONS', [Extensions::class, 'yform_data_list_action_buttons']);
-
+    rex_extension::register('PACKAGES_INCLUDED', Usability::init(...));
+    rex_extension::register('YFORM_MANAGER_DATA_PAGE', Extensions::ext_yformManagerDataPage(...));
+    rex_extension::register('YFORM_DATA_LIST', Extensions::ext_yformDataList(...));
+    rex_extension::register('YFORM_MANAGER_REX_INFO', Extensions::ext_yformManagerRexInfo(...));
+    rex_extension::register('YFORM_DATA_LIST_QUERY', Extensions::ext_yformDataListSql(...));
+    rex_extension::register('REX_LIST_GET', Extensions::ext_rexListGet(...));
+    rex_extension::register('YFORM_DATA_LIST_ACTION_BUTTONS', Extensions::yform_data_list_action_buttons(...));
 }
 
 // includes ytemplates in cli environment(for cronjob tasks)
