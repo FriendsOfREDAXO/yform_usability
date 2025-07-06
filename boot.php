@@ -11,6 +11,7 @@
  * file that was distributed with this source code.
  */
 
+ /** TODO: Umstellen auf den korrekten FOR-Namespace */
 namespace yform\usability;
 
 use rex;
@@ -66,7 +67,6 @@ if (rex::isBackend() && rex::getUser()) {
     rex_extension::register('YFORM_DATA_LIST_QUERY', Extensions::ext_yformDataListSql(...));
     rex_extension::register('REX_LIST_GET', Extensions::ext_rexListGet(...));
     rex_extension::register('YFORM_DATA_LIST_ACTION_BUTTONS', Extensions::yform_data_list_action_buttons(...));
-
 }
 
 // includes ytemplates in cli environment(for cronjob tasks)
