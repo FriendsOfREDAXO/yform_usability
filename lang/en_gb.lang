@@ -4,9 +4,11 @@ yform_label.online_status = Show online/offline state
 yform_label.sorting = Sorting active
 yform_label.duplication = Duplication active
 yform_label.all = All
+yform_label.start_or_end = Status column 
 
 yform_usability_action.duplicate = duplicate
 
 yform_usability.help_prio = <b>Order via drag&drop</b>: the table needs a field of typ <code>prio</code>. Please change the table's default order from <code>id</code> to <code>prio</code>.
 yform_usability.help_status = <b>Change dataset online-status via click</b>: the table needs a choice field with the rowname <code>status</code>, the values are freely selectable (i.e.: <code>Inaktiv=0,Aktiv=1,Pending=2,zu Erledigen=55</code>).
 yform_usability.help_open_readme = open readme
+yform_usability.start_or_end = add at the beginning instead of at the end
