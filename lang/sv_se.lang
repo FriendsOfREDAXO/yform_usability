@@ -10,10 +10,12 @@ yform_usability.all_tables = Alla tabeller
 yform_usability.addon_settings = Addon inställningar
 yform_usability.search = YForm sök
 yform_usability.use_inline_search = Använd inline-sök
+yform_usability.start_or_end = lägg till i början istället för i slutet
 
 yform_label.online_status = Visa online / offline-status
 yform_label.sorting = Sortering aktiv
 yform_label.duplication = Duplicera poster
+yform_label.start_or_end = Statuskolumn
 
 yform_usability_action.duplicate = Duplicera
 
