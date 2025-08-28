@@ -65,7 +65,9 @@ class Extensions
 
     protected static function addStatusToggle($list, $table): rex_yform_list
     {
-        $list->addColumn('status_toggle', '', count($list->getColumnNames()));
+        $config = Usability::getConfig();
+        $start_or_end = ($config['start_or_end'] === '|1|') ? 2 : count($list->getColumnNames());
+        $list->addColumn('status_toggle', '', $start_or_end );
         $list->setColumnLabel('status_toggle', $list->getColumnLabel('status', rex_i18n::msg('status')));
         $list->setColumnFormat(
             'status_toggle',
