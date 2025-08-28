@@ -88,6 +88,13 @@ $form->addFieldset($addon->i18n('yform_usability.table_config'));
     $form->addRawField('</div>');
 }
 {
+    $form->addRawField('<div>');
+    $field = $form->addCheckboxField('start_or_end', ($config['start_or_end']) ? 1 : null);
+    $field->setLabel($addon->i18n('yform_label.start_or_end'));
+    $field->addOptions([1 => $addon->i18n('yform_usability.start_or_end')]);
+    $form->addRawField('</div>');
+}
+{
     $form->addRawField('<div data-toggle-wrapper>');
     $field = $form->addCheckboxField('use_inline_search', empty($config) ? 1 : null);
     $field->setLabel($addon->i18n('yform_usability.search'));
