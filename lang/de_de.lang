@@ -10,10 +10,12 @@ yform_usability.all_tables = Alle Tabellen
 yform_usability.addon_settings = Addon-Einstellungen
 yform_usability.search = Yform-Suche
 yform_usability.use_inline_search = Inline-Suche verwenden
+yform_usability.start_or_end = am Anfang statt am Ende hinzufügen
 
 yform_label.online_status = Online/Offline Status anzeigen
 yform_label.sorting = Sortierung aktiv
 yform_label.duplication = Duplizieren von Datensätzen
+yform_label.start_or_end = Status-Spalte
 
 yform_usability_action.duplicate = duplizieren
 
