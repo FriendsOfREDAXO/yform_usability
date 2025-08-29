@@ -1,5 +1,5 @@
 package: yform_usability
-version: '2.1.4'
+version: '2.1.6'
 author: 'Friends Of REDAXO'
 supportpage: https://github.com/FriendsOfREDAXO/yform_usability
 compile: 0
@@ -9,7 +9,7 @@ requires:
     php:
         version: '>=7, <9'
     packages:
-        yform/manager: '^4.0.2'
+        yform: '>=4.0.2, <6'
 
 pages:
     yform/manager/usability:

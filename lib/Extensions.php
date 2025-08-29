@@ -37,7 +37,7 @@ class Extensions
 {
     public static function init(): void
     {
-        rex_extension::register('YFORM_DATA_UPDATED', [Extensions::class, 'ext__dataUpdated']);
+        rex_extension::register('YFORM_DATA_UPDATED', self::ext__dataUpdated(...));
 
         rex_extension::register('PACKAGES_INCLUDED', function (){
             if (rex_request('rex-api-call', 'string') == 'yform_usability_api') {
@@ -58,7 +58,7 @@ class Extensions
         if (rex::isBackend()) {
             rex_extension::register(
                 'yform/usability.getStatusColumnParams.options',
-                [Extensions::class, 'ext__getStatusColumnOptions']
+                self::ext__getStatusColumnOptions(...)
             );
         }
     }
