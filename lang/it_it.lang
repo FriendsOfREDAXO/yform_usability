@@ -2,5 +2,6 @@ yform_label.online_status = Visualizza online/offline stato
 yform_label.sorting = Ordinamento attivato
 yform_label.duplication = Duplicazione attiva
 yform_label.all = Tutti
+yform_label.status_first_column = Colonna stato prima
 
 yform_usability_action.duplicate = duplicare
