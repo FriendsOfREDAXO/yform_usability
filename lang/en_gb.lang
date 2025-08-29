@@ -4,6 +4,7 @@ yform_label.online_status = Show online/offline state
 yform_label.sorting = Sorting active
 yform_label.duplication = Duplication active
 yform_label.all = All
+yform_label.status_first_column = State column first
 
 yform_usability_action.duplicate = duplicate
 
