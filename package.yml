@@ -24,3 +24,5 @@ default_config:
     sorting_tables_all: '|1|'
     status_tables_all: '|1|'
     use_inline_search: NULL
+    status_first_column: NULL
+    status_first_column_all: '|1|'
