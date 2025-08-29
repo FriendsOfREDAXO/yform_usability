@@ -65,27 +65,41 @@ class Extensions
 
     protected static function addStatusToggle($list, $table): rex_yform_list
     {
-        $list->addColumn('status_toggle', '', count($list->getColumnNames()));
-        $list->setColumnLabel('status_toggle', $list->getColumnLabel('status', rex_i18n::msg('status')));
-        $list->setColumnFormat(
-            'status_toggle',
-            'custom',
-            function ($params) {
-                $value   = $params['list']->getValue('status');
-                $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
+        $config = Usability::getConfig(); // load settings
+        $status_position = count($list->getColumnNames()); // default: column position at the end
+        // get all yform table manager tablenames
+        $tables = [];
+        foreach(rex_yform_manager_table::getAll() as $yform_table) {
+            $tables[] = $yform_table->getTableName();
+        };
+        // move columns of all/selected tables if conditions are met
+        if($config['status_first_column_all'] === '|1|' || in_array($table->getTableName(), explode('|', trim($config['status_first_column_tables'] ?? '', '|')))) {
+            $status_position = 2; // 0 = icon column, 1 = id column
+        }
+        // transform existing status column
+        if(in_array('status', $list->getColumnNames())) {
+            $list->setColumnFormat(
+                'status',
+                'custom',
+                function ($params) {
+                    $value   = $params['list']->getValue('status');
+                    $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
 
-                return strtr(
-                    $tparams['element'],
-                    [
-                        '{{ID}}'    => $params['list']->getValue('id'),
-                        '{{TABLE}}' => $params['params']['table']->getTableName(),
-                    ]
-                );
-            },
-            ['table' => $table]
-        );
+                    return strtr(
+                        $tparams['element'],
+                        [
+                            '{{ID}}'    => $params['list']->getValue('id'),
+                            '{{TABLE}}' => $params['params']['table']->getTableName(),
+                        ]
+                    );
+                },
+                ['table' => $table]
+            );
+            $list->setColumnPosition('status', $status_position);
+        }
         return $list;
     }
+
 
     protected static function addDragNDropSort($list, $table)
     {
