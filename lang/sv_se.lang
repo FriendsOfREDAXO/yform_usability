@@ -14,6 +14,7 @@ yform_usability.use_inline_search = Använd inline-sök
 yform_label.online_status = Visa online / offline-status
 yform_label.sorting = Sortering aktiv
 yform_label.duplication = Duplicera poster
+yform_label.status_first_column = Statuskolumn i början
 
 yform_usability_action.duplicate = Duplicera
 
