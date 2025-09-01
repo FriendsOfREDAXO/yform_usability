@@ -10,6 +10,14 @@
         font-size: 15px;
         padding: 1px;
     }
+    
+    // Status column minimum width - multiple selectors for better browser support
+    td:has(.status-toggle), 
+    td:has(.status-select),
+    .status-column,
+    td.status-column {
+        min-width: 100px;
+    }
 
     .sort-handle:hover {
         color: #4b9ad9;
@@ -33,46 +41,31 @@
     }
 }
 
+// Specific YForm checkbox status field minimum width
+.yform-table-field-value-checkbox.yform-table-field-name-status {
+    min-width: 100px;
+}
+
 #yform_usability-search {
     .form-group {
-        margin: 0;
+        margin-bottom: 15px;
     }
 
-    .form-group > * {
-        margin-bottom: 10px;
+    .input-wrapper {
+        position: relative;
 
-        &:last-child {
-            margin: 0;
-        }
-    }
-
-    @media (min-width: 640px) {
-        .form-group > * {
-            display: inline-block;
-            margin: 0 10px 0 0;
-
-            &:last-child {
-                margin: 0;
-            }
-        }
-        label {
-            width: 14%;
-        }
-        select {
-            width: 30%;
-        }
-        .input-wrapper {
-            width: 48%;
-            position: relative;
-
-            .filter-reset {
-                display: none;
-                cursor: pointer;
-                position: absolute;
-                top: 0;
-                right: 0;
-                font-size: 24px;
-                padding: 5px 8px;
+        .filter-reset {
+            display: none;
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #999;
+            
+            &:hover {
+                color: #333;
             }
         }
     }
@@ -80,7 +73,7 @@
     &.filtered {
         .input-wrapper {
             input {
-                padding-right: 37px;
+                padding-right: 35px;
             }
 
             .filter-reset {
