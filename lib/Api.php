@@ -45,26 +45,46 @@ class rex_api_yform_usability_api extends rex_api_function
         $data_id = (int) rex_post('data_id', 'int');
         $table = rex_post('table', 'string');
 
-        /** @var rex_yform_manager_dataset|null $modelClass */
-        $modelClass = rex_yform_manager_dataset::get($data_id, $table);
-        if ($modelClass) {
-            $modelClass->setValue('status', $status);
-            if ($modelClass->save()) {
-                // NOTE: needed because on yorm save we cannot detect, if the status has changed
-                // (old data always same as live data)
-                // @see https://github.com/yakamara/redaxo_yform/issues/1443
-                rex_extension::registerPoint(
-                    new rex_extension_point(
-                        'YFORM_DATA_STATUS_CHANGED',
-                        null,
-                        [
-                            'data_id' => $data_id,
-                            'table' => rex_yform_manager_table::get($table),
-                            'data' => $modelClass->getData(),
-                            'old_data' => true,
-                        ]
-                    )
-                );
+        // Get the YForm table object
+        $tableObject = rex_yform_manager_table::get($table);
+        if (!$tableObject) {
+            return;
+        }
+
+        // Use the table's query method to get the record
+        /** @var rex_yform_manager_dataset|null $record */
+        $record = $tableObject->query()->findId($data_id);
+        if ($record) {
+            // For status changes, we want to bypass full validation to avoid issues with
+            // be_manager_relation fields that have empty validation (Issue #166)
+            
+            // Use rex_sql directly to update only the status field
+            $sql = rex_sql::factory();
+            $sql->setTable($tableObject->getTableName());
+            $sql->setWhere('id = :id', ['id' => $data_id]);
+            $sql->setValue('status', $status);
+            
+            if ($sql->update()) {
+                // Reload the record to get updated data
+                $record = $tableObject->query()->findId($data_id);
+                
+                if ($record) {
+                    // NOTE: needed because on yorm save we cannot detect, if the status has changed
+                    // (old data always same as live data)
+                    // @see https://github.com/yakamara/redaxo_yform/issues/1443
+                    rex_extension::registerPoint(
+                        new rex_extension_point(
+                            'YFORM_DATA_STATUS_CHANGED',
+                            null,
+                            [
+                                'data_id' => $data_id,
+                                'table' => $tableObject,
+                                'data' => $record->getData(),
+                                'old_data' => true,
+                            ]
+                        )
+                    );
+                }
             }
         }
 

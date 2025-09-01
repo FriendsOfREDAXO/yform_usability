@@ -44,7 +44,10 @@ if ($openerData) {
 <form action="<?= rex_url::backendPage('yform/manager/data_edit', array_merge($getParams, ['table_name' => $manager->table->getTablename()])) ?>" method="get" onsubmit="return false;" id="yform_usability-search" class="<?= $term != '' ? 'filtered' : '' ?>">
     <div class="form-group">
         <label class="control-label">Suche</label>
-        <select name="yfu-searchfield" class="form-control" onchange="YformUsability.doYformSearch(this, event)">
+        <select name="yfu-searchfield" class="form-control selectpicker" 
+                data-style="btn-default" data-size="8" data-container="body"
+                data-live-search="<?= count($options) > 10 ? 'true' : 'false' ?>"
+                onchange="YformUsability.doYformSearch(this, event)">
             <?php if (count($options) > 1): ?>
                 <option value="<?= implode(',', $optionVals) ?>">- <?= rex_i18n::msg('yform_usability.search_in_all') ?> -</option>
             <?php endif; ?>
