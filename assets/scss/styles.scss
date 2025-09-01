@@ -10,6 +10,14 @@
         font-size: 15px;
         padding: 1px;
     }
+    
+    // Status column minimum width - multiple selectors for better browser support
+    td:has(.status-toggle), 
+    td:has(.status-select),
+    .status-column,
+    td.status-column {
+        min-width: 100px;
+    }
 
     .sort-handle:hover {
         color: #4b9ad9;
@@ -31,6 +39,11 @@
             background: transparent !important;
         }
     }
+}
+
+// Specific YForm checkbox status field minimum width
+.yform-table-field-value-checkbox.yform-table-field-name-status {
+    min-width: 100px;
 }
 
 #yform_usability-search {
