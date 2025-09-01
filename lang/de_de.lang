@@ -19,7 +19,7 @@ yform_label.status_first_column = Status-Spalte am Anfang
 yform_usability_action.duplicate = duplizieren
 
 yform_usability.help_prio = <b>Sortierung per Drag&Drop</b>: die Tabelle benötigt ein Feld vom Typ <code>prio</code>. Außerdem bitte in den Eigenschaften der Tabelle die Sortierung von <code>id</code> auf <code>prio</code> ändern.
-yform_usability.help_status = <b>Status-Toggle für Ein-/Ausschalten per Klick</b>: die Tabelle benötigt ein choice Feld mit dem Feldnamen <code>status</code>. Werte sind frei wählbar (Bsp.: <code>Inaktiv=0,Aktiv=1,Pending=2,zu Erledigen=55</code>). Die Status-Spalte wird automatisch angezeigt, unabhängig von der Sichtbarkeitseinstellung im Table Manager!
+yform_usability.help_status = <b>Status-Toggle für Ein-/Ausschalten per Klick</b>: die Tabelle benötigt ein choice Feld mit dem Feldnamen <code>status</code>. Werte sind frei wählbar (Bsp.: <code>Inaktiv=0,Aktiv=1,Pending=2,zu Erledigen=55</code>). Das Status-Feld muss im Table Manager auf "sichtbar" gesetzt sein!
 yform_usability.help_open_readme = Readme öffnen
 
 yform_usability.media_config = Medien-Vorschau Konfiguration

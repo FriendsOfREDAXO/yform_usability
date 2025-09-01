@@ -79,59 +79,26 @@ class Extensions
             $status_position = 2; // 0 = icon column, 1 = id column
         }
         
-        // Check if table has a status field (regardless of visibility settings)
-        $hasStatusField = false;
-        foreach ($table->getFields() as $field) {
-            if ($field->getName() === 'status') {
-                $hasStatusField = true;
-                break;
-            }
-        }
-        
-        if ($hasStatusField) {
-            // Always add/transform status column when status toggle is enabled
-            if (in_array('status', $list->getColumnNames())) {
-                // Status column already exists - just transform it
-                $list->setColumnFormat(
-                    'status',
-                    'custom',
-                    function ($params) {
-                        $value = $params['list']->getValue('status');
-                        $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
+        // transform existing status column (only if it's already visible in the list)
+        if (in_array('status', $list->getColumnNames())) {
+            $list->setColumnFormat(
+                'status',
+                'custom',
+                function ($params) {
+                    $value = $params['list']->getValue('status');
+                    $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
 
-                        return strtr(
-                            $tparams['element'],
-                            [
-                                '{{ID}}' => $params['list']->getValue('id'),
-                                '{{TABLE}}' => $params['params']['table']->getTableName(),
-                            ]
-                        );
-                    },
-                    ['table' => $table]
-                );
-                $list->setColumnPosition('status', $status_position);
-            } else {
-                // Status column doesn't exist in list (hidden in table manager) - add it
-                $list->addColumn('status', '', $status_position);
-                $list->setColumnLabel('status', rex_i18n::msg('status'));
-                $list->setColumnFormat(
-                    'status',
-                    'custom',
-                    function ($params) {
-                        $value = $params['list']->getValue('status');
-                        $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
-
-                        return strtr(
-                            $tparams['element'],
-                            [
-                                '{{ID}}' => $params['list']->getValue('id'),
-                                '{{TABLE}}' => $params['params']['table']->getTableName(),
-                            ]
-                        );
-                    },
-                    ['table' => $table]
-                );
-            }
+                    return strtr(
+                        $tparams['element'],
+                        [
+                            '{{ID}}' => $params['list']->getValue('id'),
+                            '{{TABLE}}' => $params['params']['table']->getTableName(),
+                        ]
+                    );
+                },
+                ['table' => $table]
+            );
+            $list->setColumnPosition('status', $status_position);
         }
         
         return $list;
