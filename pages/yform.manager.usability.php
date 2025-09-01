@@ -31,7 +31,6 @@ $content = '
     </a>
     <p>' . $this->i18n('yform_usability.help_prio') . '</p>
     <p style="margin-bottom:0">' . $this->i18n('yform_usability.help_status') . '</p>
-    <p><a href="' . rex_url::backendPage('yform/manager/usability/thumbnails') . '" class="btn btn-primary"><i class="fa fa-image"></i> ' . rex_i18n::msg('yform_usability.thumbnail_mappings') . '</a></p>
 ';
 
 $fragment = new rex_fragment();
