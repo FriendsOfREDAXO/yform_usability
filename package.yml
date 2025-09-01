@@ -15,6 +15,10 @@ pages:
     yform/manager/usability:
         title: 'Usability'
         perm: admin[]
+        subpages:
+            thumbnails:
+                title: 'yform_usability.thumbnail_mappings'
+                perm: admin[]
 
 default_config:
     duplicate_tables: NULL

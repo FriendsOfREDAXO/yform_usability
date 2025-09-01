@@ -107,7 +107,26 @@ var YformUsability = (function ($) {
                 onUpdate: function (evt) {
                     var $sortIcon = $(evt.item).find('.sort-icon'),
                         $next = $(evt.from).children(':eq(' + (evt.newIndex + 1) + ')'),
-                        nextId = $next.length ? $next.find('.sort-icon').data('id') : 0;
+                        nextId = 0;
+                        
+                    // Check if element was moved to the end of the current page
+                    if (!$next.length) {
+                        // Element is moved to end of page - check if there are more pages after this one
+                        var $pagination = $('.rex-page').find('.pagination');
+                        var $nextPageLink = $pagination.find('.next:not(.disabled)');
+                        
+                        if ($nextPageLink.length > 0) {
+                            // There are more pages - we need to find the first item of the next page
+                            // For now, set nextId to 0 to use fallback behavior
+                            nextId = 0;
+                        } else {
+                            // This is the last page - element should go to the absolute end
+                            nextId = 0;
+                        }
+                    } else {
+                        // There's a next element on the same page
+                        nextId = $next.find('.sort-icon').data('id');
+                    }
 
                     var url = $sortIcon.data('url');
 
@@ -120,7 +139,10 @@ var YformUsability = (function ($) {
                         table_type: $sortIcon.data('table-type'),
                         table_sort_order: $sortIcon.data('table-sort-order') || null,
                         table_sort_field: $sortIcon.data('table-sort-field') || null,
-                        next_id: nextId
+                        next_id: nextId,
+                        // Add pagination context to help backend understand current page
+                        current_page_start: new URLSearchParams(window.location.search).get('start') || 0,
+                        current_page_amount: $(evt.from).children().length
                     }).done(function (data) {
                         $('#rex-js-ajax-loader').removeClass('rex-visible');
                     });

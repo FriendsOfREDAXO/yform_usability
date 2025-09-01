@@ -125,6 +125,41 @@ class Extensions
         return $list;
     }
 
+    protected static function addThumbnailFormatting($list, $table)
+    {
+        $tableName = $table->getTableName();
+        $thumbnailMappings = ThumbnailManager::getMappingsForTable($tableName);
+        
+        if (empty($thumbnailMappings)) {
+            return $list;
+        }
+        
+        // Get column names from the list
+        $columnNames = $list->getColumnNames();
+        
+        foreach ($thumbnailMappings as $columnName => $mapping) {
+            // Check if this column exists in the list
+            if (!in_array($columnName, $columnNames)) {
+                continue;
+            }
+            
+            $thumbSize = $mapping['thumb_size'] ?? 'rex_thumbnail_default';
+            
+            // Format the column to show thumbnails
+            $list->setColumnFormat(
+                $columnName,
+                'custom',
+                function ($params) use ($thumbSize) {
+                    $filename = $params['list']->getValue($params['params']['column_name']);
+                    return ThumbnailManager::generateThumbnailHtml($filename, $thumbSize);
+                },
+                ['column_name' => $columnName]
+            );
+        }
+        
+        return $list;
+    }
+
     public static function getArrayFromString($string)
     {
         if (is_array($string)) {
@@ -306,6 +341,10 @@ class Extensions
         if ($hasSorting && empty($isOpener) && count($table->getFields(['name' => 'prio']))) {
             $list = self::addDragNDropSort($list, $table);
         }
+        
+        // Add thumbnail formatting for mapped columns
+        $list = self::addThumbnailFormatting($list, $table);
+        
         $ep->setSubject($list);
     }
 
