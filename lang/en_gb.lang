@@ -12,10 +12,11 @@ yform_usability.help_prio = <b>Order via drag&drop</b>: the table needs a field 
 yform_usability.help_status = <b>Change dataset online-status via click</b>: the table needs a choice field with the rowname <code>status</code>, the values are freely selectable (i.e.: <code>Inaktiv=0,Aktiv=1,Pending=2,zu Erledigen=55</code>).
 yform_usability.help_open_readme = open readme
 
-yform_usability.thumbnail_config = Image Preview Configuration
-yform_usability.thumbnail_mappings = Image Preview Mappings
-yform_usability.add_thumbnail_mapping = Add Image Preview
-yform_usability.edit_thumbnail_mapping = Edit Image Preview
+yform_usability.media_config = Media Preview Configuration
+yform_usability.media_preview = Media Preview
+yform_usability.media_mappings = Media Preview Mappings
+yform_usability.add_media_mapping = Add Mapping
+yform_usability.edit_media_mapping = Edit Mapping
 yform_usability.table = Table
 yform_usability.column = Column
 yform_usability.thumbnail_size = Thumbnail Size
@@ -29,7 +30,8 @@ yform_usability.delete = Delete
 yform_usability.abort = Cancel
 yform_usability.edit = Edit
 yform_usability.thumbnail_mapping_exists = Mapping for this table and column already exists
-yform_usability.thumbnail_mapping_added = Image preview mapping was added
-yform_usability.thumbnail_mapping_updated = Image preview mapping was updated
-yform_usability.thumbnail_mapping_deleted = Image preview mapping was deleted
+yform_usability.media_mapping_added = Media preview mapping has been added
+yform_usability.media_mapping_updated = Media preview mapping has been updated
+yform_usability.media_mapping_deleted = Media preview mapping has been deleted
 yform_usability.really_delete = Really delete?
+yform_usability.media_mapping_exists = Mapping for this table and column already exists

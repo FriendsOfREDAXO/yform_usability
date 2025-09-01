@@ -23,7 +23,7 @@ use rex_url;
 use rex_view;
 use rex_yform_manager_table;
 
-echo rex_view::title(rex_i18n::msg('yform') . ' - ' . rex_i18n::msg('yform_usability.thumbnail_config'));
+echo rex_view::title(rex_i18n::msg('yform') . ' - ' . $addon->i18n('media_mappings'));
 
 $addon = rex_addon::get('yform_usability');
 $func = rex_request('func', 'string');
@@ -49,7 +49,7 @@ if ($func == 'add' || $func == 'edit') {
             ]);
             
             if ($sql->getRows() > 0) {
-                echo rex_view::error(rex_i18n::msg('yform_usability.thumbnail_mapping_exists'));
+                echo rex_view::error(rex_i18n::msg('yform_usability.media_mapping_exists'));
             } else {
                 $sql->reset();
                 $sql->setTable(rex::getTable('yform_usability_thumbnails'));
@@ -60,7 +60,7 @@ if ($func == 'add' || $func == 'edit') {
                 
                 try {
                     $sql->insert();
-                    echo rex_view::success(rex_i18n::msg('yform_usability.thumbnail_mapping_added'));
+                    echo rex_view::success(rex_i18n::msg('yform_usability.media_mapping_added'));
                     $func = '';
                 } catch (rex_sql_exception $e) {
                     echo rex_view::error($e->getMessage());
@@ -76,7 +76,7 @@ if ($func == 'add' || $func == 'edit') {
             
             try {
                 $sql->update();
-                echo rex_view::success(rex_i18n::msg('yform_usability.thumbnail_mapping_updated'));
+                echo rex_view::success(rex_i18n::msg('yform_usability.media_mapping_updated'));
                 $func = '';
             } catch (rex_sql_exception $e) {
                 echo rex_view::error($e->getMessage());
@@ -91,7 +91,7 @@ if ($func == 'add' || $func == 'edit') {
         
         try {
             $sql->delete();
-            echo rex_view::success(rex_i18n::msg('yform_usability.thumbnail_mapping_deleted'));
+            echo rex_view::success(rex_i18n::msg('yform_usability.media_mapping_deleted'));
             $func = '';
         } catch (rex_sql_exception $e) {
             echo rex_view::error($e->getMessage());
@@ -151,7 +151,7 @@ if ($func == 'add' || $func == 'edit') {
     }
     
     echo '<fieldset>';
-    echo '<legend>' . rex_i18n::msg($func == 'add' ? 'yform_usability.add_thumbnail_mapping' : 'yform_usability.edit_thumbnail_mapping') . '</legend>';
+    echo '<legend>' . rex_i18n::msg($func == 'add' ? 'yform_usability.add_media_mapping' : 'yform_usability.edit_media_mapping') . '</legend>';
     
     echo '<div class="rex-form-row">';
     echo '<p class="rex-form-col-a rex-form-select">';
@@ -224,7 +224,7 @@ if ($func == 'add' || $func == 'edit') {
     echo '<div class="rex-toolbar">';
     echo '<div class="rex-toolbar-content">';
     echo '<a class="btn btn-primary" href="' . rex_url::currentBackendPage(['func' => 'add']) . '">';
-    echo '<i class="rex-icon rex-icon-add-action"></i> ' . rex_i18n::msg('yform_usability.add_thumbnail_mapping');
+    echo '<i class="rex-icon rex-icon-add-action"></i> ' . rex_i18n::msg('yform_usability.add_media_mapping');
     echo '</a>';
     echo '</div>';
     echo '</div>';

@@ -22,10 +22,11 @@ yform_usability.help_prio = <b>Sortierung per Drag&Drop</b>: die Tabelle benöti
 yform_usability.help_status = <b>Datensätze per Klick online / offline schalten</b>: die Tabelle benötigt ein choice Feld mit dem Feldnamen <code>status</code>. Werte sind frei wählbar (Bsp.: <code>Inaktiv=0,Aktiv=1,Pending=2,zu Erledigen=55</code>)!
 yform_usability.help_open_readme = Readme öffnen
 
-yform_usability.thumbnail_config = Bild-Vorschau Konfiguration
-yform_usability.thumbnail_mappings = Bild-Vorschau Zuordnungen
-yform_usability.add_thumbnail_mapping = Bild-Vorschau hinzufügen
-yform_usability.edit_thumbnail_mapping = Bild-Vorschau bearbeiten
+yform_usability.media_config = Medien-Vorschau Konfiguration
+yform_usability.media_preview = Medien-Vorschau
+yform_usability.media_mappings = Medien-Vorschau Zuordnungen
+yform_usability.add_media_mapping = Zuordnung hinzufügen
+yform_usability.edit_media_mapping = Zuordnung bearbeiten
 yform_usability.table = Tabelle
 yform_usability.column = Spalte
 yform_usability.thumbnail_size = Vorschau-Größe
@@ -39,7 +40,8 @@ yform_usability.delete = Löschen
 yform_usability.abort = Abbrechen
 yform_usability.edit = Bearbeiten
 yform_usability.thumbnail_mapping_exists = Mapping für diese Tabelle und Spalte existiert bereits
-yform_usability.thumbnail_mapping_added = Bild-Vorschau Zuordnung wurde hinzugefügt
-yform_usability.thumbnail_mapping_updated = Bild-Vorschau Zuordnung wurde aktualisiert
-yform_usability.thumbnail_mapping_deleted = Bild-Vorschau Zuordnung wurde gelöscht
+yform_usability.media_mapping_added = Medien-Vorschau Zuordnung wurde hinzugefügt
+yform_usability.media_mapping_updated = Medien-Vorschau Zuordnung wurde aktualisiert
+yform_usability.media_mapping_deleted = Medien-Vorschau Zuordnung wurde gelöscht
 yform_usability.really_delete = Wirklich löschen?
+yform_usability.media_mapping_exists = Mapping für diese Tabelle und Spalte existiert bereits
