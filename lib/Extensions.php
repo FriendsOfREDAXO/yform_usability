@@ -99,9 +99,6 @@ class Extensions
                 ['table' => $table]
             );
             $list->setColumnPosition('status', $status_position);
-            
-            // Add CSS class for status column minimum width
-            $list->setColumnAttributes('status', ['class' => 'status-column']);
         }
         
         return $list;
