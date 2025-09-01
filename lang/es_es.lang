@@ -1,6 +1,6 @@
 yform_usability.search_in_all = Buscar en todo
 
-yform_label.online_status = Mostrar estado en línea/fuera de línea
+yform_label.online_status = Activar alternador de estado
 yform_label.sorting = Clasificación activa
 yform_label.duplication = Duplicación activa
 yform_label.all = Todos
