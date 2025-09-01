@@ -108,47 +108,74 @@ class ThumbnailManager
 
             $media = rex_media::get($singleFilename);
             if (!$media) {
-                $thumbnails[] = '<span class="text-muted yform-usability-thumbnail-file">' . htmlspecialchars($singleFilename) . ' <small>(nicht gefunden)</small></span>';
+                $thumbnails[] = '<span class="text-muted yform-usability-thumbnail-file" title="' . htmlspecialchars($singleFilename) . ' (nicht gefunden)">' . htmlspecialchars($singleFilename) . ' <small>(nicht gefunden)</small></span>';
                 continue;
             }
 
             $isImage = $media->isImage();
+            $mediapoolUrl = rex_url::backendController(['page' => 'mediapool/media', 'file_name' => $singleFilename]);
             
             if ($isImage) {
                 if ($thumbSize === 'rex_thumbnail_default') {
                     // Use REDAXO's default thumbnail with better sizing
                     $thumbUrl = rex_url::media($singleFilename);
-                    $thumbnails[] = '<img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" title="' . htmlspecialchars($singleFilename) . '">';
+                    $thumbnails[] = '<a href="' . htmlspecialchars($mediapoolUrl) . '" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" target="_blank"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
                 } else {
                     // Use Media Manager type
                     if (rex_addon::get('media_manager')->isAvailable()) {
                         $thumbUrl = rex_url::frontend('media/' . $thumbSize . '/' . $singleFilename);
-                        $thumbnails[] = '<img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" title="' . htmlspecialchars($singleFilename) . '">';
+                        $thumbnails[] = '<a href="' . htmlspecialchars($mediapoolUrl) . '" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" target="_blank"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
                     } else {
                         // Fallback to original file
                         $thumbUrl = rex_url::media($singleFilename);
-                        $thumbnails[] = '<img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" title="' . htmlspecialchars($singleFilename) . '">';
+                        $thumbnails[] = '<a href="' . htmlspecialchars($mediapoolUrl) . '" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" target="_blank"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
                     }
                 }
             } else {
-                // Not an image - show filename with file type icon
+                // Not an image - show Font Awesome 6 icon with media pool link
                 $extension = strtolower(pathinfo($singleFilename, PATHINFO_EXTENSION));
-                $iconClass = match($extension) {
-                    'pdf' => 'fa-file-pdf-o',
-                    'doc', 'docx' => 'fa-file-word-o',
-                    'xls', 'xlsx' => 'fa-file-excel-o',
-                    'ppt', 'pptx' => 'fa-file-powerpoint-o',
-                    'zip', 'rar', '7z' => 'fa-file-archive-o',
-                    'mp4', 'avi', 'mov' => 'fa-file-video-o',
-                    'mp3', 'wav', 'ogg' => 'fa-file-audio-o',
-                    'txt' => 'fa-file-text-o',
-                    default => 'fa-file-o'
-                };
-                $thumbnails[] = '<span class="text-muted yform-usability-thumbnail-file" style="display: inline-block; margin: 2px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; background: #f9f9f9; min-width: 60px; text-align: center;"><i class="fa ' . $iconClass . '"></i><br><small>' . htmlspecialchars(basename($singleFilename)) . '</small></span>';
+                $iconClass = self::getFileIcon($extension);
+                $thumbnails[] = '<a href="' . htmlspecialchars($mediapoolUrl) . '" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" target="_blank" class="yform-usability-thumbnail-file-link" style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; background: #f8f9fa; text-decoration: none; color: #6c757d; transition: all 0.2s;"><i class="' . $iconClass . '" style="font-size: 24px;"></i></a>';
             }
         }
 
         return '<div class="yform-usability-thumbnails">' . implode(' ', $thumbnails) . '</div>';
+    }
+
+    /**
+     * Get Font Awesome 6 icon class for file extension
+     */
+    private static function getFileIcon(string $extension): string
+    {
+        return match($extension) {
+            // Documents
+            'pdf' => 'fa-regular fa-file-pdf',
+            'doc', 'docx' => 'fa-regular fa-file-word',
+            'xls', 'xlsx' => 'fa-regular fa-file-excel',
+            'ppt', 'pptx' => 'fa-regular fa-file-powerpoint',
+            'txt', 'rtf' => 'fa-regular fa-file-lines',
+            
+            // Archives
+            'zip', 'rar', '7z', 'tar', 'gz', 'bz2' => 'fa-regular fa-file-zipper',
+            
+            // Media
+            'mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv' => 'fa-regular fa-file-video',
+            'mp3', 'wav', 'ogg', 'flac', 'aac', 'wma' => 'fa-regular fa-file-audio',
+            'svg' => 'fa-regular fa-file-image',
+            
+            // Code
+            'html', 'htm' => 'fa-regular fa-file-code',
+            'css', 'scss', 'sass', 'less' => 'fa-regular fa-file-code',
+            'js', 'ts', 'jsx', 'tsx' => 'fa-regular fa-file-code',
+            'php', 'py', 'rb', 'java', 'c', 'cpp', 'cs' => 'fa-regular fa-file-code',
+            'xml', 'json', 'yml', 'yaml' => 'fa-regular fa-file-code',
+            
+            // Images (shouldn't occur here, but just in case)
+            'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff' => 'fa-regular fa-file-image',
+            
+            // Default
+            default => 'fa-regular fa-file'
+        };
     }
 
     /**

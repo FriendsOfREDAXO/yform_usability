@@ -16,7 +16,7 @@ pages:
         title: 'Usability'
         perm: admin[]
     yform/manager/usability_thumbnails:
-        title: 'yform_usability.thumbnail_mappings'
+        title: 'translate:yform_usability.thumbnail_mappings'
         perm: admin[]
 
 default_config:
