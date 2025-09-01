@@ -23,9 +23,10 @@ use rex_url;
 use rex_view;
 use rex_yform_manager_table;
 
+$addon = rex_addon::get('yform_usability');
+
 echo rex_view::title(rex_i18n::msg('yform') . ' - ' . $addon->i18n('media_mappings'));
 
-$addon = rex_addon::get('yform_usability');
 $func = rex_request('func', 'string');
 $table_name = rex_request('table_name', 'string');
 
