@@ -113,29 +113,37 @@ class ThumbnailManager
             }
 
             $isImage = $media->isImage();
-            $mediapoolUrl = rex_url::backendController(['page' => 'mediapool/media', 'file_name' => $singleFilename]);
+            $mediaId = $media->getId();
+            $categoryId = $media->getCategoryId();
+            
+            // REDAXO-style popup URL with media ID
+            $mediapoolUrl = rex_url::backendController([
+                'page' => 'mediapool/media', 
+                'file_id' => $mediaId, 
+                'rex_file_category' => $categoryId
+            ]);
             
             if ($isImage) {
                 if ($thumbSize === 'rex_thumbnail_default') {
                     // Use REDAXO's default thumbnail with better sizing
                     $thumbUrl = rex_url::media($singleFilename);
-                    $thumbnails[] = '<a href="' . htmlspecialchars($mediapoolUrl) . '" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" target="_blank"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
+                    $thumbnails[] = '<a href="javascript:void(0)" onclick="openMediaDetails(\'\', ' . $mediaId . ', ' . $categoryId . ')" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" class="yform-usability-thumbnail-image-link"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
                 } else {
                     // Use Media Manager type
                     if (rex_addon::get('media_manager')->isAvailable()) {
                         $thumbUrl = rex_url::frontend('media/' . $thumbSize . '/' . $singleFilename);
-                        $thumbnails[] = '<a href="' . htmlspecialchars($mediapoolUrl) . '" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" target="_blank"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
+                        $thumbnails[] = '<a href="javascript:void(0)" onclick="openMediaDetails(\'\', ' . $mediaId . ', ' . $categoryId . ')" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" class="yform-usability-thumbnail-image-link"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
                     } else {
                         // Fallback to original file
                         $thumbUrl = rex_url::media($singleFilename);
-                        $thumbnails[] = '<a href="' . htmlspecialchars($mediapoolUrl) . '" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" target="_blank"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
+                        $thumbnails[] = '<a href="javascript:void(0)" onclick="openMediaDetails(\'\', ' . $mediaId . ', ' . $categoryId . ')" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" class="yform-usability-thumbnail-image-link"><img src="' . htmlspecialchars($thumbUrl) . '" alt="' . htmlspecialchars($singleFilename) . '" style="width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover;" class="yform-usability-thumbnail-image"></a>';
                     }
                 }
             } else {
                 // Not an image - show Font Awesome 6 icon with media pool link
                 $extension = strtolower(pathinfo($singleFilename, PATHINFO_EXTENSION));
                 $iconClass = self::getFileIcon($extension);
-                $thumbnails[] = '<a href="' . htmlspecialchars($mediapoolUrl) . '" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" target="_blank" class="yform-usability-thumbnail-file-link" style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; background: #f8f9fa; text-decoration: none; color: #6c757d; transition: all 0.2s;"><i class="' . $iconClass . '" style="font-size: 24px;"></i></a>';
+                $thumbnails[] = '<a href="javascript:void(0)" onclick="openMediaDetails(\'\', ' . $mediaId . ', ' . $categoryId . ')" title="' . htmlspecialchars($singleFilename) . ' - Im Medienpool bearbeiten" class="yform-usability-thumbnail-file-link" style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; background: #f8f9fa; text-decoration: none; color: #6c757d; transition: all 0.2s;"><i class="' . $iconClass . '" style="font-size: 24px;"></i></a>';
             }
         }
 
