@@ -29,6 +29,11 @@ class rex_yform_value_data_dump extends rex_yform_value_abstract
         }
     }
 
+    public function getDescription(): string
+    {
+        return 'data_dump|name|label|notice|';
+    }
+
     public function getDefinitions($values = []): array
     {
         return [

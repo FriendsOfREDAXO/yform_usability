@@ -1,6 +1,29 @@
-yform_label.online_status = Visualizza online/offline stato
+yform_label.online_status = Attiva interruttore di stato
 yform_label.sorting = Ordinamento attivato
 yform_label.duplication = Duplicazione attiva
 yform_label.all = Tutti
+yform_label.status_first_column = Colonna stato prima
 
 yform_usability_action.duplicate = duplicare
+
+yform_usability.thumbnail_config = Configurazione Anteprima Immagine
+yform_usability.thumbnail_mappings = Mappature Anteprime
+yform_usability.add_thumbnail_mapping = Aggiungi Anteprima
+yform_usability.edit_thumbnail_mapping = Modifica Anteprima
+yform_usability.table = Tabella
+yform_usability.column = Colonna
+yform_usability.thumbnail_size = Dimensione Miniatura
+yform_usability.select_table = Seleziona Tabella
+yform_usability.column_help = Nome della colonna che contiene campi media (es. "image", "gallery", "media")
+yform_usability.default_thumbnail = Miniatura Predefinita
+yform_usability.createdate = Creato
+yform_usability.updatedate = Aggiornato
+yform_usability.save = Salva
+yform_usability.delete = Elimina
+yform_usability.abort = Annulla
+yform_usability.edit = Modifica
+yform_usability.thumbnail_mapping_exists = Esiste già una mappatura per questa tabella e colonna
+yform_usability.thumbnail_mapping_added = Mappatura anteprima aggiunta
+yform_usability.thumbnail_mapping_updated = Mappatura anteprima aggiornata
+yform_usability.thumbnail_mapping_deleted = Mappatura anteprima eliminata
+yform_usability.really_delete = Eliminare veramente?

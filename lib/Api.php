@@ -45,26 +45,46 @@ class rex_api_yform_usability_api extends rex_api_function
         $data_id = (int) rex_post('data_id', 'int');
         $table = rex_post('table', 'string');
 
-        /** @var rex_yform_manager_dataset|null $modelClass */
-        $modelClass = rex_yform_manager_dataset::get($data_id, $table);
-        if ($modelClass) {
-            $modelClass->setValue('status', $status);
-            if ($modelClass->save()) {
-                // NOTE: needed because on yorm save we cannot detect, if the status has changed
-                // (old data always same as live data)
-                // @see https://github.com/yakamara/redaxo_yform/issues/1443
-                rex_extension::registerPoint(
-                    new rex_extension_point(
-                        'YFORM_DATA_STATUS_CHANGED',
-                        null,
-                        [
-                            'data_id' => $data_id,
-                            'table' => rex_yform_manager_table::get($table),
-                            'data' => $modelClass->getData(),
-                            'old_data' => true,
-                        ]
-                    )
-                );
+        // Get the YForm table object
+        $tableObject = rex_yform_manager_table::get($table);
+        if (!$tableObject) {
+            return;
+        }
+
+        // Use the table's query method to get the record
+        /** @var rex_yform_manager_dataset|null $record */
+        $record = $tableObject->query()->findId($data_id);
+        if ($record) {
+            // For status changes, we want to bypass full validation to avoid issues with
+            // be_manager_relation fields that have empty validation (Issue #166)
+            
+            // Use rex_sql directly to update only the status field
+            $sql = rex_sql::factory();
+            $sql->setTable($tableObject->getTableName());
+            $sql->setWhere('id = :id', ['id' => $data_id]);
+            $sql->setValue('status', $status);
+            
+            if ($sql->update()) {
+                // Reload the record to get updated data
+                $record = $tableObject->query()->findId($data_id);
+                
+                if ($record) {
+                    // NOTE: needed because on yorm save we cannot detect, if the status has changed
+                    // (old data always same as live data)
+                    // @see https://github.com/yakamara/redaxo_yform/issues/1443
+                    rex_extension::registerPoint(
+                        new rex_extension_point(
+                            'YFORM_DATA_STATUS_CHANGED',
+                            null,
+                            [
+                                'data_id' => $data_id,
+                                'table' => $tableObject,
+                                'data' => $record->getData(),
+                                'old_data' => true,
+                            ]
+                        )
+                    );
+                }
             }
         }
 
@@ -130,7 +150,45 @@ class rex_api_yform_usability_api extends rex_api_function
                 if ($next_id) {
                     $prio = $tableobject->query()->findId($next_id)->getValue('prio');
                 } else {
-                    $prio = $tableobject->query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne()->getValue('prio');
+                    // Check if we have pagination context from frontend
+                    $currentPageStart = (int) rex_post('current_page_start', 'int', 0);
+                    $currentPageAmount = (int) rex_post('current_page_amount', 'int', 0);
+                    
+                    if ($currentPageAmount > 0) {
+                        // We have pagination context - get the priority that should be after the last item on current page
+                        // First, get all items with proper filtering and ordering
+                        $query = $tableobject->query()->orderBy('prio', $sort);
+                        
+                        // Apply existing filters if any
+                        if (!empty($filter)) {
+                            foreach ($filter as $filterCondition) {
+                                $query->whereRaw($filterCondition);
+                            }
+                        }
+                        
+                        $allItems = $query->find();
+                        
+                        if (!empty($allItems)) {
+                            // Calculate which item should come after the current page's last position
+                            $targetIndex = $currentPageStart + $currentPageAmount - 1; // -1 because we want the last item of current page
+                            
+                            if ($targetIndex < count($allItems)) {
+                                // Use the priority of the item that's currently at the target position
+                                $targetItem = $allItems[$targetIndex];
+                                $prio = $targetItem->getValue('prio');
+                            } else {
+                                // Element should go to absolute end - get the highest priority
+                                $lastItem = end($allItems);
+                                $prio = $lastItem->getValue('prio');
+                            }
+                        } else {
+                            // Fallback to original behavior if no items found
+                            $prio = $tableobject->query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne()->getValue('prio');
+                        }
+                    } else {
+                        // No pagination context - use original behavior (last item of entire table)
+                        $prio = $tableobject->query()->orderBy('prio', $sort == 'asc' ? 'desc' : 'asc')->findOne()->getValue('prio');
+                    }
                 }
             }
             try {

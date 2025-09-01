@@ -39,8 +39,8 @@ class Extensions
     {
         rex_extension::register('YFORM_DATA_UPDATED', self::ext__dataUpdated(...));
 
-        rex_extension::register('PACKAGES_INCLUDED', function (){
-            if (rex_request('rex-api-call', 'string') == 'yform_usability_api') {
+        rex_extension::register('PACKAGES_INCLUDED', function () {
+            if (rex_request('rex-api-call', 'string') === 'yform_usability_api') {
                 // api endpoint
                 $api_result = rex_api_yform_usability_api::factory();
 
@@ -65,25 +65,42 @@ class Extensions
 
     protected static function addStatusToggle($list, $table): rex_yform_list
     {
-        $list->addColumn('status_toggle', '', count($list->getColumnNames()));
-        $list->setColumnLabel('status_toggle', $list->getColumnLabel('status', rex_i18n::msg('status')));
-        $list->setColumnFormat(
-            'status_toggle',
-            'custom',
-            function ($params) {
-                $value   = $params['list']->getValue('status');
-                $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
+        $config = Usability::getConfig(); // load settings
+        $status_position = count($list->getColumnNames()); // default: column position at the end
+        
+        // get all yform table manager tablenames
+        $tables = [];
+        foreach (rex_yform_manager_table::getAll() as $yform_table) {
+            $tables[] = $yform_table->getTableName();
+        }
+        
+        // move columns of all/selected tables if conditions are met
+        if ($config['status_first_column_all'] === '|1|' || in_array($table->getTableName(), explode('|', trim($config['status_first_column_tables'] ?? '', '|')))) {
+            $status_position = 2; // 0 = icon column, 1 = id column
+        }
+        
+        // transform existing status column (only if it's already visible in the list)
+        if (in_array('status', $list->getColumnNames())) {
+            $list->setColumnFormat(
+                'status',
+                'custom',
+                function ($params) {
+                    $value = $params['list']->getValue('status');
+                    $tparams = Utils::getStatusColumnParams($params['params']['table'], $value, $params['list']);
 
-                return strtr(
-                    $tparams['element'],
-                    [
-                        '{{ID}}'    => $params['list']->getValue('id'),
-                        '{{TABLE}}' => $params['params']['table']->getTableName(),
-                    ]
-                );
-            },
-            ['table' => $table]
-        );
+                    return strtr(
+                        $tparams['element'],
+                        [
+                            '{{ID}}' => $params['list']->getValue('id'),
+                            '{{TABLE}}' => $params['params']['table']->getTableName(),
+                        ]
+                    );
+                },
+                ['table' => $table]
+            );
+            $list->setColumnPosition('status', $status_position);
+        }
+        
         return $list;
     }
 
@@ -93,7 +110,7 @@ class Extensions
         $orderBy      = rex_get('sort', 'string', $table->getSortFieldName());
 
 
-        if ($firstColName != 'id' && $orderBy == 'prio') {
+        if ($firstColName != 'id' && $orderBy === 'prio') {
             $list->addFormAttribute('class', 'sortable-list');
             $list->setColumnFormat(
                 $firstColName,
@@ -122,6 +139,41 @@ class Extensions
                 ['table' => $table]
             );
         }
+        return $list;
+    }
+
+    protected static function addThumbnailFormatting($list, $table)
+    {
+        $tableName = $table->getTableName();
+        $thumbnailMappings = ThumbnailManager::getMappingsForTable($tableName);
+        
+        if (empty($thumbnailMappings)) {
+            return $list;
+        }
+        
+        // Get column names from the list
+        $columnNames = $list->getColumnNames();
+        
+        foreach ($thumbnailMappings as $columnName => $mapping) {
+            // Check if this column exists in the list
+            if (!in_array($columnName, $columnNames)) {
+                continue;
+            }
+            
+            $thumbSize = $mapping['thumb_size'] ?? 'rex_thumbnail_default';
+            
+            // Format the column to show thumbnails
+            $list->setColumnFormat(
+                $columnName,
+                'custom',
+                function ($params) use ($thumbSize) {
+                    $filename = $params['list']->getValue($params['params']['column_name']);
+                    return ThumbnailManager::generateThumbnailHtml($filename, $thumbSize);
+                },
+                ['column_name' => $columnName]
+            );
+        }
+        
         return $list;
     }
 
@@ -156,7 +208,7 @@ class Extensions
         $list    = $ep->getSubject();
         $lparams = $list->getParams();
 
-        if ($lparams['page'] == 'yform/manager/table_field') {
+        if ($lparams['page'] === 'yform/manager/table_field') {
             $list->addFormAttribute('class', 'sortable-list');
 
             $firstColName = current($list->getColumnNames());
@@ -230,7 +282,7 @@ class Extensions
         $manager = $ep->getSubject();
         $config = Usability::getConfig();
 
-        $hasSearch = $config['use_inline_search'] == '|1|' || in_array(
+        $hasSearch = $config['use_inline_search'] === '|1|' || in_array(
                 $manager->table->getTableName(),
                 explode(
                     '|',
@@ -263,21 +315,21 @@ class Extensions
 
         $list->addFormAttribute('class', 'table-responsive');
 
-        $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
+        $hasDuplicate = $config['duplicate_tables_all'] === '|1|' || in_array(
             $tableName,
             explode(
                 '|',
                 trim($config['duplicate_tables'] ?? '', '|')
             )
         );
-        $hasStatus    = $config['status_tables_all'] == '|1|' || in_array(
+        $hasStatus    = $config['status_tables_all'] === '|1|' || in_array(
             $tableName,
             explode(
                 '|',
                 trim($config['status_tables'] ?? '', '|')
             )
         );
-        $hasSorting   = $config['sorting_tables_all'] == '|1|' || in_array(
+        $hasSorting   = $config['sorting_tables_all'] === '|1|' || in_array(
             $tableName,
             explode(
                 '|',
@@ -306,6 +358,10 @@ class Extensions
         if ($hasSorting && empty($isOpener) && count($table->getFields(['name' => 'prio']))) {
             $list = self::addDragNDropSort($list, $table);
         }
+        
+        // Add thumbnail formatting for mapped columns
+        $list = self::addThumbnailFormatting($list, $table);
+        
         $ep->setSubject($list);
     }
 
@@ -323,7 +379,7 @@ class Extensions
         $config         = rex_addon::get('yform_usability')->getConfig(null, $default_config);
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
-        $hasDuplicate = $config['duplicate_tables_all'] == '|1|' || in_array(
+        $hasDuplicate = $config['duplicate_tables_all'] === '|1|' || in_array(
             $table->getTableName(),
             explode(
                 '|',
@@ -356,18 +412,18 @@ class Extensions
         if ($isDetailPage) {
             return;
         }
-        $isYFormEditPage = rex_get('page', 'string', '') == 'yform/manager/data_edit';
+        $isYFormEditPage = rex_get('page', 'string', '') === 'yform/manager/data_edit';
         if (!$isYFormEditPage) {
             return;
         }
 
 
         // TODO convert where queries into yorm
-        if (rex_request('yfu-action', 'string') == 'search') {
+        if (rex_request('yfu-action', 'string') === 'search') {
             $term = trim(rex_request('yfu-term', 'string'));
 
             if ($term != '') {
-                $isEmptyTerm = $term == '!' || $term == '#';
+                $isEmptyTerm = $term === '!' || $term === '#';
                 $listSql     = $ep->getSubject();
                 $tableName   = $listSql->getTableName();
                 $table       = rex_yform_manager_table::get($tableName);
@@ -380,7 +436,7 @@ class Extensions
                     $field = !empty($table->getFields(['name' => $fieldname])) ? $table->getFields(['name' => $fieldname])[0] : null;
 
                     if ($field) {
-                        if ($field->getTypename() == 'be_manager_relation') {
+                        if ($field->getTypename() === 'be_manager_relation') {
                             if ($isEmptyTerm) {
                                 $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
                             } else {
@@ -409,20 +465,20 @@ class Extensions
                                 $relWhere = $relWhere ?: [-1];
                                 $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
                             }
-                        } elseif ($field->getTypename() == 'choice') {
+                        } elseif ($field->getTypename() === 'choice') {
                             if ($isEmptyTerm) {
                                 $_term = '""';
                             } else {
                                 $list    = new rex_yform_choice_list([]);
                                 $choices = $field->getElement('choices');
 
-                                if (is_string($choices) && rex_sql::getQueryType($choices) == 'SELECT') {
+                                if (is_string($choices) && rex_sql::getQueryType($choices) === 'SELECT') {
                                     $list->createListFromSqlArray($sql->getArray($choices));
                                 } elseif (is_string($choices) && strlen(trim($choices)) > 0 && substr(
                                     trim($choices),
                                     0,
                                     1
-                                ) == '{') {
+                                ) === '{') {
                                     $list->createListFromJson($choices);
                                 } else {
                                     $list->createListFromStringArray(self::getArrayFromString($choices));
@@ -453,7 +509,7 @@ class Extensions
                                 $_term = $sql->escape('%' . $term . '%');
                             }
                             $where[] = $sql->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
-                        } elseif ($field->getTypename() == 'be_link') {
+                        } elseif ($field->getTypename() === 'be_link') {
                             if ($isEmptyTerm) {
                                 $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
                             } else {
@@ -485,7 +541,7 @@ class Extensions
                             $_term   = $isEmptyTerm ? '""' : $sql->escape('%' . $term . '%');
                             $where[] = $sql->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
                         }
-                    } elseif ($fieldname == 'id') {
+                    } elseif ($fieldname === 'id') {
                         $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape($term);
                     }
                 }

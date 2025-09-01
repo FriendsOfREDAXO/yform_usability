@@ -1,12 +1,37 @@
 yform_usability.search_in_all = in all
 
-yform_label.online_status = Show online/offline state
+yform_label.online_status = Enable status toggle
 yform_label.sorting = Sorting active
 yform_label.duplication = Duplication active
 yform_label.all = All
+yform_label.status_first_column = State column first
 
 yform_usability_action.duplicate = duplicate
 
 yform_usability.help_prio = <b>Order via drag&drop</b>: the table needs a field of typ <code>prio</code>. Please change the table's default order from <code>id</code> to <code>prio</code>.
-yform_usability.help_status = <b>Change dataset online-status via click</b>: the table needs a choice field with the rowname <code>status</code>, the values are freely selectable (i.e.: <code>Inaktiv=0,Aktiv=1,Pending=2,zu Erledigen=55</code>).
+yform_usability.help_status = <b>Status toggle for click-based switching</b>: the table needs a choice field with the rowname <code>status</code>, the values are freely selectable (i.e.: <code>Inactive=0,Active=1,Pending=2,To Do=55</code>). The status field must be set to "visible" in the Table Manager!
 yform_usability.help_open_readme = open readme
+
+yform_usability.media_config = Media Preview Configuration
+yform_usability.media_preview = Media Preview
+yform_usability.media_mappings = Media Preview Mappings
+yform_usability.add_media_mapping = Add Mapping
+yform_usability.edit_media_mapping = Edit Mapping
+yform_usability.table = Table
+yform_usability.column = Column
+yform_usability.thumbnail_size = Thumbnail Size
+yform_usability.select_table = Select Table
+yform_usability.column_help = Name of the column that contains media fields (e.g. "image", "gallery", "media")
+yform_usability.default_thumbnail = Default Thumbnail
+yform_usability.createdate = Created
+yform_usability.updatedate = Updated
+yform_usability.save = Save
+yform_usability.delete = Delete
+yform_usability.abort = Cancel
+yform_usability.edit = Edit
+yform_usability.thumbnail_mapping_exists = Mapping for this table and column already exists
+yform_usability.media_mapping_added = Media preview mapping has been added
+yform_usability.media_mapping_updated = Media preview mapping has been updated
+yform_usability.media_mapping_deleted = Media preview mapping has been deleted
+yform_usability.really_delete = Really delete?
+yform_usability.media_mapping_exists = Mapping for this table and column already exists

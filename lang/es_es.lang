@@ -1,12 +1,35 @@
 yform_usability.search_in_all = Buscar en todo
 
-yform_label.online_status = Mostrar estado en línea/fuera de línea
+yform_label.online_status = Activar alternador de estado
 yform_label.sorting = Clasificación activa
 yform_label.duplication = Duplicación activa
 yform_label.all = Todos
+yform_label.status_first_column = Primero la columna de estado
 
 yform_usability_action.duplicate = duplicar
 
 yform_usability.help_prio = <b>Ordenar por arrastrar y soltar </b>: la tabla necesita un campo de tipo <code>prio</code>. Además, en las propiedades de la tabla, cambie la clasificación de <code>id</code> a <code>prio</code>.
 yform_usability.help_status = <b>Cambiar el estado en línea del conjunto de datos mediante el clic</b>: la tabla necesita un campo de tipo choice con el nombre de fila <code>estado</code>, los valores deben ser <code>0</code> y <code>1</code>.
 yform_usability.help_open_readme = Lecturas abiertas
+
+yform_usability.thumbnail_config = Configuración de Vista Previa de Imagen
+yform_usability.thumbnail_mappings = Asignaciones de Vista Previa
+yform_usability.add_thumbnail_mapping = Agregar Vista Previa
+yform_usability.edit_thumbnail_mapping = Editar Vista Previa
+yform_usability.table = Tabla
+yform_usability.column = Columna
+yform_usability.thumbnail_size = Tamaño de Miniatura
+yform_usability.select_table = Seleccionar Tabla
+yform_usability.column_help = Nombre de la columna que contiene campos de medios (ej. "image", "gallery", "media")
+yform_usability.default_thumbnail = Miniatura Por Defecto
+yform_usability.createdate = Creado
+yform_usability.updatedate = Actualizado
+yform_usability.save = Guardar
+yform_usability.delete = Eliminar
+yform_usability.abort = Cancelar
+yform_usability.edit = Editar
+yform_usability.thumbnail_mapping_exists = Ya existe una asignación para esta tabla y columna
+yform_usability.thumbnail_mapping_added = Se agregó la asignación de vista previa
+yform_usability.thumbnail_mapping_updated = Se actualizó la asignación de vista previa
+yform_usability.thumbnail_mapping_deleted = Se eliminó la asignación de vista previa
+yform_usability.really_delete = ¿Eliminar realmente?

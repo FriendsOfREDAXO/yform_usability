@@ -15,6 +15,7 @@ namespace yform\usability;
 
 use rex;
 use rex_sql_column;
+use rex_sql_index;
 use rex_sql_table;
 
 rex_sql_table::get(rex::getTable('yform_table'))
@@ -32,4 +33,16 @@ rex_sql_table::get(rex::getTable('yform_field'))
     ->ensureColumn(new rex_sql_column('createuser', 'varchar(191)'))
     ->ensureColumn(new rex_sql_column('updateuser', 'varchar(191)'))
     ->alter();
+
+// Create thumbnail mappings table
+rex_sql_table::get(rex::getTable('yform_usability_thumbnails'))
+    ->ensureColumn(new rex_sql_column('id', 'int(11)', false, null, 'auto_increment'))
+    ->ensureColumn(new rex_sql_column('table_name', 'varchar(255)'))
+    ->ensureColumn(new rex_sql_column('column_name', 'varchar(255)'))
+    ->ensureColumn(new rex_sql_column('thumb_size', 'varchar(255)', false, 'rex_thumbnail_default'))
+    ->ensureColumn(new rex_sql_column('createdate', 'datetime'))
+    ->ensureColumn(new rex_sql_column('updatedate', 'datetime', true))
+    ->setPrimaryKey('id')
+    ->ensureIndex(new rex_sql_index('table_column', ['table_name', 'column_name'], rex_sql_index::UNIQUE))
+    ->ensure();
 

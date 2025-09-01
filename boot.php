@@ -44,11 +44,13 @@ if (rex::isBackend() && rex::getUser()) {
 
         rex_file::copy($addon->getPath('assets/vendor/Sortable.min.js'), $addon->getAssetsPath('vendor/Sortable.min.js'));
         rex_file::copy($addon->getPath('assets/script.js'), $addon->getAssetsPath('script.js'));
+        rex_file::copy($addon->getPath('assets/yform-usability.css'), $addon->getAssetsPath('yform-usability.css'));
     }
 
     rex_view::setJsProperty('ajax_url', rex_url::frontendController(
         rex_csrf_token::factory('rex_api_yform_usability_api')->getUrlParams()));
     rex_view::addCssFile($addon->getAssetsUrl('styles.css?mtime=' . filemtime($addon->getAssetsPath('styles.css'))));
+    rex_view::addCssFile($addon->getAssetsUrl('yform-usability.css?mtime=' . filemtime($addon->getAssetsPath('yform-usability.css'))));
 
     switch (rex_be_controller::getCurrentPagePart(1)) {
         case 'content':
@@ -56,6 +58,11 @@ if (rex::isBackend() && rex::getUser()) {
         default:
             rex_view::addJsFile($addon->getAssetsUrl('vendor/Sortable.min.js?mtime=' . filemtime($addon->getAssetsPath('script.js'))));
             rex_view::addJsFile($addon->getAssetsUrl('script.js?mtime=' . filemtime($addon->getAssetsPath('script.js'))));
+            
+            // Add mediapool JavaScript if available (for thumbnail popup functionality)
+            if (rex_addon::get('mediapool')->isAvailable()) {
+                rex_view::addJsFile(rex_addon::get('mediapool')->getAssetsUrl('mediapool.js'));
+            }
             break;
     }
 

@@ -1,0 +1,33 @@
+/* YForm Usability Thumbnails */
+.yform-usability-thumbnails {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+}
+
+.yform-usability-thumbnail-image {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.yform-usability-thumbnail-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.yform-usability-thumbnail-file-link {
+    transition: all 0.2s ease !important;
+}
+
+.yform-usability-thumbnail-file-link:hover {
+    background: #e9ecef !important;
+    border-color: #adb5bd !important;
+    color: #495057 !important;
+    text-decoration: none !important;
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.yform-usability-thumbnail-file {
+    font-size: 0.85em;
+}

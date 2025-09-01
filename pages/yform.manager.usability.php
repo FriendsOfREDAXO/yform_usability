@@ -77,6 +77,18 @@ $form->addFieldset($addon->i18n('yform_usability.table_config'));
 }
 {
     $form->addRawField('<div data-toggle-wrapper>');
+    $field = $form->addCheckboxField('status_first_column_all', empty($config) ? 1 : null);
+    $field->setLabel($addon->i18n('yform_label.status_first_column'));
+    $field->addOptions([1 => $addon->i18n('yform_usability.all_tables')]);
+
+    $field = $form->addSelectField('status_first_column_tables');
+    $select = $field->getSelect();
+    $select->setMultiple();
+    $select->addOptions($tables);
+    $form->addRawField('</div>');
+}
+{
+    $form->addRawField('<div data-toggle-wrapper>');
     $field = $form->addCheckboxField('duplicate_tables_all', empty($config) ? 1 : null);
     $field->setLabel($addon->i18n('yform_label.duplication'));
     $field->addOptions([1 => $addon->i18n('yform_usability.all_tables')]);

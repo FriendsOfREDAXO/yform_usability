@@ -131,3 +131,29 @@ body.rex-theme-dark {
     }
 }
 
+/* Thumbnail styles */
+.yform-usability-thumbnails {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    
+    img {
+        transition: transform 0.2s ease-in-out;
+        cursor: pointer;
+        
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+    }
+}
+
+.yform-usability-thumbnail-file {
+    font-size: 12px;
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
