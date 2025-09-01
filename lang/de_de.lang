@@ -14,6 +14,7 @@ yform_usability.use_inline_search = Inline-Suche verwenden
 yform_label.online_status = Online/Offline Status anzeigen
 yform_label.sorting = Sortierung aktiv
 yform_label.duplication = Duplizieren von Datensätzen
+yform_label.status_first_column = Status-Spalte am Anfang
 
 yform_usability_action.duplicate = duplizieren
 

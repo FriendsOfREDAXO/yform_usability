@@ -4,6 +4,7 @@ yform_label.online_status = Mostrar estado en línea/fuera de línea
 yform_label.sorting = Clasificación activa
 yform_label.duplication = Duplicación activa
 yform_label.all = Todos
+yform_label.status_first_column = Primero la columna de estado
 
 yform_usability_action.duplicate = duplicar
 

@@ -2,6 +2,7 @@ yform_label.online_status = Exibir status online/offline
 yform_label.sorting = Triagem ativa
 yform_label.duplication = Duplicação ativa
 yform_label.all = Todos
+yform_label.status_first_column = Coluna de estado no início
 
 yform_usability_action.duplicate = Duplicar
 
