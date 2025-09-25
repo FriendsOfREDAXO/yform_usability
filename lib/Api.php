@@ -39,6 +39,18 @@ class rex_api_yform_usability_api extends rex_api_function
         return new rex_api_result($this->success, $this->response);
     }
 
+    /**
+     * Handle status changes for YForm records
+     * 
+     * This method bypasses YForm validation to avoid issues with be_manager_relation
+     * fields that have empty validation in m:n relationships (Issue #166).
+     * 
+     * Fixed issues:
+     * - Method name case to match JavaScript API call
+     * - Response structure to return message.element as expected by frontend
+     * - Direct SQL update to bypass validation problems
+     * - Proper error handling for edge cases
+     */
     private function __changeStatus()
     {
         $status = rex_post('status', 'string');
