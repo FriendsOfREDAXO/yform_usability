@@ -75,7 +75,7 @@ class Extensions
         }
         
         // move columns of all/selected tables if conditions are met
-        if ($config['status_first_column_all'] === '|1|' || in_array($table->getTableName(), explode('|', trim($config['status_first_column_tables'] ?? '', '|')))) {
+        if ((isset($config['status_first_column_all']) && $config['status_first_column_all'] === '|1|') || in_array($table->getTableName(), explode('|', trim($config['status_first_column_tables'] ?? '', '|')))) {
             $status_position = 2; // 0 = icon column, 1 = id column
         }
         
