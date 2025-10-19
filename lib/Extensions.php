@@ -286,7 +286,7 @@ class Extensions
                     $jsName = str_replace("'", "\\'", $name);
                     $jsTableName = str_replace("'", "\\'", $tableName);
                     
-                    return '<a href="#" onclick="yformDuplicateField(\'' . $jsTableName . '\', ' . $id . ', \'' . $jsName . '\', \'' . $csrf_param . '\'); return false;" title="Duplizieren">' .
+                    return '<a href="#" onclick="if(typeof yformDuplicateField === \'function\') { yformDuplicateField(\'' . $jsTableName . '\', ' . $id . ', \'' . $jsName . '\', \'' . $csrf_param . '\'); } else { alert(\'Funktion nicht gefunden!\'); } return false;" title="Duplizieren">' .
                            '<i class="rex-icon rex-icon-duplicate"></i></a>';
                 });
             }
