@@ -181,3 +181,35 @@ var YformUsability = (function ($) {
         }
     };
 })(jQuery);
+
+// Global function for field duplication with name prompt
+window.yformDuplicateField = function(tableName, fieldId, originalName, csrfParam) {
+    var newName = prompt('Neuen Feldnamen eingeben:', originalName + '_copy');
+    
+    if (newName === null) {
+        return; // User cancelled
+    }
+    
+    newName = newName.trim();
+    
+    if (newName === '') {
+        alert('Feldname darf nicht leer sein.');
+        return;
+    }
+    
+    // Validate field name
+    if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(newName)) {
+        alert('Ungültiger Feldname. Nur Buchstaben, Zahlen und Unterstriche erlaubt. Muss mit einem Buchstaben beginnen.');
+        return;
+    }
+    
+    // Build URL from parameters to avoid & escaping issues
+    var url = 'index.php?page=yform/manager/table_field' +
+              '&table_name=' + encodeURIComponent(tableName) +
+              '&func=duplicate' +
+              '&field_id=' + fieldId +
+              '&' + csrfParam +
+              '&new_name=' + encodeURIComponent(newName);
+    
+    window.location.href = url;
+};

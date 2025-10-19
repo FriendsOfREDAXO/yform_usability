@@ -73,6 +73,7 @@ if (rex::isBackend() && rex::getUser()) {
     rex_extension::register('YFORM_MANAGER_REX_INFO', Extensions::ext_yformManagerRexInfo(...));
     rex_extension::register('YFORM_DATA_LIST_QUERY', Extensions::ext_yformDataListSql(...));
     rex_extension::register('REX_LIST_GET', Extensions::ext_rexListGet(...));
+    rex_extension::register('PAGE_CHECKED', Extensions::ext_tableFieldFunc(...));
     rex_extension::register('YFORM_DATA_LIST_ACTION_BUTTONS', Extensions::yform_data_list_action_buttons(...));
 }
 

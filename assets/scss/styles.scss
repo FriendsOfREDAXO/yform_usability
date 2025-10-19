@@ -19,9 +19,44 @@
         min-width: 100px;
     }
 
-    .sort-handle:hover {
-        color: #4b9ad9;
-        cursor: ns-resize;
+    .sort-handle {
+        cursor: grab;
+        padding: 4px;
+        transition: all 0.2s ease;
+        
+        &:hover {
+            color: #4b9ad9;
+            cursor: grab;
+            transform: scale(1.1);
+        }
+        
+        &:active {
+            cursor: grabbing;
+        }
+    }
+    
+    // Container for edit + drag icons in data lists
+    .yform-data-icons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 70px;
+        
+        a, i {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        a {
+            padding: 4px;
+            transition: all 0.2s ease;
+            
+            &:hover {
+                color: #4b9ad9;
+                transform: scale(1.1);
+            }
+        }
     }
 
     .sortable-ghost {

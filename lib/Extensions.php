@@ -99,9 +99,6 @@ class Extensions
                 ['table' => $table]
             );
             $list->setColumnPosition('status', $status_position);
-            
-            // Add CSS class for status column minimum width
-            $list->setColumnAttributes('status', ['class' => 'status-column']);
         }
         
         return $list;
@@ -115,27 +112,33 @@ class Extensions
 
         if ($firstColName != 'id' && $orderBy === 'prio') {
             $list->addFormAttribute('class', 'sortable-list');
+            
+            // Add drag handle column before first column (but keep edit icon)
+            $list->addColumn('yform_drag_handle', '', 0);
+            $list->setColumnLabel('yform_drag_handle', '');
+            $list->setColumnLayout('yform_drag_handle', ['<th class="rex-table-icon">###VALUE###</th>', '<td class="rex-table-icon">###VALUE###</td>']);
+            
             $list->setColumnFormat(
-                $firstColName,
+                'yform_drag_handle',
                 'custom',
-                function ($params) {
+                function ($params) use ($table) {
                     $filters = rex_extension::registerPoint(
                         new rex_extension_point(
                             'yform/usability.addDragNDropSort.filters',
                             [],
                             [
                                 'list_params' => $params,
-                                'table'       => $params['params']['table'],
+                                'table'       => $table,
                             ]
                         )
                     );
                     $url = rex_url::currentBackendPage(['method' => 'updateSort'] + rex_api_yform_usability_api::getUrlParams());
                     return '
-                        <i class="rex-icon fa fa-bars sort-icon"
+                        <i class="rex-icon fa fa-bars sort-icon sort-handle"
                             data-id="###id###"
                             data-url="'.$url . '"
                             data-table-type="orm_model"
-                            data-table="' . $params['params']['table']->getTableName() . '"
+                            data-table="' . $table->getTableName() . '"
                             data-filter="' . implode(',', $filters) . '"></i>
                     ';
                 },
@@ -260,7 +263,151 @@ class Extensions
                 },
                 ['yform_table' => $lparams['table_name'], 'table' => $tableName]
             );
+            
+            // Add duplicate button column (nur wenn aktiviert)
+            $config = Usability::getConfig();
+            $duplicateEnabled = $config['duplicate_tables_all'] === '|1|' || in_array($lparams['table_name'], explode('|', trim($config['duplicate_tables'] ?? '', '|')));
+            
+            if ($duplicateEnabled) {
+                $table = rex_yform_manager_table::get($lparams['table_name']);
+                $_csrf_key = $table->getCSRFKey();
+                $csrf_params = rex_csrf_token::factory($_csrf_key)->getUrlParams();
+                $csrf_param = key($csrf_params) . '=' . current($csrf_params);
+                $tableName = $lparams['table_name'];
+                
+                $list->addColumn('duplicate', '');
+                $list->setColumnLabel('duplicate', rex_i18n::msg('yform_usability_action.duplicate'));
+                $list->setColumnLayout('duplicate', ['', '<td class="rex-table-action">###VALUE###</td>']);
+                $list->setColumnFormat('duplicate', 'custom', function($params) use ($csrf_param, $tableName) {
+                    $id = $params['list']->getValue('id');
+                    $name = $params['list']->getValue('name');
+                    
+                    // Pass parameters separately to avoid & escaping issues
+                    $jsName = str_replace("'", "\\'", $name);
+                    $jsTableName = str_replace("'", "\\'", $tableName);
+                    
+                    return '<a href="#" onclick="yformDuplicateField(\'' . $jsTableName . '\', ' . $id . ', \'' . $jsName . '\', \'' . $csrf_param . '\'); return false;" title="Duplizieren">' .
+                           '<i class="rex-icon rex-icon-duplicate"></i></a>';
+                });
+            }
         }
+    }
+
+    public static function ext_tableFieldFunc(rex_extension_point $ep): void
+    {
+        $func = rex_request('func', 'string');
+        
+        if ($func !== 'duplicate') {
+            return;
+        }
+        
+        // Get table_name from request and load table
+        $table_name = rex_request('table_name', 'string');
+        
+        if (empty($table_name)) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => 'Kein Tabellenname übergeben'];
+            rex_response::sendRedirect('index.php?page=yform/manager/table_field');
+            exit;
+        }
+        
+        $table = rex_yform_manager_table::get($table_name);
+        
+        if (!$table) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => 'Tabelle nicht gefunden'];
+            rex_response::sendRedirect('index.php?page=yform/manager/table_field');
+            exit;
+        }
+        
+        $field_id = rex_request('field_id', 'int');
+        $new_name = rex_request('new_name', 'string', '');
+        $_csrf_key = $table->getCSRFKey();
+        
+        // CSRF-Token validieren
+        if (!rex_csrf_token::factory($_csrf_key)->isValid()) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => rex_i18n::msg('csrf_token_invalid')];
+            rex_response::sendRedirect('index.php?page=yform/manager/table_field&table_name=' . urlencode($table->getTableName()));
+            exit;
+        }
+        
+        if ($field_id <= 0) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => 'Keine gültige Feld-ID übergeben'];
+            rex_response::sendRedirect('index.php?page=yform/manager/table_field&table_name=' . urlencode($table->getTableName()));
+            exit;
+        }
+        
+        if (empty($new_name)) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => 'Kein neuer Feldname angegeben'];
+            rex_response::sendRedirect('index.php?page=yform/manager/table_field&table_name=' . urlencode($table->getTableName()));
+            exit;
+        }
+        
+        // Validiere Feldname
+        if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $new_name)) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => 'Ungültiger Feldname. Nur Buchstaben, Zahlen und Unterstriche erlaubt. Muss mit einem Buchstaben beginnen.'];
+            rex_response::sendRedirect('index.php?page=yform/manager/table_field&table_name=' . urlencode($table->getTableName()));
+            exit;
+        }
+        
+        // Feld laden
+        $sourceSql = rex_sql::factory();
+        $sourceSql->setQuery('SELECT * FROM ' . rex::getTable('yform_field') . ' WHERE id = ? AND table_name = ?', [$field_id, $table->getTableName()]);
+        
+        if ($sourceSql->getRows() == 0) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => 'Das zu duplizierende Feld wurde nicht gefunden'];
+            rex_response::sendRedirect('index.php?page=yform/manager/table_field&table_name=' . urlencode($table->getTableName()));
+            exit;
+        }
+        
+        // Prüfe ob Name bereits existiert
+        $checkSql = rex_sql::factory();
+        $checkSql->setQuery('SELECT id FROM ' . rex::getTable('yform_field') . ' WHERE table_name = ? AND name = ?', [$table->getTableName(), $new_name]);
+        
+        if ($checkSql->getRows() > 0) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => 'Ein Feld mit dem Namen "' . $new_name . '" existiert bereits.'];
+            rex_response::sendRedirect('index.php?page=yform/manager/table_field&table_name=' . urlencode($table->getTableName()));
+            exit;
+        }
+        
+        // Neues Feld erstellen - direkt nach dem Original (prio + 1)
+        $newSql = rex_sql::factory();
+        $newSql->setTable(rex::getTable('yform_field'));
+        
+        $originalPrio = (int) $sourceSql->getValue('prio');
+        
+        // Alle Felder mit prio > originalPrio um 1 erhöhen
+        $updateSql = rex_sql::factory();
+        $updateSql->setQuery(
+            'UPDATE ' . rex::getTable('yform_field') . ' SET prio = prio + 1 WHERE table_name = ? AND prio > ?',
+            [$table->getTableName(), $originalPrio]
+        );
+        
+        // Kopiere alle Felder außer id und name
+        $columns = $sourceSql->getFieldnames();
+        foreach ($columns as $column) {
+            if ($column === 'id') {
+                continue;
+            }
+            if ($column === 'name') {
+                $newSql->setValue('name', $new_name);
+            } elseif ($column === 'prio') {
+                $newSql->setValue('prio', $originalPrio + 1);
+            } else {
+                $newSql->setValue($column, $sourceSql->getValue($column));
+            }
+        }
+        
+        try {
+            $newSql->insert();
+            
+            $_SESSION['yform_usability_message'] = ['type' => 'success', 'text' => 'Feld "' . $new_name . '" wurde erfolgreich dupliziert.'];
+        } catch (\Exception $e) {
+            $_SESSION['yform_usability_message'] = ['type' => 'error', 'text' => 'Fehler beim Duplizieren: ' . $e->getMessage()];
+        }
+        
+        // Build redirect URL manually to avoid &amp; escaping
+        $redirectUrl = 'index.php?page=yform/manager/table_field&table_name=' . urlencode($table->getTableName());
+        rex_response::sendRedirect($redirectUrl);
+        exit;
     }
 
     public static function ext_yformManagerRexInfo(rex_extension_point $ep): void
