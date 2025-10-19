@@ -1,1 +1,143 @@
-.sortable-list .status-toggle{cursor:pointer;white-space:nowrap}.sortable-list .status-select{min-width:100px;height:28px !important;font-size:15px;padding:1px}.sortable-list td:has(.status-toggle),.sortable-list td:has(.status-select),.sortable-list .status-column,.sortable-list td.status-column{min-width:100px}.sortable-list .sort-handle:hover{color:#4b9ad9;cursor:ns-resize}.sortable-list .sortable-ghost{background:#FFFCDD !important}.sortable-list .sortable-ghost td{background:transparent !important}.sortable-list .sortable-drag{background:rgba(255, 255, 255, 0.5) !important}.sortable-list .sortable-drag td{background:transparent !important}.yform-table-field-value-checkbox.yform-table-field-name-status{min-width:100px}#yform_usability-search .form-group{margin-bottom:15px}#yform_usability-search .input-wrapper{position:relative}#yform_usability-search .input-wrapper .filter-reset{display:none;cursor:pointer;position:absolute;top:50%;right:10px;transform:translateY(-50%);font-size:16px;color:#999}#yform_usability-search .input-wrapper .filter-reset:hover{color:#333}#yform_usability-search.filtered .input-wrapper input{padding-right:35px}#yform_usability-search.filtered .input-wrapper .filter-reset{display:block}.yform-lang-tabs .tab-content{background:#fff;border-bottom:2px solid #c1c9d4;padding:20px 12px 12px 12px}.yform-lang-tabs .tab-content textarea{display:block;width:100%}@media (max-width:767px){.table-responsive .dropdown-menu{position:static !important}}@media (min-width:768px){.table-responsive{overflow:inherit}}body.rex-theme-dark .yform-lang-tabs .tab-content{background:inherit}@media (prefers-color-scheme:dark){body:not(.rex-theme-light) .yform-lang-tabs .tab-content{background:inherit}}.yform-usability-thumbnails{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.yform-usability-thumbnails img{transition:transform 0.2s ease-in-out;cursor:pointer}.yform-usability-thumbnails img:hover{transform:scale(1.1);box-shadow:0 2px 8px rgba(0,0,0,0.2)}.yform-usability-thumbnail-file{font-size:12px;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.sortable-list .status-toggle {
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sortable-list .status-select {
+  min-width: 100px;
+  height: 28px !important;
+  font-size: 15px;
+  padding: 1px;
+}
+.sortable-list td:has(.status-toggle),
+.sortable-list td:has(.status-select),
+.sortable-list .status-column,
+.sortable-list td.status-column {
+  min-width: 100px;
+}
+.sortable-list .sort-handle {
+  cursor: grab;
+  padding: 4px;
+  transition: all 0.2s ease;
+}
+.sortable-list .sort-handle:hover {
+  color: #4b9ad9;
+  cursor: grab;
+  transform: scale(1.1);
+}
+.sortable-list .sort-handle:active {
+  cursor: grabbing;
+}
+.sortable-list .yform-data-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 70px;
+}
+.sortable-list .yform-data-icons a, .sortable-list .yform-data-icons i {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.sortable-list .yform-data-icons a {
+  padding: 4px;
+  transition: all 0.2s ease;
+}
+.sortable-list .yform-data-icons a:hover {
+  color: #4b9ad9;
+  transform: scale(1.1);
+}
+.sortable-list .sortable-ghost {
+  background: #FFFCDD !important;
+}
+.sortable-list .sortable-ghost td {
+  background: transparent !important;
+}
+.sortable-list .sortable-drag {
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+.sortable-list .sortable-drag td {
+  background: transparent !important;
+}
+
+.yform-table-field-value-checkbox.yform-table-field-name-status {
+  min-width: 100px;
+}
+
+#yform_usability-search .form-group {
+  margin-bottom: 15px;
+}
+#yform_usability-search .input-wrapper {
+  position: relative;
+}
+#yform_usability-search .input-wrapper .filter-reset {
+  display: none;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #999;
+}
+#yform_usability-search .input-wrapper .filter-reset:hover {
+  color: #333;
+}
+#yform_usability-search.filtered .input-wrapper input {
+  padding-right: 35px;
+}
+#yform_usability-search.filtered .input-wrapper .filter-reset {
+  display: block;
+}
+
+.yform-lang-tabs .tab-content {
+  background: #fff;
+  border-bottom: 2px solid #c1c9d4;
+  padding: 20px 12px 12px 12px;
+}
+.yform-lang-tabs .tab-content textarea {
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .table-responsive .dropdown-menu {
+    position: static !important;
+  }
+}
+@media (min-width: 768px) {
+  .table-responsive {
+    overflow: inherit;
+  }
+}
+body.rex-theme-dark .yform-lang-tabs .tab-content {
+  background: inherit;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.rex-theme-light) .yform-lang-tabs .tab-content {
+    background: inherit;
+  }
+}
+/* Thumbnail styles */
+.yform-usability-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.yform-usability-thumbnails img {
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+.yform-usability-thumbnails img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.yform-usability-thumbnail-file {
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
