@@ -157,11 +157,12 @@ var YformUsability = (function ($) {
         $form.on('submit', function (evt) {
             $.pjax.submit(evt, {
                 push: true,
-                fragment: '#rex-js-page-main',
-                container: '#rex-js-page-main'
+                fragment: '.panel-default',
+                container: '.panel-default'
             });
             $(document).on('pjax:end', function () {
                 $('#yform_usability-search').find('[name=yfu-term]').focus();
+                $('#yform_usability-search').addClass('filtered');
             });
             return false;
         });
