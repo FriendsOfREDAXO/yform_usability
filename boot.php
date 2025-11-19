@@ -58,11 +58,6 @@ if (rex::isBackend() && rex::getUser()) {
         default:
             rex_view::addJsFile($addon->getAssetsUrl('vendor/Sortable.min.js?mtime=' . filemtime($addon->getAssetsPath('script.js'))));
             rex_view::addJsFile($addon->getAssetsUrl('script.js?mtime=' . filemtime($addon->getAssetsPath('script.js'))));
-            
-            // Add mediapool JavaScript if available (for thumbnail popup functionality)
-            if (rex_addon::get('mediapool')->isAvailable()) {
-                rex_view::addJsFile(rex_addon::get('mediapool')->getAssetsUrl('mediapool.js'));
-            }
             break;
     }
 
