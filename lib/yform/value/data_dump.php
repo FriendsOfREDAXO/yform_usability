@@ -20,7 +20,7 @@ class rex_yform_value_data_dump extends rex_yform_value_abstract
         if ($this->getValue() !== null && !is_string($this->getValue())) {
             $this->setValue(serialize($this->getValue()));
         }
-        if ($this->needsOutput()) {
+        if ($this->needsOutput() && $this->getElement('preview') !== "0") {
             $this->params['form_output'][$this->getId()] = $this->parse('value.data_dump.tpl.php');
         }
         $this->params['value_pool']['email'][$this->getName()] = $this->getValue();
@@ -36,6 +36,7 @@ class rex_yform_value_data_dump extends rex_yform_value_abstract
                 'name'   => ['type' => 'name', 'label' => rex_i18n::msg("yform_values_defaults_name")],
                 'label'  => ['type' => 'text', 'label' => rex_i18n::msg("yform_values_defaults_label")],
                 'notice' => ['type' => 'text', 'label' => rex_i18n::msg('yform_values_defaults_notice')],
+                'preview' => 1,
             ],
             'description'   => "Ausgabe für verschiedene Daten-Typen (Array, Object, XML, ...)",
             'is_searchable' => false,
