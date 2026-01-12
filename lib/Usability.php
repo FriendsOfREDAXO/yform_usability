@@ -56,12 +56,15 @@ class Usability
                 $sql->select();
 
                 if ($sql->getRows()) {
+                    // Get list of fields that should not be duplicated
+                    $skipFields = self::getFieldsToSkipOnDuplicate($table);
+                    
                     $iSql = rex_sql::factory();
                     $iSql->setTable($tablename);
                     foreach ($sql->getFieldNames() as $field) {
                         if ($field == 'status') {
                             $iSql->setValue($field, 0);
-                        } elseif ($field != 'id') {
+                        } elseif ($field != 'id' && !in_array($field, $skipFields)) {
                             $iSql->setValue($field, $sql->getValue($field));
                         }
                     }
@@ -69,6 +72,56 @@ class Usability
                 }
             }
         }
+    }
+
+    /**
+     * Get list of field names that should not be duplicated
+     * This includes UUID fields, generate_key fields, and fields with unique validation
+     * 
+     * @param rex_yform_manager_table $table
+     * @return array Array of field names to skip
+     */
+    private static function getFieldsToSkipOnDuplicate($table)
+    {
+        $skipFields = [];
+        
+        // Get all value fields from the table
+        $fields = $table->getFields();
+        
+        foreach ($fields as $field) {
+            $fieldName = $field->getName();
+            $fieldType = $field->getTypeName();
+            
+            // Skip UUID fields
+            if ($fieldType === 'uuid') {
+                $skipFields[] = $fieldName;
+                continue;
+            }
+            
+            // Skip generate_key fields
+            if ($fieldType === 'generate_key') {
+                $skipFields[] = $fieldName;
+                continue;
+            }
+        }
+        
+        // Get all validate fields to check for unique constraints
+        $validateSql = rex_sql::factory();
+        $validateSql->setQuery(
+            'SELECT name FROM ' . rex::getTable('yform_field') . ' 
+             WHERE table_name = ? AND type_id = ? AND type_name = ?',
+            [$table->getTableName(), 'validate', 'unique']
+        );
+        
+        while ($validateSql->hasNext()) {
+            $fieldName = $validateSql->getValue('name');
+            if (!in_array($fieldName, $skipFields)) {
+                $skipFields[] = $fieldName;
+            }
+            $validateSql->next();
+        }
+        
+        return $skipFields;
     }
 
     public static function installTableSets($installPath)
