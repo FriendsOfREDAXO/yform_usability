@@ -1,5 +1,8 @@
 {
     "require": {
         "symfony/serializer": "^5.3"
+    },
+    "require-dev": {
+        "friendsofredaxo/linter": "*"
     }
 }

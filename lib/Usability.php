@@ -108,14 +108,15 @@ class Usability
         // Get all validate fields to check for unique constraints
         $validateSql = rex_sql::factory();
         $validateSql->setQuery(
-            'SELECT name FROM ' . rex::getTable('yform_field') . ' 
-             WHERE table_name = ? AND type_id = ? AND type_name = ?',
+            'SELECT name FROM ' . rex::getTable('yform_field') . ' WHERE table_name = ? AND type_id = ? AND type_name = ?',
             [$table->getTableName(), 'validate', 'unique']
         );
         
+        // Use array flip for efficient lookups
+        $skipFieldsFlipped = array_flip($skipFields);
         while ($validateSql->hasNext()) {
             $fieldName = $validateSql->getValue('name');
-            if (!in_array($fieldName, $skipFields)) {
+            if (!isset($skipFieldsFlipped[$fieldName])) {
                 $skipFields[] = $fieldName;
             }
             $validateSql->next();
