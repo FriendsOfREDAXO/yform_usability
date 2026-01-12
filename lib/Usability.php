@@ -81,7 +81,7 @@ class Usability
      * @param rex_yform_manager_table $table
      * @return array Associative array with field names as keys (for O(1) lookup)
      */
-    private static function getFieldsToSkipOnDuplicate($table)
+    private static function getFieldsToSkipOnDuplicate(rex_yform_manager_table $table)
     {
         $skipFields = [];
         
@@ -113,11 +113,12 @@ class Usability
         );
         
         // Iterate through all rows and add unique fields to skip list
-        if ($validateSql->getRows() > 0) {
-            do {
-                $fieldName = $validateSql->getValue('name');
-                $skipFields[$fieldName] = true;
-            } while ($validateSql->next());
+        while ($validateSql->getRows() > 0) {
+            $fieldName = $validateSql->getValue('name');
+            $skipFields[$fieldName] = true;
+            if (!$validateSql->next()) {
+                break;
+            }
         }
         
         return $skipFields;
