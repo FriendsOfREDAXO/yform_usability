@@ -113,9 +113,11 @@ class Usability
         );
         
         // Iterate through all rows and add unique fields to skip list
-        foreach ($validateSql as $row) {
-            $fieldName = $row->getValue('name');
-            $skipFields[$fieldName] = true;
+        if ($validateSql->getRows() > 0) {
+            do {
+                $fieldName = $validateSql->getValue('name');
+                $skipFields[$fieldName] = true;
+            } while ($validateSql->next());
         }
         
         return $skipFields;
