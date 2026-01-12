@@ -56,7 +56,7 @@ class Usability
                 $sql->select();
 
                 if ($sql->getRows()) {
-                    // Get list of fields that should not be duplicated
+                    // Get list of fields that should not be duplicated (as hash map for O(1) lookup)
                     $skipFields = self::getFieldsToSkipOnDuplicate($table);
                     
                     $iSql = rex_sql::factory();
@@ -64,7 +64,7 @@ class Usability
                     foreach ($sql->getFieldNames() as $field) {
                         if ($field == 'status') {
                             $iSql->setValue($field, 0);
-                        } elseif ($field != 'id' && !in_array($field, $skipFields)) {
+                        } elseif ($field != 'id' && !isset($skipFields[$field])) {
                             $iSql->setValue($field, $sql->getValue($field));
                         }
                     }
@@ -79,7 +79,7 @@ class Usability
      * This includes UUID fields, generate_key fields, and fields with unique validation
      * 
      * @param rex_yform_manager_table $table
-     * @return array Array of field names to skip
+     * @return array Associative array with field names as keys (for O(1) lookup)
      */
     private static function getFieldsToSkipOnDuplicate($table)
     {
@@ -94,13 +94,13 @@ class Usability
             
             // Skip UUID fields
             if ($fieldType === 'uuid') {
-                $skipFields[] = $fieldName;
+                $skipFields[$fieldName] = true;
                 continue;
             }
             
             // Skip generate_key fields
             if ($fieldType === 'generate_key') {
-                $skipFields[] = $fieldName;
+                $skipFields[$fieldName] = true;
                 continue;
             }
         }
@@ -112,14 +112,10 @@ class Usability
             [$table->getTableName(), 'validate', 'unique']
         );
         
-        // Use array flip for efficient lookups
-        $skipFieldsFlipped = array_flip($skipFields);
-        while ($validateSql->hasNext()) {
-            $fieldName = $validateSql->getValue('name');
-            if (!isset($skipFieldsFlipped[$fieldName])) {
-                $skipFields[] = $fieldName;
-            }
-            $validateSql->next();
+        // Iterate through all rows and add unique fields to skip list
+        foreach ($validateSql as $row) {
+            $fieldName = $row->getValue('name');
+            $skipFields[$fieldName] = true;
         }
         
         return $skipFields;
