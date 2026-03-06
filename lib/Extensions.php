@@ -724,8 +724,11 @@ class Extensions
 
     public static function ext__getStatusColumnOptions(rex_extension_point $ep): void
     {
-        if (rex_addon::exists('sprog') && rex_addon::get('sprog')->isAvailable()) {
+        if (rex_addon::get('sprog')->isAvailable()) {
             $options = $ep->getSubject();
+            if (!is_iterable($options)) {
+                return;
+            }
 
             foreach ($options as &$option) {
                 $option = Wildcard::parse($option);
