@@ -15,7 +15,7 @@ class rex_yform_value_data_dump extends rex_yform_value_abstract
     public function enterObject()
     {
         if (rex::isBackend()) {
-            if (array_key_exists($this->getName(), (array)$this->params['value_pool']['sql_overwrite'])) {
+            if (array_key_exists($this->getName(), (array) ($this->params['value_pool']['sql_overwrite'] ?? []))) {
                 $this->setValue($this->params['value_pool']['sql_overwrite'][$this->getName()]);
             }
             if ($this->getValue() !== null && !is_string($this->getValue())) {

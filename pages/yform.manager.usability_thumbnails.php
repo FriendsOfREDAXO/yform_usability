@@ -115,9 +115,9 @@ if ($func == 'add' || $func == 'edit') {
         $sql->select();
         
         if ($sql->getRows()) {
-            $form_table_name = $sql->getValue('table_name');
-            $form_column_name = $sql->getValue('column_name');
-            $form_thumb_size = $sql->getValue('thumb_size');
+            $form_table_name = (string) $sql->getValue('table_name');
+            $form_column_name = (string) $sql->getValue('column_name');
+            $form_thumb_size = (string) $sql->getValue('thumb_size');
         }
     }
     
@@ -134,7 +134,7 @@ if ($func == 'add' || $func == 'edit') {
         $sql = rex_sql::factory();
         $sql->setQuery('SELECT name FROM ' . rex::getTable('media_manager_type') . ' ORDER BY name');
         while ($sql->hasNext()) {
-            $type_name = $sql->getValue('name');
+            $type_name = (string) $sql->getValue('name');
             $thumb_sizes[$type_name] = $type_name;
             $sql->next();
         }
@@ -181,7 +181,7 @@ if ($func == 'add' || $func == 'edit') {
     echo '<select class="form-control" name="thumb_size" id="rex-yform-usability-thumbsize">';
     foreach ($thumb_sizes as $size_key => $size_label) {
         $selected = $size_key == $form_thumb_size ? ' selected="selected"' : '';
-        echo '<option value="' . htmlspecialchars($size_key) . '"' . $selected . '>' . htmlspecialchars($size_label) . '</option>';
+        echo '<option value="' . htmlspecialchars((string) $size_key) . '"' . $selected . '>' . htmlspecialchars($size_label) . '</option>';
     }
     echo '</select>';
     echo '</p>';
@@ -255,8 +255,8 @@ if ($func == 'add' || $func == 'edit') {
     });
     
     // Format dates
-    $list->setColumnFormat('createdate', 'strftime', '%d.%m.%Y %H:%M');
-    $list->setColumnFormat('updatedate', 'strftime', '%d.%m.%Y %H:%M');
+    $list->setColumnFormat('createdate', 'date', 'd.m.Y H:i');
+    $list->setColumnFormat('updatedate', 'date', 'd.m.Y H:i');
     
     // Add edit link
     $list->addColumn('edit', '<i class="rex-icon rex-icon-edit"></i> ' . rex_i18n::msg('yform_usability.edit'), -1, ['<th class="rex-table-action" colspan="1">###VALUE###</th>', '<td class="rex-table-action">###VALUE###</td>']);

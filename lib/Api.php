@@ -88,15 +88,14 @@ class rex_api_yform_usability_api extends rex_api_function
             }
         }
 
-        // DEPRECATED
         // flush url path file for url < 2
         if (rex_addon::get('url')->isAvailable()) {
-            if (rex_string::versionCompare(rex_addon::get('url')->getVersion(), '2.0.0')) {
+            if (rex_version::compare(rex_addon::get('url')->getVersion(), '2.0.0', '<')) {
                 rex_file::delete(rex_path::addonCache('url', 'pathlist.php'));
             }
         }
 
-        $tparams = Utils::getStatusColumnParams(rex_yform_manager_table::get($table), $status);
+        $tparams = Utils::getStatusColumnParams($tableObject, $status);
 
         $tparams['element'] = strtr(
             $tparams['element'],
@@ -145,7 +144,10 @@ class rex_api_yform_usability_api extends rex_api_function
                 rex_yform_manager_table::deleteCache();
             } else {
                 $tableobject = rex_yform_manager_table::get($tablename);
-                $sort        = strtolower($tableobject->getSortOrderName());
+                if (!$tableobject) {
+                    throw new rex_api_exception("Table '{$tablename}' not found");
+                }
+                $sort = strtolower($tableobject->getSortOrderName());
 
                 if ($next_id) {
                     $prio = $tableobject->query()->findId($next_id)->getValue('prio');

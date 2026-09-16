@@ -65,7 +65,7 @@ class Model extends rex_yform_manager_dataset
                 $sql->update();
             } else {
                 $sql->insert();
-                $this->setId($sql->getLastId());
+                $this->setValue('id', (int) $sql->getLastId());
             }
         } catch (rex_sql_exception $ex) {
             // error is passed by getError method
@@ -81,7 +81,7 @@ class Model extends rex_yform_manager_dataset
     public function valueIsset($key, $langId = false)
     {
         $value = $this->getValue($key, $langId);
-        return is_object($value) || strlen($value) > 0;
+        return is_object($value) || strlen((string) $value) > 0;
     }
 
     public function getValue($key, $langId = false, $default = '')
@@ -95,7 +95,7 @@ class Model extends rex_yform_manager_dataset
 
     public function getObjectValue($key, $langId = false)
     {
-        return unserialize($this->getValue($key, $langId));
+        return unserialize((string) $this->getValue($key, $langId));
     }
 
     public function getArrayValue($key, $langId = false, $default = [], $separator = ','): array
@@ -105,9 +105,9 @@ class Model extends rex_yform_manager_dataset
         if ($langId) {
             $key .= '_' . ($langId === true ? rex_clang::getCurrentId() : $langId);
         }
-        $value = $this->getRawValue($key);
+        $value = (string) $this->getRawValue($key);
 
-        if (strlen($value)) {
+        if ('' !== $value) {
             $decoded_json = (array)json_decode($value, true);
 
             if (json_last_error() == JSON_ERROR_NONE) {
@@ -119,7 +119,7 @@ class Model extends rex_yform_manager_dataset
         return array_filter((array)$result);
     }
 
-    public function getName(int $langId = null)
+    public function getName(?int $langId = null)
     {
         $langId = $langId ?? rex_clang::getCurrentId();
         if ($this->hasValue("name_$langId")) {
@@ -137,7 +137,7 @@ class Model extends rex_yform_manager_dataset
         return null;
     }
 
-    public function getDescription(int $langId = null)
+    public function getDescription(?int $langId = null)
     {
         $langId      = $langId ?? rex_clang::getCurrentId();
         $description = $this->getValue('description', $langId);
@@ -159,12 +159,12 @@ class Model extends rex_yform_manager_dataset
 
     public function getCreateDate()
     {
-        return strtotime($this->getValue('createdate'));
+        return strtotime((string) $this->getValue('createdate'));
     }
 
     public function getUpdateDate()
     {
-        return strtotime($this->getValue('updatedate'));
+        return strtotime((string) $this->getValue('updatedate'));
     }
 
     public static function hasUrlProfile($langId = null): bool

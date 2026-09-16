@@ -24,7 +24,6 @@ use rex_view;
 use rex_yform_manager;
 use rex_yform_manager_table;
 use rex_yform_value_choice;
-use rex_yform_value_select;
 
 class Utils
 {
@@ -46,18 +45,29 @@ class Utils
 
     public static function getStatusColumnParams(rex_yform_manager_table $table, $currentValue, $list = null)
     {
-        $Field   = $table->getValueField('status');
-        $choices = $Field->getElement('choices');
-        $options = $Field->getElement('options');
-        $istatus = '';
+        $Field = $table->getValueField('status');
 
-        if (strlen(trim($choices))) {
+        if (null === $Field) {
+            return [
+                'current_label' => '',
+                'intern_status' => '',
+                'toggle_value'  => '',
+                'element'       => '',
+            ];
+        }
+
+        $choices       = trim((string) $Field->getElement('choices'));
+        $optionsString = trim((string) $Field->getElement('options'));
+        $options       = [];
+        $istatus       = '';
+
+        if ('' !== $choices) {
             $options = rex_yform_value_choice::getListValues([
                 'field'  => 'status',
                 'params' => ['field' => $Field],
             ]);
-        } else if (strlen(trim($options))) {
-            $options = array_filter((array)(new rex_yform_value_select())->getArrayFromString($Field->getElement('options')));
+        } else if ('' !== $optionsString) {
+            $options = array_filter(Extensions::getArrayFromString($optionsString));
         } else if ($Field->getElement('type_name') == 'checkbox') {
             $options = [rex_i18n::msg('yrewrite_forward_inactive'), rex_i18n::msg('package_hactive')];
         }
@@ -71,10 +81,13 @@ class Utils
         if (!is_array($options)) {
             $options = [];
         }
-        $okeys   = count($options) ? array_keys($options) : explode(',', $Field->getElement('values'));
+        $okeys   = count($options) ? array_keys($options) : explode(',', (string) $Field->getElement('values'));
         $cur_idx = array_search($currentValue, $okeys);
-        if (!$cur_idx) { $currentValue = $okeys[0]; }
-        $nvalue  = isset($okeys[$cur_idx + 1]) ? $okeys[$cur_idx + 1] : $okeys[0];
+        if (false === $cur_idx || 0 === $cur_idx) {
+            $cur_idx      = 0;
+            $currentValue = $okeys[0];
+        }
+        $nvalue = $okeys[$cur_idx + 1] ?? $okeys[0];
 
         $url = rex_url::currentBackendPage(['method' => 'changeStatus'] + rex_api_yform_usability_api::getUrlParams());
 
@@ -87,16 +100,16 @@ class Utils
         } else if (count($options) == 1) {
             $element = array_shift($options);
         } else {
-            $istatus = isset($options[$currentValue]) && $currentValue != 0 && $currentValue != '' ? 'online' : 'offline';
+            $istatus = isset($options[$currentValue ?? '']) && $currentValue != 0 && $currentValue != '' ? 'online' : 'offline';
             $element = '
                 <a class="rex-link-expanded status-toggle rex-' . $istatus . '" data-id="{{ID}}" data-api-url="'.$url . '" data-status="' . $nvalue . '" data-table="{{TABLE}}" href="#!">
-                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . rex_i18n::translate($options[$currentValue] ?? '') . '</span>
+                    <i class="rex-icon rex-icon-' . $istatus . '"></i>&nbsp;<span class="text">' . rex_i18n::translate($options[$currentValue ?? ''] ?? '') . '</span>
                 </a>
             ';
         }
 
         return [
-            'current_label' => $options[$currentValue] ?? "",
+            'current_label' => $options[$currentValue ?? ''] ?? "",
             'intern_status' => $istatus,
             'toggle_value'  => $nvalue,
             'element'       => $element,
