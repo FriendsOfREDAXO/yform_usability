@@ -21,7 +21,6 @@ use rex_yform_manager_field;
 use rex_yform_manager_query;
 use rex_yform_manager_table;
 use rex_yform_value_choice;
-use Sprog\Wildcard;
 use yform\usability\lib\helpers\Csv;
 
 
@@ -185,7 +184,7 @@ class Export
         }
         $fieldPrefix = $tablePrefix ? $tablePrefix . ': ' : '';
 
-        return $fieldPrefix . Wildcard::parse($field->getLabel()) . self::getFieldLanguageSuffix($field->getName());
+        return $fieldPrefix . rex_i18n::translate($field->getLabel(), false) . self::getFieldLanguageSuffix($field->getName());
     }
 
     private static function getFieldLanguageSuffix($fieldName): string
