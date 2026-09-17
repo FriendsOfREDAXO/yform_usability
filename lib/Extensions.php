@@ -80,7 +80,10 @@ class Extensions
         }
         
         // transform existing status column (only if it's already visible in the list)
-        if (in_array('status', $list->getColumnNames())) {
+        // und nur, wenn das Feld tatsaechlich von diesem AddOn dargestellt werden kann -
+        // eigene Feldtypen (z.B. ein individueller Inline-Switch) bleiben sonst unveraendert,
+        // statt mit einem leeren/falschen Status-Icon ueberschrieben zu werden.
+        if (in_array('status', $list->getColumnNames()) && Utils::hasKnownStatusOptions($table)) {
             $list->setColumnFormat(
                 'status',
                 'custom',
