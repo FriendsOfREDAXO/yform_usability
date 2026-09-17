@@ -11,11 +11,11 @@
  * file that was distributed with this source code.
  */
 
-$data = $this->getValue();
+$data = (string) $this->getValue();
 $data = @unserialize($data);
 
 if ($data === false) {
-    $decoded_json = (array)json_decode($this->getValue(), true);
+    $decoded_json = (array) json_decode((string) $this->getValue(), true);
 
     if (json_last_error() == JSON_ERROR_NONE) {
         $data = $decoded_json;

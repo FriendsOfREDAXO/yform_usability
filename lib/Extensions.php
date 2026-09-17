@@ -30,7 +30,7 @@ use rex_yform_choice_list;
 use rex_yform_list;
 use rex_yform_manager_field;
 use rex_yform_manager_table;
-use Wildcard;
+use Sprog\Wildcard;
 use function rex_request;
 
 class Extensions
@@ -173,7 +173,7 @@ class Extensions
                 $columnName,
                 'custom',
                 function ($params) use ($thumbSize) {
-                    $filename = $params['list']->getValue($params['params']['column_name']);
+                    $filename = (string) $params['list']->getValue($params['params']['column_name']);
                     return ThumbnailManager::generateThumbnailHtml($filename, $thumbSize);
                 },
                 ['column_name' => $columnName]
@@ -189,11 +189,11 @@ class Extensions
             return $string;
         }
         $delimeter  = ',';
-        $rawOptions = preg_split('~(?<!\\\)' . preg_quote($delimeter, '~') . '~', $string);
+        $rawOptions = preg_split('~(?<!\\\)' . preg_quote($delimeter, '~') . '~', (string) $string) ?: [];
         $options    = [];
         foreach ($rawOptions as $option) {
             $delimeter   = '=';
-            $finalOption = preg_split('~(?<!\\\)' . preg_quote($delimeter, '~') . '~', $option);
+            $finalOption = preg_split('~(?<!\\\)' . preg_quote($delimeter, '~') . '~', $option) ?: [$option];
             $v           = $finalOption[0];
             if (isset($finalOption[1])) {
                 $k = $finalOption[1];
@@ -214,7 +214,7 @@ class Extensions
         $list    = $ep->getSubject();
         $lparams = $list->getParams();
 
-        if ($lparams['page'] === 'yform/manager/table_field') {
+        if (($lparams['page'] ?? '') === 'yform/manager/table_field') {
             $list->addFormAttribute('class', 'sortable-list');
 
             $firstColName = current($list->getColumnNames());
@@ -266,7 +266,7 @@ class Extensions
             
             // Add duplicate button column (nur wenn aktiviert)
             $config = Usability::getConfig();
-            $duplicateEnabled = $config['duplicate_tables_all'] === '|1|' || in_array($lparams['table_name'], explode('|', trim($config['duplicate_tables'] ?? '', '|')));
+            $duplicateEnabled = ($config['duplicate_tables_all'] ?? '') === '|1|' || in_array($lparams['table_name'] ?? '', explode('|', trim($config['duplicate_tables'] ?? '', '|')));
             
             if ($duplicateEnabled) {
                 $table = rex_yform_manager_table::get($lparams['table_name']);
@@ -432,7 +432,7 @@ class Extensions
         $manager = $ep->getSubject();
         $config = Usability::getConfig();
 
-        $hasSearch = $config['use_inline_search'] === '|1|' || in_array(
+        $hasSearch = ($config['use_inline_search'] ?? '') === '|1|' || in_array(
                 $manager->table->getTableName(),
                 explode(
                     '|',
@@ -465,21 +465,21 @@ class Extensions
 
         $list->addFormAttribute('class', 'table-responsive');
 
-        $hasDuplicate = $config['duplicate_tables_all'] === '|1|' || in_array(
+        $hasDuplicate = ($config['duplicate_tables_all'] ?? '') === '|1|' || in_array(
             $tableName,
             explode(
                 '|',
                 trim($config['duplicate_tables'] ?? '', '|')
             )
         );
-        $hasStatus    = $config['status_tables_all'] === '|1|' || in_array(
+        $hasStatus    = ($config['status_tables_all'] ?? '') === '|1|' || in_array(
             $tableName,
             explode(
                 '|',
                 trim($config['status_tables'] ?? '', '|')
             )
         );
-        $hasSorting   = $config['sorting_tables_all'] === '|1|' || in_array(
+        $hasSorting   = ($config['sorting_tables_all'] ?? '') === '|1|' || in_array(
             $tableName,
             explode(
                 '|',
@@ -529,7 +529,7 @@ class Extensions
         $config         = rex_addon::get('yform_usability')->getConfig(null, $default_config);
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
-        $hasDuplicate = $config['duplicate_tables_all'] === '|1|' || in_array(
+        $hasDuplicate = ($config['duplicate_tables_all'] ?? '') === '|1|' || in_array(
             $table->getTableName(),
             explode(
                 '|',
@@ -591,7 +591,7 @@ class Extensions
                                 $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
                             } else {
                                 $_whereChunks = [];
-                                foreach (explode(',', $field->getElement('field')) as $_field) {
+                                foreach (explode(',', (string) $field->getElement('field')) as $_field) {
                                     $_field = trim($_field, '"');
                                     $_field = trim($_field);
 

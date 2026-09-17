@@ -57,13 +57,13 @@ if ($openerData) {
                     <?php endif; ?>
 
                     <?php foreach ($options as $option): ?>
-                        <option value="<?= $option['value'] ?>" <?= count($selFields) == 1 && in_array($option['value'], $selFields) ? 'selected' : '' ?>><?= $option['label'] ?></option>
+                        <option value="<?= rex_escape($option['value']) ?>" <?= count($selFields) == 1 && in_array($option['value'], $selFields) ? 'selected' : '' ?>><?= rex_escape($option['label']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="col-sm-6">
                 <div class="input-wrapper">
-                    <input type="text" name="yfu-term" class="form-control" value="<?= rex_request('yfu-term', 'string') ?>" onfocus="this.selectionStart = this.selectionEnd = this.value.length;">
+                    <input type="text" name="yfu-term" class="form-control" value="<?= rex_escape($term) ?>" onfocus="this.selectionStart = this.selectionEnd = this.value.length;">
                     <i class="fa fa-times-circle filter-reset" onclick="YformUsability.resetYformSearch(this)"></i>
                 </div>
             </div>
