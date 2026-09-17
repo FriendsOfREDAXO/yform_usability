@@ -43,6 +43,48 @@ class Utils
         return $output;
     }
 
+    /**
+     * YForm-Core-Feldtypen, deren "choices"/"options"-Konfigurationselemente
+     * dieselbe Bedeutung haben wie von getStatusColumnParams() erwartet
+     * (Werteliste bzw. Wert=>Label-Zuordnung fuer die Status-Anzeige).
+     */
+    private const KNOWN_STATUS_FIELD_TYPES = ['choice', 'checkbox', 'select'];
+
+    /**
+     * True, wenn das "status"-Feld einer Tabelle von diesem AddOn selbst
+     * dargestellt werden kann. Bewusst ueber eine Allowlist bekannter
+     * YForm-Core-Feldtypen entschieden, NICHT ueber die blosse Anwesenheit
+     * eines "choices"/"options"-Konfigurationselements: benutzerdefinierte
+     * Feldtypen (z.B. ein eigener Inline-Switch aus dem "fields"-AddOn)
+     * koennen ein gleichnamiges "options"-Element mit voellig anderer
+     * Bedeutung fuehren (z.B. "0,1" als erlaubte Rohwerte statt als
+     * Wert=>Label-Liste) - das wuerde sonst faelschlich als "bekannt"
+     * durchgehen und die Spalte mit einem leeren/falschen Status-Icon
+     * ueberschreiben, obwohl der eigentliche Feldtyp bereits ueber YForms
+     * eigenen "rex_yform_value_<type>::getListValue()"-Mechanismus korrekt
+     * gerendert wird. Eigene Erweiterungen koennen sich weiterhin ueber den
+     * Extension Point "yform/usability.getStatusColumnParams.options"
+     * anmelden, um zusaetzliche Feldtypen explizit zu unterstuetzen.
+     */
+    public static function hasKnownStatusOptions(rex_yform_manager_table $table): bool
+    {
+        $Field = $table->getValueField('status');
+        if (null === $Field) {
+            return false;
+        }
+
+        if (in_array($Field->getElement('type_name'), self::KNOWN_STATUS_FIELD_TYPES, true)) {
+            return true;
+        }
+
+        $options = rex_extension::registerPoint(new rex_extension_point('yform/usability.getStatusColumnParams.options', [], [
+            'table' => $table,
+            'list'  => null,
+        ]));
+
+        return is_array($options) && count($options) > 0;
+    }
+
     public static function getStatusColumnParams(rex_yform_manager_table $table, $currentValue, $list = null)
     {
         $Field = $table->getValueField('status');
