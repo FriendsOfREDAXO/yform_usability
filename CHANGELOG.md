@@ -2,6 +2,7 @@
 
 ## **xx.xx.20xx x.x.x**
 
+- API (`rex_api_yform_usability_api`): Sortier- und Filterparameter werden strenger geprüft, Filterbedingungen sind signiert (`filter_sig` in der Sortier-URL). Status und Sortierung berücksichtigen die Tabellenrechte, Feldsortierung nur für Admins, das CSRF-Token wird geprüft. `data-table`/`data-filter` werden escaped.
 - Interne Optimierung (Callbacks IDE- und RexStan-freundlich in der "First class callable syntax" notiert).
 - Initiales Changelog
 - Überprüfung der Kompatibilität zu YForm 5

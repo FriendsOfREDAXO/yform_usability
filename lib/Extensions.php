@@ -135,14 +135,15 @@ class Extensions
                             ]
                         )
                     );
-                    $url = rex_url::currentBackendPage(['method' => 'updateSort'] + rex_api_yform_usability_api::getUrlParams());
+                    $filter = implode(',', $filters);
+                    $url = rex_url::currentBackendPage(['method' => 'updateSort', 'filter_sig' => rex_api_yform_usability_api::filterSignature($filter)] + rex_api_yform_usability_api::getUrlParams());
                     return '
                         <i class="rex-icon fa fa-bars sort-icon sort-handle"
                             data-id="###id###"
                             data-url="'.$url . '"
                             data-table-type="orm_model"
-                            data-table="' . $table->getTableName() . '"
-                            data-filter="' . implode(',', $filters) . '"></i>
+                            data-table="' . rex_escape($table->getTableName()) . '"
+                            data-filter="' . rex_escape($filter) . '"></i>
                     ';
                 },
                 ['table' => $table]
@@ -250,7 +251,8 @@ class Extensions
                             // $style = 'background-color:#eff9f9;';
                             break;
                     }
-                    $url = rex_url::currentBackendPage(['method' => 'updateSort'] + rex_api_yform_usability_api::getUrlParams());
+                    $filter = implode(',', $filters);
+                    $url = rex_url::currentBackendPage(['method' => 'updateSort', 'filter_sig' => rex_api_yform_usability_api::filterSignature($filter)] + rex_api_yform_usability_api::getUrlParams());
                     return '
                     <td class="rex-table-icon" style="' . $style . '">
                         <i class="rex-icon fa fa-bars sort-icon"
@@ -259,8 +261,8 @@ class Extensions
                             data-table-type="db_table"
                             data-table-sort-field="prio"
                             data-table-sort-order="asc"
-                            data-table="' . $params['params']['yform_table'] . '"
-                            data-filter="' . implode(',', $filters) . '"></i>
+                            data-table="' . rex_escape($params['params']['yform_table']) . '"
+                            data-filter="' . rex_escape($filter) . '"></i>
                     </td>
                 ';
                 },
