@@ -39,6 +39,36 @@ class rex_api_yform_usability_api extends rex_api_function
         return new rex_api_result($this->success, $this->response);
     }
 
+    /**
+     * Every URL pointing here is built with getUrlParams() and therefore
+     * already carries the token (Utils::getStatusColumnParams(),
+     * Extensions::addDragNDropSort(), boot.php). The core does not check it
+     * unless this returns true.
+     */
+    protected function requiresCsrfProtection()
+    {
+        return true;
+    }
+
+    /**
+     * Signature of the filter conditions a sortable row carries.
+     *
+     * The conditions are SQL, provided server-side by the extension point
+     * `yform/usability.addDragNDropSort.filters`, written into the markup
+     * and posted back by the browser. Only conditions this installation
+     * rendered itself are accepted.
+     */
+    public static function filterSignature(string $filter): string
+    {
+        $key = (string) rex_config::get('yform_usability', 'filter_key', '');
+        if ('' === $key) {
+            $key = bin2hex(random_bytes(32));
+            rex_config::set('yform_usability', 'filter_key', $key);
+        }
+
+        return hash_hmac('sha256', $filter, $key);
+    }
+
     private function __changestatus()
     {
         $status = rex_post('status', 'string');
@@ -49,6 +79,9 @@ class rex_api_yform_usability_api extends rex_api_function
         $tableObject = rex_yform_manager_table::get($table);
         if (!$tableObject) {
             return;
+        }
+        if (!$tableObject->isGranted('EDIT', rex::requireUser())) {
+            throw new rex_api_exception('Permission denied');
         }
 
         // Use the table's query method to get the record
@@ -116,14 +149,32 @@ class rex_api_yform_usability_api extends rex_api_function
             $data_id = rex_post('data_id', 'int');
             $next_id = rex_post('next_id', 'int');
             $filter  = rex_post('filter', 'string');
+
+            // The filter conditions are SQL and come back from the browser:
+            // only accept what this installation signed when rendering the list.
+            if (!hash_equals(self::filterSignature($filter), rex_get('filter_sig', 'string', ''))) {
+                throw new rex_api_exception('Invalid filter signature');
+            }
+
             $filter  = strlen($filter) ? explode(',', $filter) : [];
 
             if (rex_post('table_type') == 'db_table') {
+                // Sorting the fields of a table is part of the table manager,
+                // which is admin only (yform/package.yml: table_field).
+                if (!rex::requireUser()->isAdmin()) {
+                    throw new rex_api_exception('Permission denied');
+                }
+
                 $sql       = rex_sql::factory();
                 $filter[]  = 'table_name = ' . $sql->escape($tablename);
                 $tablename = rex::getTable('yform_field');
-                $sort      = rex_post('table_sort_order', 'string', 'asc');
+                $sort      = 'desc' === rex_post('table_sort_order', 'string', 'asc') ? 'desc' : 'asc';
+                // Interpolated into SQL below. The only value ever rendered
+                // is "prio" (Extensions::ext_rexListGet()).
                 $sfield    = rex_post('table_sort_field', 'string', 'prio');
+                if ('prio' !== $sfield) {
+                    throw new rex_api_exception('Invalid sort field');
+                }
 
 
                 if ($next_id) {
@@ -146,6 +197,9 @@ class rex_api_yform_usability_api extends rex_api_function
                 $tableobject = rex_yform_manager_table::get($tablename);
                 if (!$tableobject) {
                     throw new rex_api_exception("Table '{$tablename}' not found");
+                }
+                if (!$tableobject->isGranted('EDIT', rex::requireUser())) {
+                    throw new rex_api_exception('Permission denied');
                 }
                 $sort = strtolower($tableobject->getSortOrderName());
 
@@ -193,6 +247,9 @@ class rex_api_yform_usability_api extends rex_api_function
                     }
                 }
             }
+            // Read from the database, but interpolated into SQL: make sure it is a number.
+            $prio = (int) $prio;
+
             try {
                 $query = "
                         UPDATE {$tablename}
