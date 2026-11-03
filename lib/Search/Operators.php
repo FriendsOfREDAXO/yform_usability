@@ -50,10 +50,14 @@ final class Operators
     private const NO_VALUE = ['empty', 'not_empty', 'checked', 'unchecked', 'set', 'not_set'];
 
     /**
+     * @param mixed $attributes Feld-Attribute (JSON-String oder Array), für Textfelder mit type=date
      * @return list<string>
      */
-    public static function forType(string $typeName, string $dbType): array
+    public static function forType(string $typeName, string $dbType, mixed $attributes = null): array
     {
+        if (self::isTextDate($typeName, $attributes)) {
+            return self::BY_TYPE['date'];
+        }
         if (array_key_exists($typeName, self::BY_TYPE)) {
             return self::BY_TYPE[$typeName];
         }
@@ -64,6 +68,22 @@ final class Operators
         }
 
         return [];
+    }
+
+    /**
+     * Textfeld, das per Attribut als HTML-Datumsfeld ausgezeichnet ist ({"type":"date"} oder datetime-local).
+     * Projekte nutzen das statt des YForm-Typs date, der leere Werte als 0000-00-00 speichert.
+     */
+    public static function isTextDate(string $typeName, mixed $attributes): bool
+    {
+        if ('text' !== $typeName) {
+            return false;
+        }
+        if (is_string($attributes)) {
+            $attributes = json_decode($attributes, true);
+        }
+        $type = is_array($attributes) && is_string($attributes['type'] ?? null) ? strtolower($attributes['type']) : '';
+        return in_array($type, ['date', 'datetime-local'], true);
     }
 
     public static function takesList(string $op): bool

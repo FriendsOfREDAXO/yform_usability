@@ -97,6 +97,22 @@ check('ops html', Operators::forType('html', ''), []);
 check('ops isMulti', [Operators::takesList('in'), Operators::takesList('between'), Operators::takesList('contains')], [true, true, false]);
 check('ops noValue', [Operators::takesNoValue('empty'), Operators::takesNoValue('checked'), Operators::takesNoValue('eq')], [true, true, false]);
 
+// Textfelder mit HTML-Typ date/datetime-local gelten als Datumsfeld (YForm date speichert leer als 0000-00-00)
+check('textDate date', Operators::isTextDate('text', '{"type":"date"}'), true);
+check('textDate datetime-local', Operators::isTextDate('text', '{"class":"x","type":"datetime-local"}'), true);
+check('textDate array', Operators::isTextDate('text', ['type' => 'DATE']), true);
+check('textDate time', Operators::isTextDate('text', '{"type":"time"}'), false);
+check('textDate textarea', Operators::isTextDate('textarea', '{"type":"date"}'), false);
+check('textDate ohne Attribut', Operators::isTextDate('text', ''), false);
+check('textDate kaputtes JSON', Operators::isTextDate('text', '{type:date'), false);
+check('ops text date', Operators::forType('text', 'varchar(10)', '{"type":"date"}'), ['between', 'before', 'after', 'empty']);
+check('ops text time', Operators::forType('text', 'varchar(5)', '{"type":"time"}'), $textOps);
+
+// Grenzen ohne Uhrzeit für Textspalten ('2026-10-01' >= '2026-10-01 00:00:00' ist als Zeichenkette falsch)
+$r = DateRange::resolve('custom', '2026-10-01', '2026-10-31', $today);
+check('dateOnly bounds', [$r->sqlFromDate(), $r->sqlToExclusiveDate()], ['2026-10-01', '2026-11-01']);
+check('dateOnly open', DateRange::resolve('custom', '', '2026-10-31', $today)->sqlFromDate(), null);
+
 // --- State -------------------------------------------------------------------
 
 $allowed = ['date' => ['modified'], 'filter' => ['status' => ['in', 'not_in', 'empty'], 'name' => $textOps]];

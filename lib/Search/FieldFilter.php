@@ -88,7 +88,7 @@ final class FieldFilter
                 return true;
             case 'between':
                 $value = array_pad((array) $value, 2, '');
-                if (in_array($type, self::DATE_TYPES, true)) {
+                if (self::isDateField($field)) {
                     $range = DateRange::resolve('custom', $value[0], $value[1], new DateTimeImmutable());
                     if (!$range || null !== $range->error) {
                         return false;
@@ -117,7 +117,11 @@ final class FieldFilter
                 $p = self::param();
                 $sql = 'before' === $op ? $col . ' < :' . $p : $col . ' >= :' . $p;
                 $bound = 'before' === $op ? $date : $date->modify('+1 day');
-                $q->whereRaw($sql, [$p => $bound->format('Y-m-d 00:00:00')]);
+                if (self::isTextDate($field)) {
+                    $q->whereRaw(self::isoDateCondition($col) . ' AND ' . $sql, [$p => $bound->format('Y-m-d')]);
+                } else {
+                    $q->whereRaw($sql, [$p => $bound->format('Y-m-d 00:00:00')]);
+                }
                 return true;
             case 'in':
             case 'not_in':
@@ -141,13 +145,20 @@ final class FieldFilter
     public static function applyDate(rex_yform_manager_query $q, rex_yform_manager_field $field, DateRange $range): void
     {
         $col = self::column($q, $field->getName());
-        if (null !== $range->sqlFrom()) {
-            $p = self::param();
-            $q->whereRaw($col . ' >= :' . $p, [$p => $range->sqlFrom()]);
+        // Textspalten (type=date) werden als Zeichenkette verglichen: Grenzen ohne Uhrzeit, Fremdformate ausschließen
+        $text = self::isTextDate($field);
+        if ($text) {
+            $q->whereRaw(self::isoDateCondition($col));
         }
-        if (null !== $range->sqlToExclusive()) {
+        $from = $text ? $range->sqlFromDate() : $range->sqlFrom();
+        $to = $text ? $range->sqlToExclusiveDate() : $range->sqlToExclusive();
+        if (null !== $from) {
             $p = self::param();
-            $q->whereRaw($col . ' < :' . $p, [$p => $range->sqlToExclusive()]);
+            $q->whereRaw($col . ' >= :' . $p, [$p => $from]);
+        }
+        if (null !== $to) {
+            $p = self::param();
+            $q->whereRaw($col . ' < :' . $p, [$p => $to]);
         }
     }
 
@@ -290,6 +301,22 @@ final class FieldFilter
             $nested->alias($alias);
             \rex_yform_value_be_manager_relation::getSearchFilter(['field' => $field, 'value' => $ids, 'query' => $nested]);
         });
+    }
+
+    /** YForm-Datumsfeld oder Textfeld mit type=date/datetime-local */
+    public static function isDateField(rex_yform_manager_field $field): bool
+    {
+        return in_array($field->getTypeName(), self::DATE_TYPES, true) || self::isTextDate($field);
+    }
+
+    public static function isTextDate(rex_yform_manager_field $field): bool
+    {
+        return Operators::isTextDate($field->getTypeName(), $field->getElement('attributes'));
+    }
+
+    private static function isoDateCondition(string $col): string
+    {
+        return $col . " REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}'";
     }
 
     public static function column(rex_yform_manager_query $q, string $name): string

@@ -97,4 +97,15 @@ final class DateRange
     {
         return $this->to?->modify('+1 day')->format('Y-m-d 00:00:00');
     }
+
+    /** Grenzen ohne Uhrzeit, für den Zeichenkettenvergleich mit Textspalten im Format JJJJ-MM-TT */
+    public function sqlFromDate(): ?string
+    {
+        return $this->from?->format('Y-m-d');
+    }
+
+    public function sqlToExclusiveDate(): ?string
+    {
+        return $this->to?->modify('+1 day')->format('Y-m-d');
+    }
 }

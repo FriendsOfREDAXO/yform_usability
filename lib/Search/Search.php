@@ -64,7 +64,7 @@ final class Search
      */
     public function dateFields(): array
     {
-        $fields = array_values(array_filter($this->searchableFields(), static fn ($f) => in_array($f->getTypeName(), FieldFilter::DATE_TYPES, true)));
+        $fields = array_values(array_filter($this->searchableFields(), FieldFilter::isDateField(...)));
         $preferred = trim((string) Usability::getConfig('search_datefield_' . $this->table->getTableName()), '|');
         usort($fields, static fn ($a, $b) => ($b->getName() === $preferred) <=> ($a->getName() === $preferred));
         return $fields;
@@ -77,7 +77,7 @@ final class Search
     {
         $result = ['id' => ['field' => self::idField($this->table->getTableName()), 'ops' => ['eq', 'gt', 'lt', 'between']]];
         foreach ($this->searchableFields() as $field) {
-            $ops = Operators::forType($field->getTypeName(), (string) $field->getDatabaseFieldType());
+            $ops = Operators::forType($field->getTypeName(), (string) $field->getDatabaseFieldType(), $field->getElement('attributes'));
             if ($ops) {
                 $result[$field->getName()] = ['field' => $field, 'ops' => $ops];
             }

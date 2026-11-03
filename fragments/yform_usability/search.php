@@ -52,7 +52,7 @@ $valueText = static function (rex_yform_manager_field $field, string $op, string
         }
         return implode(', ', $values);
     }
-    if (in_array($field->getTypeName(), FieldFilter::DATE_TYPES, true)) {
+    if (FieldFilter::isDateField($field)) {
         $values = array_map($formatDate, $values);
     }
     return implode(' – ', array_filter($values, 'strlen'));
@@ -70,7 +70,7 @@ $renderBody = static function (string $name, array $def, string $index, string $
     $op = in_array($op, $ops, true) ? $op : $ops[0];
     $id = 'yfu-f-' . $index;
     $base = 'yfu-f[' . $index . '][value]';
-    $isDate = in_array($type, FieldFilter::DATE_TYPES, true);
+    $isDate = FieldFilter::isDateField($field);
     $isNumber = in_array($type, ['integer', 'number'], true) || 'id' === $name;
     $inputType = $isDate ? 'date' : ($isNumber ? 'number' : 'text');
     $toInput = static fn (string $v) => $isDate && ($d = DateRange::parseDate($v)) ? $d->format('Y-m-d') : $v;
