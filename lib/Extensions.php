@@ -26,11 +26,11 @@ use rex_response;
 use rex_sql;
 use rex_url;
 use rex_version;
-use rex_yform_choice_list;
 use rex_yform_list;
 use rex_yform_manager_field;
 use rex_yform_manager_table;
 use Sprog\Wildcard;
+use yform\usability\Search\Search;
 use function rex_request;
 
 class Extensions
@@ -417,11 +417,24 @@ class Extensions
 
     public static function ext_yformManagerRexInfo(rex_extension_point $ep): void
     {
-        if ($manager = rex::getProperty('yform_usability.searchTableManager')) {
+        $manager = rex::getProperty('yform_usability.searchTableManager');
+        $search = rex::getProperty('yform_usability.search');
+        if ($manager && $search) {
             $content = $ep->getSubject();
+
+            // Trefferzahl nur bei aktiver Suche; getDataListQuery wendet über YFORM_DATA_LIST_QUERY die Suche an
+            $count = null;
+            if ($search->state()->isActive()) {
+                $query = $manager->getDataListQuery($manager->table->query()->alias('t0'), rex_request('rex_yform_filter', 'array', []));
+                $count = $query->count();
+            }
+
             // search bar
             $fragment = new rex_fragment();
             $fragment->setVar('manager', $manager);
+            $fragment->setVar('search', $search, false);
+            $fragment->setVar('count', $count, false);
+            $fragment->setVar('errors', rex::getProperty('yform_usability.searchErrors', []), false);
             $partial = $fragment->parse('yform_usability/search.php');
 
             $fragment = new rex_fragment();
@@ -435,26 +448,21 @@ class Extensions
     public static function ext_yformManagerDataPage(rex_extension_point $ep): void
     {
         $manager = $ep->getSubject();
-        $config = Usability::getConfig();
+        $search = Search::forTable($manager->table);
 
-        $hasSearch = ($config['use_inline_search'] ?? '') === '|1|' || in_array(
-                $manager->table->getTableName(),
-                explode(
-                    '|',
-                    trim($config['search_tables'] ?? '', '|')
-                )
-            );
-
-        if ($manager->table->isSearchable() && $hasSearch) {
+        if ($search) {
             $functions = $manager->dataPageFunctions;
             $sIndex = array_search('search', $functions);
 
             if ($sIndex !== false) {
                 rex::setProperty('yform_usability.searchTableManager', $manager);
+                rex::setProperty('yform_usability.search', $search);
                 unset($functions[$sIndex]);
                 $functions[] = 'yform_search';
                 $manager->setDataPageFunctions($functions);
-                $manager->setLinkVars(self::getLinkVars());
+                $manager->setLinkVars($search->linkVars());
+                // gefilterte, sonst ausgeblendete Felder vor dem Aufbau der Liste einblenden
+                rex::setProperty('yform_usability.revealedFields', $search->revealHiddenFields());
                 $ep->setSubject($manager);
             }
         }
@@ -469,6 +477,7 @@ class Extensions
         $isOpener  = rex_get('rex_yform_manager_opener', 'array', []);
 
         $list->addFormAttribute('class', 'table-responsive');
+        self::moveRevealedColumns($list, $table);
 
         $hasDuplicate = ($config['duplicate_tables_all'] ?? '') === '|1|' || in_array(
             $tableName,
@@ -558,160 +567,48 @@ class Extensions
         return $buttons;
     }
 
-
+    /**
+     * Durch einen Filter eingeblendete Spalten direkt hinter die ID setzen und im Kopf kennzeichnen.
+     */
+    private static function moveRevealedColumns(rex_yform_list $list, rex_yform_manager_table $table): void
+    {
+        $label = rex_escape(rex_i18n::rawMsg('yform_usability.search_revealed_column'));
+        foreach (array_reverse((array) rex::getProperty('yform_usability.revealedFields', [])) as $name) {
+            $field = $table->getValueField($name);
+            if (!$field || !in_array($name, $list->getColumnNames(), true)) {
+                continue;
+            }
+            try {
+                $list->setColumnPosition($name, $list->getColumnPosition('id') + 1);
+            } catch (\InvalidArgumentException) {
+                // ohne ID-Spalte bleibt die Spalte an ihrem Platz
+            }
+            $list->setColumnLayout($name, [
+                '<th class="yfu-revealed">###VALUE### <i class="rex-icon fa-filter" aria-hidden="true" title="' . $label . '"></i><span class="sr-only">(' . $label . ')</span></th>',
+                '<td class="yfu-revealed yform-table-field-value-' . rex_escape($field->getTypeName()) . ' yform-table-field-name-' . rex_escape($name) . '" data-title="###LABEL###">###VALUE###</td>',
+            ]);
+        }
+    }
 
     public static function ext_yformDataListSql(rex_extension_point $ep): void
     {
-        // NOTE: filter should only be active on overview page, not default page
-        $isDetailPage = rex_get('data_id', 'int', 0) > 0;
-        if ($isDetailPage) {
+        $query = $ep->getSubject();
+
+        // Einzelabfrage des Managers (Datensatz öffnen, speichern, löschen) nicht filtern: Passt der Datensatz
+        // nach dem Bearbeiten nicht mehr zur Suche, gälte er sonst als nicht vorhanden
+        if (str_contains($query->getQuery(), '`' . $query->getTableAlias() . '`.`id` = :where')) {
             return;
         }
-        $isYFormEditPage = rex_get('page', 'string', '') === 'yform/manager/data_edit';
-        if (!$isYFormEditPage) {
-            return;
-        }
 
+        $table = rex_yform_manager_table::get($query->getTableName());
+        $search = $table ? Search::forTable($table) : null;
 
-        // TODO convert where queries into yorm
-        if (rex_request('yfu-action', 'string') === 'search') {
-            $term = trim(rex_request('yfu-term', 'string'));
-
-            if ($term != '') {
-                $isEmptyTerm = $term === '!' || $term === '#';
-                $listSql     = $ep->getSubject();
-                $tableName   = $listSql->getTableName();
-                $table       = rex_yform_manager_table::get($tableName);
-                $sql         = rex_sql::factory();
-                $sprogIsAvl  = rex_addon::get('sprog')->isAvailable();
-                $fields      = explode(',', rex_request('yfu-searchfield', 'string'));
-
-                $where = [];
-                foreach ($fields as $fieldname) {
-                    $field = !empty($table->getFields(['name' => $fieldname])) ? $table->getFields(['name' => $fieldname])[0] : null;
-
-                    if ($field) {
-                        if ($field->getTypename() === 'be_manager_relation') {
-                            if ($isEmptyTerm) {
-                                $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
-                            } else {
-                                $_whereChunks = [];
-                                foreach (explode(',', (string) $field->getElement('field')) as $_field) {
-                                    $_field = trim($_field, '"');
-                                    $_field = trim($_field);
-
-                                    if ('' != $_field) {
-                                        $_whereChunks[] = "{$_field} LIKE :term";
-                                    }
-                                }
-
-                                $relWhere  = [];
-                                $query     = "
-                                    SELECT id
-                                    FROM {$field->getElement('table')}
-                                    WHERE " . implode(' OR ', $_whereChunks) . "
-                                ";
-                                $relResult = $sql->getArray($query, ['term' => "%{$term}%"]);
-
-                                foreach ($relResult as $item) {
-                                    $relWhere[] = $item['id'];
-                                }
-
-                                $relWhere = $relWhere ?: [-1];
-                                $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
-                            }
-                        } elseif ($field->getTypename() === 'choice') {
-                            if ($isEmptyTerm) {
-                                $_term = '""';
-                            } else {
-                                $list    = new rex_yform_choice_list([]);
-                                $choices = $field->getElement('choices');
-
-                                if (is_string($choices) && rex_sql::getQueryType($choices) === 'SELECT') {
-                                    $list->createListFromSqlArray($sql->getArray($choices));
-                                } elseif (is_string($choices) && strlen(trim($choices)) > 0 && substr(
-                                    trim($choices),
-                                    0,
-                                    1
-                                ) === '{') {
-                                    $list->createListFromJson($choices);
-                                } else {
-                                    $list->createListFromStringArray(self::getArrayFromString($choices));
-                                }
-
-                                foreach ($list->getChoicesByValues() as $value => $item) {
-                                    if (stripos($item, $term) !== false) {
-                                        $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape($value);
-                                    } elseif ($sprogIsAvl) {
-                                        $label = Wildcard::get(
-                                            strtr(
-                                                $item,
-                                                [
-                                                    Wildcard::getOpenTag()  => '',
-                                                    Wildcard::getCloseTag() => '',
-                                                ]
-                                            )
-                                        );
-
-                                        if (stripos($label, $term) !== false) {
-                                            $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape(
-                                                $value
-                                            );
-                                        }
-                                    }
-                                }
-
-                                $_term = $sql->escape('%' . $term . '%');
-                            }
-                            $where[] = $sql->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
-                        } elseif ($field->getTypename() === 'be_link') {
-                            if ($isEmptyTerm) {
-                                $where[] = $sql->escapeIdentifier($fieldname) . ' = ""';
-                            } else {
-                                $relWhere = [];
-                                $query    = "
-                                SELECT id
-                                FROM rex_article
-                                WHERE
-                                  name LIKE :term
-                                  OR id = :id
-                            ";
-
-                                $relResult = $sql->getArray(
-                                    $query,
-                                    [
-                                        'term' => "%{$term}%",
-                                        'id'   => $term,
-                                    ]
-                                );
-
-                                foreach ($relResult as $item) {
-                                    $relWhere[] = $item['id'];
-                                }
-
-                                $relWhere = $relWhere ?: [-1];
-                                $where[]  = $sql->escapeIdentifier($fieldname) . ' IN(' . implode(',', $relWhere) . ')';
-                            }
-                        } else {
-                            $_term   = $isEmptyTerm ? '""' : $sql->escape('%' . $term . '%');
-                            $where[] = $sql->escapeIdentifier($fieldname) . ' LIKE ' . $_term;
-                        }
-                    } elseif ($fieldname === 'id') {
-                        $where[] = $sql->escapeIdentifier($fieldname) . ' = ' . $sql->escape($term);
-                    }
-                }
-
-                if (count($where)) {
-
-                    if (strrpos($listSql->getQuery(), 'where') !== false) {
-                        $listSql->whereRaw(' AND (' . implode(' OR ', $where) . ') ');
-                    } else {
-                        $listSql->whereRaw(' (' . implode(' OR ', $where) . ') ');
-                    }
-                }
-
-                $ep->setSubject($listSql);
+        if ($search && $search->state()->isActive()) {
+            $errors = $search->apply($query);
+            if ($errors) {
+                rex::setProperty('yform_usability.searchErrors', $errors);
             }
+            $ep->setSubject($query);
         }
     }
 
@@ -740,21 +637,5 @@ class Extensions
             }
             $ep->setSubject($options);
         }
-    }
-
-    private static function getLinkVars(): array
-    {
-        // NOTE all params that yform usability uses for filtering
-        $params = [
-            'yfu-term',
-            'yfu-action',
-            'yfu-searchfield'
-        ];
-
-        $linkVars = [];
-        foreach ($params as $param) {
-            $linkVars[$param] = rex_get($param, 'string');
-        }
-        return $linkVars;
     }
 }

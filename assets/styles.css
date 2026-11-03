@@ -63,30 +63,98 @@
   min-width: 100px;
 }
 
-#yform_usability-search .form-group {
-  margin-bottom: 15px;
+.yfu-search-bar,
+.yfu-search-date,
+.yfu-search-range,
+.yfu-search-actions,
+.yfu-filter,
+.yfu-filter-body,
+.yfu-filter-value,
+.yfu-search-active,
+.yfu-search-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
-#yform_usability-search .input-wrapper {
-  position: relative;
+.yfu-search-bar {
+  gap: 8px;
 }
-#yform_usability-search .input-wrapper .filter-reset {
+.yfu-search-q {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.yfu-search-date .form-control,
+.yfu-filter .form-control {
+  width: auto;
+  max-width: 100%;
+}
+.yfu-search-range label {
+  margin: 0;
+  font-weight: normal;
+}
+.yfu-search-actions {
+  margin-left: auto;
+}
+.yfu-search-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.yfu-search-filters:empty {
   display: none;
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: #999;
 }
-#yform_usability-search .input-wrapper .filter-reset:hover {
-  color: #333;
+.yfu-filter {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
-#yform_usability-search.filtered .input-wrapper input {
-  padding-right: 35px;
+.yfu-search [hidden] {
+  display: none !important;
 }
-#yform_usability-search.filtered .input-wrapper .filter-reset {
-  display: block;
+.yfu-search-active {
+  gap: 8px;
+  margin-top: 10px;
+}
+.yfu-search-chips {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.yfu-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 2px 10px;
+  border: 1px solid #c1c9d4;
+  border-radius: 13px;
+}
+.yfu-chip:hover,
+.yfu-chip:focus {
+  text-decoration: none;
+  border-color: currentColor;
+}
+.yfu-chip:focus-visible,
+.yfu-search-reset:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+/* Fundstellen: dunkler Text auf Gelb, in hellem und dunklem Theme lesbar */
+.yfu-mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: #ffe066;
+  color: #1a1a1a;
+}
+.yfu-revealed .rex-icon {
+  margin-left: 4px;
+  opacity: .6;
+}
+.yfu-search-count {
+  margin: 0 0 0 auto;
 }
 
 .yform-lang-tabs .tab-content {

@@ -7,7 +7,7 @@ compile: 0
 requires:
     redaxo: '^5.14.1'
     php:
-        version: '>=7, <9'
+        version: '>=8.1, <9'
     packages:
         yform: '>=4.0.2, <6'
 
