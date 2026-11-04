@@ -16,6 +16,9 @@ final class Terms
 {
     public const MAX_TERMS = 10;
 
+    /** Hinter jedes LIKE mit likeContains(): eigenes Zeichen, weil der Backslash vom SQL-Modus abhängt (NO_BACKSLASH_ESCAPES) */
+    public const LIKE_ESCAPE = " ESCAPE '!'";
+
     private const SOFT_HYPHENS = ["\u{00AD}", '&shy;'];
 
     /**
@@ -41,7 +44,7 @@ final class Terms
 
     public static function escapeLike(string $value): string
     {
-        return strtr($value, ['\\' => '\\\\', '%' => '\%', '_' => '\_']);
+        return strtr($value, ['!' => '!!', '%' => '!%', '_' => '!_']);
     }
 
     public static function likeContains(string $term): string

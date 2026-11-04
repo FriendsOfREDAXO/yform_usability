@@ -14,6 +14,8 @@ namespace yform\usability\Search;
  */
 final class State
 {
+    public const MAX_FILTERS = 20;
+
     private const OWN_PREFIX = 'yfu-';
 
     /** Parameter, die beim Absenden einer neuen Suche nicht mitgenommen werden (dazu <liste>_start von rex_list) */
@@ -225,6 +227,9 @@ final class State
             }
 
             $filters[] = ['field' => $field, 'op' => $op, 'value' => $value];
+            if (self::MAX_FILTERS === count($filters)) {
+                break;
+            }
         }
         return $filters;
     }

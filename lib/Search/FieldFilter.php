@@ -36,6 +36,9 @@ final class FieldFilter
     /** @var array<string, array<string, string>> */
     private static array $choiceCache = [];
 
+    /** @var array<string, array<int, string>|null> */
+    private static array $relationOptionCache = [];
+
     /**
      * Gibt false zurück, wenn der Wert für die Bedingung ungültig ist und nichts angewendet wurde.
      *
@@ -49,11 +52,11 @@ final class FieldFilter
         switch ($op) {
             case 'contains':
                 $p = self::param();
-                $q->whereRaw(Terms::normalizedColumn($col) . ' LIKE :' . $p, [$p => Terms::likeContains(self::plain((string) $value))]);
+                $q->whereRaw(Terms::normalizedColumn($col) . ' LIKE :' . $p . Terms::LIKE_ESCAPE, [$p => Terms::likeContains(self::plain((string) $value))]);
                 return true;
             case 'not_contains':
                 $p = self::param();
-                $q->whereRaw('(' . $col . ' IS NULL OR ' . Terms::normalizedColumn($col) . ' NOT LIKE :' . $p . ')', [$p => Terms::likeContains(self::plain((string) $value))]);
+                $q->whereRaw('(' . $col . ' IS NULL OR ' . Terms::normalizedColumn($col) . ' NOT LIKE :' . $p . Terms::LIKE_ESCAPE . ')', [$p => Terms::likeContains(self::plain((string) $value))]);
                 return true;
             case 'equals':
                 $p = self::param();
@@ -135,7 +138,7 @@ final class FieldFilter
                     return true;
                 }
                 $p = self::param();
-                $q->whereRaw($col . ' LIKE :' . $p, [$p => Terms::likeContains(self::plain((string) $value))]);
+                $q->whereRaw($col . ' LIKE :' . $p . Terms::LIKE_ESCAPE, [$p => Terms::likeContains(self::plain((string) $value))]);
                 return true;
         }
 
@@ -204,15 +207,20 @@ final class FieldFilter
      */
     public static function relationOptions(rex_yform_manager_field $field, int $limit = 1000): ?array
     {
+        $key = $field->getElement('table_name') . '.' . $field->getName() . '.' . $limit;
+        if (array_key_exists($key, self::$relationOptionCache)) {
+            return self::$relationOptionCache[$key];
+        }
+
         $columns = self::relationDisplayColumns($field);
         if (!$columns) {
-            return [];
+            return self::$relationOptionCache[$key] = [];
         }
 
         $sql = rex_sql::factory();
         $table = $sql->escapeIdentifier((string) $field->getElement('table'));
         if ((int) $sql->getArray('SELECT COUNT(*) AS c FROM ' . $table)[0]['c'] > $limit) {
-            return null;
+            return self::$relationOptionCache[$key] = null;
         }
 
         $select = implode(', ', array_map([$sql, 'escapeIdentifier'], $columns));
@@ -222,7 +230,7 @@ final class FieldFilter
             unset($row['id']);
             $options[$id] = trim(implode(' ', array_filter(array_map('strval', $row), 'strlen'))) ?: (string) $id;
         }
-        return $options;
+        return self::$relationOptionCache[$key] = $options;
     }
 
     /**
@@ -240,7 +248,7 @@ final class FieldFilter
         $p = self::param();
         $match = [];
         foreach ($columns as $column) {
-            $match[] = Terms::normalizedColumn('`yfu_r`.' . $sql->escapeIdentifier($column)) . ' LIKE :' . $p;
+            $match[] = Terms::normalizedColumn('`yfu_r`.' . $sql->escapeIdentifier($column)) . ' LIKE :' . $p . Terms::LIKE_ESCAPE;
         }
         $match = '(' . implode(' OR ', $match) . ')';
         $target = $sql->escapeIdentifier((string) $field->getElement('table'));
@@ -280,7 +288,7 @@ final class FieldFilter
     {
         $p = self::param();
         $q->whereRaw(
-            'EXISTS (SELECT 1 FROM ' . rex_sql::factory()->escapeIdentifier(rex::getTable('article')) . ' AS `yfu_a` WHERE FIND_IN_SET(`yfu_a`.`id`, ' . $col . ') AND `yfu_a`.`name` LIKE :' . $p . ')',
+            'EXISTS (SELECT 1 FROM ' . rex_sql::factory()->escapeIdentifier(rex::getTable('article')) . ' AS `yfu_a` WHERE FIND_IN_SET(`yfu_a`.`id`, ' . $col . ') AND `yfu_a`.`name` LIKE :' . $p . Terms::LIKE_ESCAPE . ')',
             [$p => Terms::likeContains(self::plain($term))],
         );
     }

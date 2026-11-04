@@ -43,8 +43,10 @@ check('split shy', Terms::split("Ibu\u{00AD}profen"), ['Ibuprofen']);
 check('split shy entity', Terms::split('Ibu&shy;profen'), ['Ibuprofen']);
 check('split only stars', Terms::split(' * ** '), []);
 check('split max 10', count(Terms::split(str_repeat('a ', 15))), 10);
-check('escapeLike', Terms::escapeLike('50%_a\\b'), '50\\%\\_a\\\\b');
-check('likeContains', Terms::likeContains('a_b'), '%a\\_b%');
+// Eigenes Escape-Zeichen statt Backslash: funktioniert auch mit NO_BACKSLASH_ESCAPES
+check('escapeLike', Terms::escapeLike('50%_a\\b!'), '50!%!_a\\b!!');
+check('likeContains', Terms::likeContains('a_b'), '%a!_b%');
+check('likeEscape', Terms::LIKE_ESCAPE, " ESCAPE '!'");
 check('normalizedColumn', Terms::normalizedColumn('`t0`.`name`'), "REPLACE(REPLACE(`t0`.`name`, UNHEX('C2AD'), ''), '&shy;', '')");
 
 // --- DateRange ---------------------------------------------------------------
@@ -145,6 +147,8 @@ check('state date bad preset', State::fromRequest(['yfu-date' => ['field' => 'mo
 check('state date empty', State::fromRequest(['yfu-date' => ['field' => 'modified', 'preset' => '', 'from' => '', 'to' => '']], $allowed)->date, null);
 check('state date not array', State::fromRequest(['yfu-date' => 'x'], $allowed)->date, null);
 check('state filters not array', State::fromRequest(['yfu-f' => 'x'], $allowed)->filters, []);
+check('state max filters', count(State::fromRequest(['yfu-f' => array_fill(0, 25, ['field' => 'name', 'op' => 'empty'])], $allowed)->filters), State::MAX_FILTERS);
+check('state max filters value', State::MAX_FILTERS, 20);
 check('state without filter 0', count($s->without('filter', 0)->filters), 2);
 check('state without q', $s->without('q')->q, '');
 check('state without date', $s->without('date')->date, null);

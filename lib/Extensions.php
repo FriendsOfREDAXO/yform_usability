@@ -422,11 +422,14 @@ class Extensions
         if ($manager && $search) {
             $content = $ep->getSubject();
 
-            // Trefferzahl nur bei aktiver Suche; getDataListQuery wendet über YFORM_DATA_LIST_QUERY die Suche an
+            // getDataListQuery wendet über YFORM_DATA_LIST_QUERY die Suche an und sammelt deren Meldungen.
+            // Die Zahl nur in der reinen Liste: Aktionen wie Löschen oder Speichern laufen erst nach dieser Stelle.
             $count = null;
             if ($search->state()->isActive()) {
                 $query = $manager->getDataListQuery($manager->table->query()->alias('t0'), rex_request('rex_yform_filter', 'array', []));
-                $count = $query->count();
+                if ('' === rex_request('func', 'string') && 'get' === rex_request_method()) {
+                    $count = $query->count();
+                }
             }
 
             // search bar

@@ -31,7 +31,7 @@ Der Zustand steht in der URL und bleibt beim Blättern, Sortieren, Bearbeiten, E
 |---|---|
 | `yfu-q` | Suchfeld |
 | `yfu-date[field\|preset\|from\|to]` | Zeitraum; `preset`: `today`, `last7`, `last30`, `this_month`, `this_year`, `last_year`, `custom` |
-| `yfu-f[n][field\|op\|value]` | Filter; Felder und Bedingungen werden gegen die Tabelle geprüft, Unbekanntes wird ignoriert |
+| `yfu-f[n][field\|op\|value]` | Filter; Felder und Bedingungen werden gegen die Tabelle geprüft, Unbekanntes wird ignoriert, höchstens 20 Filter |
 
 ## Installation
 
