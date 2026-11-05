@@ -17,6 +17,7 @@ use rex;
 use rex_addon;
 use rex_api_function;
 use rex_api_yform_usability_api;
+use rex_be_controller;
 use rex_csrf_token;
 use rex_extension;
 use rex_extension_point;
@@ -302,7 +303,7 @@ class Extensions
     {
         $func = rex_request('func', 'string');
         
-        if ($func !== 'duplicate') {
+        if ($func !== 'duplicate' || rex_be_controller::getCurrentPage() !== 'yform/manager/table_field') {
             return;
         }
         
