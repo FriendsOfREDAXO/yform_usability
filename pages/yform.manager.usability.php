@@ -19,6 +19,7 @@ use rex_i18n;
 use rex_url;
 use rex_view;
 use rex_yform_manager_table;
+use yform\usability\Search\Search;
 
 echo rex_view::title(rex_i18n::msg('yform'));
 
@@ -110,6 +111,35 @@ $form->addFieldset($addon->i18n('yform_usability.table_config'));
     $select->setMultiple();
     $select->addOptions($tables);
     $form->addRawField('</div>');
+}
+
+// Suche je Tabelle: Felder für das Suchfeld, voreingestelltes Datumsfeld
+$searchTables = array_filter(rex_yform_manager_table::getAll(), static fn ($t) => Search::forTable($t));
+if ($searchTables) {
+    $form->addFieldset($addon->i18n('yform_usability.search_table_settings'));
+    foreach ($searchTables as $table) {
+        $search = Search::forTable($table);
+        $fields = array_filter($table->getValueFields(), static fn ($f) => $f->isSearchable());
+
+        $field  = $form->addSelectField('search_fields_' . $table->getTableName());
+        $field->setLabel(rex_escape($table->getName()) . '<br><small>' . $addon->i18n('yform_usability.search_fields') . '</small>');
+        $select = $field->getSelect();
+        $select->setMultiple();
+        foreach ($fields as $f) {
+            $select->addOption($f->getLabel() . ' [' . $f->getName() . ']', $f->getName());
+        }
+
+        // Auswahl nur sinnvoll, wenn es mehr als ein Datumsfeld gibt
+        $dateFields = $search->dateFields();
+        if (count($dateFields) > 1) {
+            $field  = $form->addSelectField('search_datefield_' . $table->getTableName());
+            $field->setLabel('<small>' . $addon->i18n('yform_usability.search_datefield') . '</small>');
+            $select = $field->getSelect();
+            foreach ($dateFields as $f) {
+                $select->addOption($f->getLabel() . ' [' . $f->getName() . ']', $f->getName());
+            }
+        }
+    }
 }
 
 $fragment = new rex_fragment();
